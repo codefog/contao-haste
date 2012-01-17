@@ -453,7 +453,7 @@ class HasteForm extends Frontend
 		{
 			$strBuffer .= '
 <input type="hidden" name="FORM_SUBMIT" value="' . $this->strFormId . '"' . $tagEnding . '
-<input type="hidden" name="TOKEN_REQUEST" value="' . REQUEST_TOKEN . '"' . $tagEnding;
+<input type="hidden" name="REQUEST_TOKEN" value="' . REQUEST_TOKEN . '"' . $tagEnding;
 		}
 
 		// Generate all fields
