@@ -453,7 +453,7 @@ class HasteForm extends Frontend
 		{
 			$strBuffer .= '
 <input type="hidden" name="FORM_SUBMIT" value="' . $this->strFormId . '"' . $tagEnding . '
-<input type="hidden" name="TOKEN_REQUEST" value="' . REQUEST_TOKEN . '"' . $tagEnding;
+<input type="hidden" name="REQUEST_TOKEN" value="' . REQUEST_TOKEN . '"' . $tagEnding;
 		}
 
 		// Generate all fields
@@ -479,7 +479,7 @@ $objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
 ' . $tagScriptStart . '
 <!--//--><![CDATA[//><!--
 window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').getPosition().y - 20));
-' . $tagScriptEnd;
+-->' . $tagScriptEnd;
 		}
 
 		return $strBuffer;
