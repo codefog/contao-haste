@@ -21,8 +21,8 @@
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  Kamil Kuzminski 2011 
- * @author     Kamil Kuzminski <http://qzminski.com> 
+ * @copyright  Kamil Kuzminski 2011-2012
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com> 
  * @package    Haste 
  * @license    LGPL
  */
@@ -31,8 +31,9 @@
 /**
  * Class HasteForm 
  *
- * @copyright  Kamil Kuzminski 2011 
- * @author     Kamil Kuzminski <http://qzminski.com> 
+ * @copyright  Kamil Kuzminski 2011-2012
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com> 
+ * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
  * @package    Haste
  */
 class HasteForm extends Frontend
@@ -63,10 +64,22 @@ class HasteForm extends Frontend
 	protected $arrWidgets = array();
 
 	/**
-	 * Configuratoin
+	 * Configuration
 	 * @var array
 	 */
 	protected $arrConfiguration = array();
+
+	/**
+	 * Fieldsets
+	 * @var array
+	 */
+	protected $arrFieldsets = array();
+
+	/**
+	 * Has fieldsets
+	 * @var boolean
+	 */
+	protected $blnHasFieldsets = false;
 
 
 	/**
@@ -186,6 +199,23 @@ class HasteForm extends Frontend
 				return $this->arrConfiguration[$strKey];
 				break;
 		}
+	}
+
+	/**
+	 * Start a new fieldset group after a given fieldname
+	 * It will include either all widgets or all widgets until the field where you call this method again
+	 * @param string
+	 * @throws Exception
+	 */
+	public function addFieldSet($strField)
+	{
+		if (in_array($strField, $this->arrFieldsets))
+		{
+			throw new Exception(sprintf('There already exists a fieldset starting at the field "%s"!', $strField));
+		}
+
+		$this->blnHasFieldsets = true;
+		$this->arrFieldsets[] = $strField;
 	}
 
 
@@ -456,13 +486,33 @@ class HasteForm extends Frontend
 <input type="hidden" name="REQUEST_TOKEN" value="' . REQUEST_TOKEN . '"' . $tagEnding;
 		}
 
-		// Generate all fields
+		$blnFieldsetOpen = false;
+
+		// Generate all fields and split them into fieldsets, if any
 		foreach ($this->arrWidgets as $objWidget)
 		{
+			if ($this->blnHasFieldsets && in_array($objWidget->name, $this->arrFieldsets))
+			{
+				// Close an opened fiedset
+				if ($blnFieldsetOpen)
+				{
+					$strBuffer .= '</fieldset>';
+				}
+				
+				$strBuffer .= '<fieldset>';
+				$blnFieldsetOpen = true;
+			}
+
 			$strBuffer .= '
 <div class="widget">' .
 $objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
 '</div>';
+		}		
+
+		// Close the last fieldset
+		if ($blnFieldsetOpen)
+		{
+			$strBuffer .= '</fieldset>';
 		}
 
 		$strBuffer .= '
