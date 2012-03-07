@@ -68,6 +68,18 @@ class HasteForm extends Frontend
      */
     protected $arrConfiguration = array();
 
+    /**
+     * Fieldsets
+     * @var array
+     */
+    protected $arrFieldsets = array();
+    
+    /**
+     * Has fieldsets
+     * @var boolean
+     */
+    protected $blnHasFieldsets = false;
+
 
     /**
      * Initialize the object
@@ -186,6 +198,23 @@ class HasteForm extends Frontend
                 return $this->arrConfiguration[$strKey];
                 break;
         }
+    }
+    
+    
+    /**
+     * Start a new fieldset group after a given fieldname
+     * It will include either all widgets or all widgets until the field where you call this method again
+     * @param string field name
+     */
+    public function addFieldSet($strField)
+    {
+        if (in_array($strField, $this->arrFieldsets))
+        {
+            throw new Exception(sprintf('There already exists a fieldset starting at the field "%s"!', $strField));
+        }
+        
+        $this->blnHasFieldsets = true;
+        $this->arrFieldsets[] = $strField;
     }
 
 
@@ -456,13 +485,39 @@ class HasteForm extends Frontend
 <input type="hidden" name="REQUEST_TOKEN" value="' . REQUEST_TOKEN . '"' . $tagEnding;
         }
 
+        $i = 0;
+        $intTotal = count($this->arrWidgets);
+        $blnOpenedFieldSet = false;
+        
         // Generate all fields
         foreach ($this->arrWidgets as $objWidget)
         {
+            // field sets
+            if ($this->blnHasFieldsets && in_array($objWidget->name, $this->arrFieldsets))
+            {
+                // close an already open one
+                if ($blnOpenedFieldSet)
+                {
+                    $strBuffer .= '</fieldset>';
+                }
+                
+                $strBuffer .= '<fieldset>';
+                $blnOpenedFieldSet = true;
+            }
+            
+            // widget
             $strBuffer .= '
 <div class="widget">' .
 $objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
 '</div>';
+
+            // end the fieldset for the very last widget
+            if ($this->blnHasFieldsets && $i == $intTotal)
+            {
+                $strBuffer .= '</fieldset>';
+            }
+            
+            $i++;
         }
 
         $strBuffer .= '
@@ -507,3 +562,5 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
         return $strUrl;
     }
 }
+
+?>
