@@ -52,6 +52,12 @@ class HasteForm extends Frontend
 	protected $blnValid = false;
 
 	/**
+	 * Form submitted
+	 * @var boolean
+	 */
+	protected $blnSubmitted = false;
+
+	/**
 	 * Fields
 	 * @var array
 	 */
@@ -99,6 +105,10 @@ class HasteForm extends Frontend
 		$this->arrConfiguration['action'] = ampersand($this->getIndexFreeRequest());
 		$this->arrConfiguration['submit'] = $GLOBALS['TL_LANG']['MSC']['submit'];
 		$this->arrConfiguration['javascript'] = true;
+		
+		// check if the form has been submitted
+		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
+		$this->blnSubmitted = ($blnIsGet || $this->Input->post('FORM_SUBMIT') == $this->strFormId);
 	}
 
 
@@ -269,9 +279,8 @@ class HasteForm extends Frontend
 	public function validate()
 	{
 		$this->initializeWidgets();
-		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
 
-		if ($blnIsGet || $this->Input->post('FORM_SUBMIT') == $this->strFormId)
+		if ($this->blnSubmitted)
 		{
 			$this->blnValid = true;
 
@@ -523,7 +532,7 @@ $objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
 </form>';
 
 		// Add a javascript if there is an error
-		if (!$this->blnValid && $this->arrConfiguration['javascript'])
+		if ($this->blnSubmitted && !$this->blnValid && $this->arrConfiguration['javascript'])
 		{
 			$strBuffer .= '
 ' . $tagScriptStart . '
