@@ -508,7 +508,7 @@ class HasteForm extends Frontend
 
 			$strBuffer .= '
 <div class="widget">' .
-$objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
+ $objWidget->generateWithError() . ' ' . (($objWidget instanceof FormCaptcha) ? $objWidget->generateQuestion() : $objWidget->generateLabel()) . 
 '</div>';
 		
 			// end fieldset if we should do that for this widget
