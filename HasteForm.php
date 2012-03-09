@@ -52,6 +52,12 @@ class HasteForm extends Frontend
 	protected $blnValid = false;
 
 	/**
+	 * Form submitted
+	 * @var boolean
+	 */
+	protected $blnSubmitted = false;
+
+	/**
 	 * Fields
 	 * @var array
 	 */
@@ -99,6 +105,10 @@ class HasteForm extends Frontend
 		$this->arrConfiguration['action'] = ampersand($this->getIndexFreeRequest());
 		$this->arrConfiguration['submit'] = $GLOBALS['TL_LANG']['MSC']['submit'];
 		$this->arrConfiguration['javascript'] = true;
+		
+		// check if the form has been submitted
+		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
+		$this->blnSubmitted = ($blnIsGet || $this->Input->post('FORM_SUBMIT') == $this->strFormId);
 	}
 
 
@@ -203,7 +213,7 @@ class HasteForm extends Frontend
 
 	/**
 	 * Start a new fieldset group after a given fieldname
-	 * It will include either all widgets or all widgets until the field where you call this method again
+	 * It will include either all widgets if only applied once or all widgets until the field where you call this method again
 	 * @param string
 	 * @throws Exception
 	 */
@@ -259,6 +269,8 @@ class HasteForm extends Frontend
 
 			$this->arrWidgets[$arrField['name']] = $objWidget;
 		}
+		
+		$this->prepareFieldSets();
 	}
 
 
@@ -269,9 +281,8 @@ class HasteForm extends Frontend
 	public function validate()
 	{
 		$this->initializeWidgets();
-		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
 
-		if ($blnIsGet || $this->Input->post('FORM_SUBMIT') == $this->strFormId)
+		if ($this->blnSubmitted)
 		{
 			$this->blnValid = true;
 
@@ -486,33 +497,25 @@ class HasteForm extends Frontend
 <input type="hidden" name="REQUEST_TOKEN" value="' . REQUEST_TOKEN . '"' . $tagEnding;
 		}
 
-		$blnFieldsetOpen = false;
-
-		// Generate all fields and split them into fieldsets, if any
+		// Generate all fields
 		foreach ($this->arrWidgets as $objWidget)
 		{
-			if ($this->blnHasFieldsets && in_array($objWidget->name, $this->arrFieldsets))
+			// start fieldset if we should do that for this widget
+			if ($objWidget->hasteFormFieldSetStart)
 			{
-				// Close an opened fiedset
-				if ($blnFieldsetOpen)
-				{
-					$strBuffer .= '</fieldset>';
-				}
-				
 				$strBuffer .= '<fieldset>';
-				$blnFieldsetOpen = true;
 			}
 
 			$strBuffer .= '
 <div class="widget">' .
-$objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
+ $objWidget->generateWithError() . ' ' . (($objWidget instanceof FormCaptcha) ? $objWidget->generateQuestion() : $objWidget->generateLabel()) . 
 '</div>';
-		}		
-
-		// Close the last fieldset
-		if ($blnFieldsetOpen)
-		{
-			$strBuffer .= '</fieldset>';
+		
+			// end fieldset if we should do that for this widget
+			if ($objWidget->hasteFormFieldSetEnd)
+			{
+				$strBuffer .= '</fieldset>';
+			}
 		}
 
 		$strBuffer .= '
@@ -523,7 +526,7 @@ $objWidget->generateLabel() . ' ' . $objWidget->generateWithError() .
 </form>';
 
 		// Add a javascript if there is an error
-		if (!$this->blnValid && $this->arrConfiguration['javascript'])
+		if ($this->blnSubmitted && !$this->blnValid && $this->arrConfiguration['javascript'])
 		{
 			$strBuffer .= '
 ' . $tagScriptStart . '
@@ -556,6 +559,44 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 
 		return $strUrl;
 	}
-}
+	
+	
+	/**
+	 * Prepare the fieldsets
+	 */
+	protected function prepareFieldSets()
+	{
+		if (!$this->blnHasFieldsets)
+		{
+			return;
+		}
+		
+		$intTotal = count($this->arrWidgets);
+		$i=0;
+		$strPrevious = '';
 
-?>
+		// Add hasteform specific properties("hasteFormFieldSetStart", "hasteFormFieldSetEnd") to every widget
+		foreach ($this->arrWidgets as $objWidget)
+		{
+			if (in_array($objWidget->name, $this->arrFieldsets))
+			{
+				// if we have already added a fieldset to any widget, the previous needs to be closed
+				if ($strPrevious)
+				{
+					$this->arrWidgets[$strPrevious]->hasteFormFieldSetEnd = true;
+				}
+				
+				$objWidget->hasteFormFieldSetStart = true;
+			}
+			
+			// Close the last fieldset
+			if ($i == ($intTotal-1))
+			{
+				$objWidget->hasteFormFieldSetEnd = true;
+			}
+
+			$strPrevious = $objWidget->name;
+			$i++;
+		}
+	}
+}
