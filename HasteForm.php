@@ -506,10 +506,7 @@ class HasteForm extends Frontend
 				$strBuffer .= '<fieldset>';
 			}
 
-			$strBuffer .= '
-<div class="widget">' .
- $objWidget->generateWithError() . ' ' . (($objWidget instanceof FormCaptcha) ? $objWidget->generateQuestion() : $objWidget->generateLabel()) . 
-'</div>';
+			$strBuffer .= '<div class="widget">' . $objWidget->parse() . '</div>';
 		
 			// end fieldset if we should do that for this widget
 			if ($objWidget->hasteFormFieldSetEnd)
