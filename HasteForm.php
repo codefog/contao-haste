@@ -214,7 +214,7 @@ class HasteForm extends Frontend
 	/**
 	 * Start a new fieldset group after a given fieldname
 	 * It will include either all widgets if only applied once or all widgets until the field where you call this method again
-	 * @param string
+	 * @param string widget field name
 	 * @throws Exception
 	 */
 	public function addFieldSet($strField)
@@ -503,7 +503,7 @@ class HasteForm extends Frontend
 			// start fieldset if we should do that for this widget
 			if ($objWidget->hasteFormFieldSetStart)
 			{
-				$strBuffer .= '<fieldset>';
+				$strBuffer .= sprintf('<fieldset class="%s">', $objWidget->hasteFormFieldCSSClass);
 			}
 
 			$strBuffer .= '<div class="widget">' . $objWidget->parse() . '</div>';
@@ -584,6 +584,7 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 				}
 				
 				$objWidget->hasteFormFieldSetStart = true;
+				$objWidget->hasteFormFieldCSSClass = 'fs_' . array_search($objWidget->name, $this->arrFieldsets);
 			}
 			
 			// Close the last fieldset
