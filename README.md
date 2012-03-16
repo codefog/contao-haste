@@ -25,6 +25,15 @@ Example
 		'eval'			=> array('mandatory'=>true, 'rgxp'=>'digit')
 	);
 	
+	// the checkbox is really annoying. It took me a few minutes to get what I wanted so I leave it here for the record
+    $arrFields['termsOfUse'] = array
+    (
+        'name'                    => 'termsOfUse',
+        'label'                   => array('This is the <legend>', 'This is the <label>'),
+        'inputType'               => 'checkbox',
+        'eval'                    => array('mandatory'=>true)                
+    );
+	
 	// first param is the form id
 	$objForm = new HasteForm('someid', $arrFields);
 	$objForm->submit = 'Submit form';
