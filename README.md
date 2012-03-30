@@ -26,16 +26,21 @@ Example
 	);
 	
 	// the checkbox is really annoying. It took me a few minutes to get what I wanted so I leave it here for the record
-    $arrFields['termsOfUse'] = array
-    (
-        'name'                    => 'termsOfUse',
-        'label'                   => array('This is the <legend>', 'This is the <label>'),
-        'inputType'               => 'checkbox',
-        'eval'                    => array('mandatory'=>true)                
-    );
+	$arrFields['termsOfUse'] = array
+	(
+		'name'                    => 'termsOfUse',
+		'label'                   => array('This is the <legend>', 'This is the <label>'),
+		'inputType'               => 'checkbox',
+		'eval'                    => array('mandatory'=>true)
+	);
 	
 	// first param is the form id
 	$objForm = new HasteForm('someid', $arrFields);
+	
+	// by the way: you can also load the fields from a DCA file instead of passing $arrFields to the constructor
+	$objForm->loadFieldsFromDca('tl_content', $arrFieldsIdontNeed=array());
+	
+	// The submit button
 	$objForm->submit = 'Submit form';
 	
 	// easily add a captcha if you like
@@ -44,6 +49,16 @@ Example
 	// you can start a new fieldset for every field. It will contain all widgets until the next field you call
 	// addFieldSet() upon or all widgets, if you call it only for one field
 	$objForm->addFieldSet('year');
+	
+	// you can also add fields later on at the very end or before a certain widget
+	$objForm->addField('type',	array
+								(
+									'label'     => 'Typ',
+									// etc.
+								), 'beforeFieldName');
+	
+	// and obviously remove a specific field
+	$objForm->removeField('type');
 	
 	// validate() also checks whether the form has been submitted
 	if ($objForm->validate())
