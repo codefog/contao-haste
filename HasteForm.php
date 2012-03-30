@@ -91,9 +91,9 @@ class HasteForm extends Frontend
 	/**
 	 * Initialize the object
 	 * @param string
-	 * @param array
+	 * @param array fields (optional, you can also set them from a DCA)
 	 */
-	public function __construct($strId, $arrFields)
+	public function __construct($strId, $arrFields=array())
 	{
 		parent::__construct();
 
@@ -215,6 +215,27 @@ class HasteForm extends Frontend
 		}
 	}
 
+
+	/**
+	 * Load the fields from a back end DCA
+	 * @param string the DCA table name
+	 * @param array an array of fields you want to skip (optional)
+	 */
+	public function loadFieldsFromDca($strTable, $arrExclulde=array())
+	{
+		$this->loadDataContainer($strTable);
+		$this->loadLanguageFile($strTable);
+		
+		foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strFieldName => $arrFieldData)
+		{
+			if (in_array($strFieldName, $arrExclulde))
+			{
+				continue;
+			}
+			
+			$this->addField($strFieldName, $arrFieldData);
+		}
+	}
 
 
 	/**
