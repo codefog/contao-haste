@@ -205,6 +205,10 @@ class HasteForm extends Frontend
 				return $this->arrConfiguration['hasUploads'] ? 'multipart/form-data' : 'application/x-www-form-urlencoded';
 				break;
 
+			case 'isSubmitted':
+				return $this->blnSubmitted;
+				break;
+
 			default:
 				return $this->arrConfiguration[$strKey];
 				break;
