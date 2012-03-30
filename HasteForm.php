@@ -246,7 +246,7 @@ class HasteForm extends Frontend
 		}
 
 		// Initialize widgets
-		foreach ($this->arrFields as $arrField)
+		foreach ($this->arrFields as $strFieldName => $arrField)
 		{
 			$strClass = $GLOBALS['TL_FFL'][$arrField['inputType']];
 
@@ -266,6 +266,13 @@ class HasteForm extends Frontend
 
 			// support the default value too
 			$arrField['value'] = $arrField['default'];
+			
+			// make sure it has a "name" attribute because it is mandatory
+			if (!isset($arrField['name']))
+			{
+				$arrField['name'] = $strFieldName;
+			}
+			
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
 
 			// Set current widget value if this is a GET request
