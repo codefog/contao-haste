@@ -263,6 +263,9 @@ class HasteForm extends Frontend
 			}
 
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];
+
+			// support the default value too
+			$arrField['value'] = $arrField['default'];
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
 
 			// Set current widget value if this is a GET request
