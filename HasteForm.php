@@ -215,6 +215,47 @@ class HasteForm extends Frontend
 		}
 	}
 
+
+
+	/**
+	 * Add a field to the fields array (optionally after a defined one)
+	 * @param string the field name
+	 * @param array the field data
+	 * @param string a field name (if the current should be injected before a reference field)
+	 */
+	public function addField($strFieldName, $arrFieldData, $strInjectBefore=false)
+	{
+		if ($strInjectBefore)
+		{
+			$arrKeys = array_keys($this->arrFields);
+			$intIndex = array_search($strInjectBefore, $arrKeys);
+			
+			if (!$intIndex)
+			{
+				throw new Exception('The field "' . $strInjectBefore . '" is not yet defined!');
+			}
+			
+			$arrNew = array();
+			$arrNew[$strFieldName] = $arrFieldData; 
+
+			array_insert($this->arrFields, $intIndex, $arrNew);
+			return;
+		}
+
+		$this->arrFields[$strFieldName] = $arrFieldData;
+	}
+	
+	
+	/**
+	 * Remove a field
+	 * @param string field name
+	 */
+	public function removeField($strFieldName)
+	{
+		unset($this->arrFields[$strFieldName]);
+	}
+	
+
 	/**
 	 * Start a new fieldset group after a given fieldname
 	 * It will include either all widgets if only applied once or all widgets until the field where you call this method again
