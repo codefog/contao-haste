@@ -98,7 +98,7 @@ class HasteForm extends Frontend
 		parent::__construct();
 
 		global $objPage;
-		$this->strFormId = 'form_' . $strId;
+		$this->strFormId = is_numeric($strId) ? 'form_' . $strId : $strId;
 		$this->arrFields = $arrFields;
 
 		$this->arrConfiguration['method'] = 'post';
