@@ -11,7 +11,7 @@ Contributors
 -------------------
 
 * Kamil Kuzminski <kamil.kuzminski@gmail.com>
-* Yanick Witschi <yanick.witschi@certo-net.ch>
+* Yanick Witschi <yanick.witschi@terminal42.ch>
 
 
 Example
