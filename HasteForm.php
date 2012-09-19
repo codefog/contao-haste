@@ -23,6 +23,8 @@
  * PHP version 5
  * @copyright  Kamil Kuzminski 2011-2012
  * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
+ * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
+ * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
  * @package    Haste
  * @license    LGPL
  */
@@ -33,7 +35,8 @@
  *
  * @copyright  Kamil Kuzminski 2011-2012
  * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
- * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
+ * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
+ * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
  * @package    Haste
  */
 class HasteForm extends Frontend
