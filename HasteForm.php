@@ -223,8 +223,8 @@ class HasteForm extends Frontend
 	 */
 	public function loadFieldsFromDca($strTable, $arrExclulde=array())
 	{
-		$this->loadDataContainer($strTable);
 		$this->loadLanguageFile($strTable);
+		$this->loadDataContainer($strTable);
 		
 		foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strFieldName => $arrFieldData)
 		{
