@@ -517,18 +517,19 @@ class HasteForm extends Frontend
 
 	/**
 	 * Add a captcha field
+	 * @param array
 	 */
-	public function addCaptcha()
+	public function addCaptcha($arrData=array())
 	{
 		if (!isset($this->arrFields['captcha']))
 		{
-			$this->arrFields['captcha'] = array
+			$this->arrFields['captcha'] = array_merge_recursive(array
 			(
 				'name'      => 'captcha',
 				'label'     => $GLOBALS['TL_LANG']['MSC']['securityQuestion'],
 				'inputType' => 'captcha',
 				'eval'      => array('mandatory'=>true)
-			);
+			), $arrData);
 		}
 	}
 
