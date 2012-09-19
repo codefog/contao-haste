@@ -10,29 +10,29 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program. If not, please visit the Free
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
  * @copyright  Kamil Kuzminski 2011-2012
- * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com> 
- * @package    Haste 
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
+ * @package    Haste
  * @license    LGPL
  */
 
 
 /**
- * Class HasteForm 
+ * Class HasteForm
  *
  * @copyright  Kamil Kuzminski 2011-2012
- * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com> 
+ * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
  * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
  * @package    Haste
  */
@@ -105,7 +105,7 @@ class HasteForm extends Frontend
 		$this->arrConfiguration['action'] = ampersand($this->getIndexFreeRequest());
 		$this->arrConfiguration['submit'] = $GLOBALS['TL_LANG']['MSC']['submit'];
 		$this->arrConfiguration['javascript'] = true;
-		
+
 		// check if the form has been submitted
 		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
 		$this->blnSubmitted = ($blnIsGet || $this->Input->post('FORM_SUBMIT') == $this->strFormId);
@@ -225,14 +225,14 @@ class HasteForm extends Frontend
 	{
 		$this->loadLanguageFile($strTable);
 		$this->loadDataContainer($strTable);
-		
+
 		foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strFieldName => $arrFieldData)
 		{
 			if (in_array($strFieldName, $arrExclulde))
 			{
 				continue;
 			}
-			
+
 			$this->addField($strFieldName, $arrFieldData);
 		}
 	}
@@ -250,14 +250,14 @@ class HasteForm extends Frontend
 		{
 			$arrKeys = array_keys($this->arrFields);
 			$intIndex = array_search($strInjectBefore, $arrKeys);
-			
+
 			if (!$intIndex)
 			{
 				throw new Exception('The field "' . $strInjectBefore . '" is not yet defined!');
 			}
-			
+
 			$arrNew = array();
-			$arrNew[$strFieldName] = $arrFieldData; 
+			$arrNew[$strFieldName] = $arrFieldData;
 
 			array_insert($this->arrFields, $intIndex, $arrNew);
 			return;
@@ -265,8 +265,8 @@ class HasteForm extends Frontend
 
 		$this->arrFields[$strFieldName] = $arrFieldData;
 	}
-	
-	
+
+
 	/**
 	 * Remove a field
 	 * @param string field name
@@ -275,7 +275,7 @@ class HasteForm extends Frontend
 	{
 		unset($this->arrFields[$strFieldName]);
 	}
-	
+
 
 	/**
 	 * Start a new fieldset group after a given fieldname
@@ -328,13 +328,13 @@ class HasteForm extends Frontend
 
 			// support the default value too
 			$arrField['value'] = $arrField['default'];
-			
+
 			// make sure it has a "name" attribute because it is mandatory
 			if (!isset($arrField['name']))
 			{
 				$arrField['name'] = $strFieldName;
 			}
-			
+
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
 
 			// Set current widget value if this is a GET request
@@ -345,7 +345,7 @@ class HasteForm extends Frontend
 
 			$this->arrWidgets[$arrField['name']] = $objWidget;
 		}
-		
+
 		$this->prepareFieldSets();
 	}
 
@@ -360,37 +360,55 @@ class HasteForm extends Frontend
 
 		if ($this->blnSubmitted)
 		{
+			$blnResetPost = false;
 			$this->blnValid = true;
 
 			// Perform validation even on GET request
-			if ($blnIsGet)
+			if (!is_array($_POST) || empty($_POST))
 			{
-				$arrPost = $_POST;
-				$_POST = array_merge($_POST, $_GET);
+				$_POST = $_GET;
+				$blnResetPost = true;
 			}
 
 			// Validate widgets
-			foreach ($this->arrWidgets as $objWidget)
+			foreach ($this->arrWidgets as $strFieldName => $objWidget)
 			{
 				$this->customValidation($objWidget);
+
 				$objWidget->validate();
+				$varValue = $objWidget->value;
+
+				// Save callback
+				if (is_array($this->arrFields[$strFieldName]['save_callback']))
+				{
+					foreach ($this->arrFields[$strFieldName]['save_callback'] as $callback)
+					{
+						$this->import($callback[0]);
+
+						try
+						{
+							$varValue = $this->$callback[0]->$callback[1]($varValue, $this);
+						}
+						catch (Exception $e)
+						{
+							$objWidget->class = 'error';
+							$objWidget->addError($e->getMessage());
+						}
+					}
+				}
 
 				if ($objWidget->hasErrors())
 				{
 					$this->blnValid = false;
 				}
 
-				// Check if form was submitted
-				if ($blnIsGet && !isset($_GET[$objWidget->name]))
-				{
-					$this->blnValid = false;
-				}
+				$objWidget->value = $varValue;
 			}
 
 			// Revert $_POST to its original form
-			if ($blnIsGet)
+			if ($blnResetPost)
 			{
-				$_POST = $arrPost;
+				$_POST = null;
 			}
 		}
 
@@ -400,7 +418,7 @@ class HasteForm extends Frontend
 
 	/**
 	 * Perform a custom validation
-	 * 
+	 *
 	 * Currently available:
 	 * - mandatoryOn => array($field => $value);
 	 *   Performs a mandatory check if $field is set to $value.
@@ -500,7 +518,7 @@ class HasteForm extends Frontend
 
 
 	/**
-	 * Get value from all widgets	 
+	 * Get value from all widgets
 	 */
 	public function fetchAll()
 	{
@@ -517,7 +535,6 @@ class HasteForm extends Frontend
 
 	/**
 	 * Add a captcha field
-	 * @param array
 	 */
 	public function addCaptcha($arrData=array())
 	{
@@ -541,7 +558,7 @@ class HasteForm extends Frontend
 	public function addFormToTemplate($objTemplate)
 	{
 		$this->initializeWidgets();
-		
+
 		$objTemplate->formId = $this->strFormId;
 		$objTemplate->method = $this->arrConfiguration['method'];
 		$objTemplate->action = $this->arrConfiguration['action'];
@@ -584,7 +601,7 @@ class HasteForm extends Frontend
 			}
 
 			$strBuffer .= '<div class="widget">' . $objWidget->parse() . '</div>';
-		
+
 			// end fieldset if we should do that for this widget
 			if ($objWidget->hasteFormFieldSetEnd)
 			{
@@ -633,8 +650,8 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 
 		return $strUrl;
 	}
-	
-	
+
+
 	/**
 	 * Prepare the fieldsets
 	 */
@@ -644,7 +661,7 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 		{
 			return;
 		}
-		
+
 		$intTotal = count($this->arrWidgets);
 		$i=0;
 		$strPrevious = '';
@@ -659,11 +676,11 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 				{
 					$this->arrWidgets[$strPrevious]->hasteFormFieldSetEnd = true;
 				}
-				
+
 				$objWidget->hasteFormFieldSetStart = true;
 				$objWidget->hasteFormFieldCSSClass = 'fs_' . array_search($objWidget->name, $this->arrFieldsets);
 			}
-			
+
 			// Close the last fieldset
 			if ($i == ($intTotal-1))
 			{
