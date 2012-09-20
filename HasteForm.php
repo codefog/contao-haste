@@ -582,7 +582,7 @@ class HasteForm extends Frontend
 		global $objPage;
 		list($tagEnding, $tagScriptStart, $tagScriptEnd) = ($objPage->outputFormat == 'html5') ? array('>', '<script>', '</script>') : array(' />', ('<script type="text/javascript">'."\n".'<!--//--><![CDATA[//><!--'), ('//--><!]]>'."\n".'</script>'));
 
-		$strBuffer .= '
+		$strBuffer = '
 <form action="' . $this->arrConfiguration['action'] . '" id="' . $this->strFormId . '" enctype="' . ($this->arrConfiguration['hasUploads'] ? 'multipart/form-data' : 'application/x-www-form-urlencoded') . '" method="' . $this->arrConfiguration['method'] . '">
 <div class="formbody">';
 
