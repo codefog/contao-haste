@@ -73,6 +73,12 @@ class HasteForm extends Frontend
 	protected $arrWidgets = array();
 
 	/**
+	 * Hidden fields
+	 * @var array
+	 */
+	protected $arrHiddenFields = array();
+
+	/**
 	 * Configuration
 	 * @var array
 	 */
@@ -105,9 +111,9 @@ class HasteForm extends Frontend
 		$this->arrFields = $arrFields;
 
 		$this->arrConfiguration['method'] = 'post';
-		$this->arrConfiguration['action'] = ampersand($this->getIndexFreeRequest());
 		$this->arrConfiguration['submit'] = $GLOBALS['TL_LANG']['MSC']['submit'];
 		$this->arrConfiguration['javascript'] = true;
+		$this->action = $this->getIndexFreeRequest();
 
 		// check if the form has been submitted
 		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
@@ -165,13 +171,32 @@ class HasteForm extends Frontend
 					}
 				}
 
-				// Remove _GET parameters
+				$varValue = ampersand($varValue);
+
+				// Move _GET parameters to the hidden fields
 				if ($this->arrConfiguration['method'] == 'get')
 				{
-					$varValue = $this->removeGetParameters($varValue);
-				}
+					if (($intCut = strpos($varValue, '?')) !== false)
+					{
+						$arrChunks = parse_url($varValue);
+						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
 
-				$varValue = ampersand($varValue);
+						foreach ($arrChunks as $chunk)
+						{
+							list($key, $value) = trimsplit('=', $chunk);
+							$this->arrHiddenFields[$key] = $value;
+						}
+
+						$varValue = substr($varValue, 0, $intCut);
+					}
+				}
+				break;
+
+			case 'hiddenFields':
+				if (is_array($varValue))
+				{
+					$this->arrHiddenFields = array_is_assoc($varValue) ? $varValue : array();
+				}
 				break;
 
 			case 'submit':
@@ -202,6 +227,10 @@ class HasteForm extends Frontend
 
 			case 'widgets':
 				return $this->arrWidgets;
+				break;
+
+			case 'hiddenFields':
+				return $this->arrHiddenFields;
 				break;
 
 			case 'enctype':
@@ -568,6 +597,7 @@ class HasteForm extends Frontend
 		$objTemplate->enctype = $this->arrConfiguration['hasUploads'] ? 'multipart/form-data' : 'application/x-www-form-urlencoded';
 		$objTemplate->submit = $this->arrConfiguration['submit'];
 		$objTemplate->fields = $this->arrWidgets;
+		$objTemplate->hiddenFields = $this->generateHiddenFields();
 		$objTemplate->hasError = !$this->blnValid;
 	}
 
@@ -594,10 +624,12 @@ class HasteForm extends Frontend
 <input type="hidden" name="REQUEST_TOKEN" value="' . REQUEST_TOKEN . '"' . $tagEnding;
 		}
 
+		$strBuffer .= $this->generateHiddenFields();
+
 		// Generate all fields
 		foreach ($this->arrWidgets as $objWidget)
 		{
-			// start fieldset if we should do that for this widget
+			// Start fieldset if we should do that for this widget
 			if ($objWidget->hasteFormFieldSetStart)
 			{
 				$strBuffer .= sprintf('<fieldset class="%s">', $objWidget->hasteFormFieldCSSClass);
@@ -605,7 +637,7 @@ class HasteForm extends Frontend
 
 			$strBuffer .= '<div class="widget">' . $objWidget->parse() . '</div>';
 
-			// end fieldset if we should do that for this widget
+			// End fieldset if we should do that for this widget
 			if ($objWidget->hasteFormFieldSetEnd)
 			{
 				$strBuffer .= '</fieldset>';
@@ -635,23 +667,29 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 
 	/**
 	 * Remove _GET parameters from the URL
-	 * @param string
+	 */
+	public function removeGetParameters()
+	{
+		$this->arrHiddenFields = array();
+	}
+
+
+	/**
+	 * Generate the hidden fields and return them as HTML string
 	 * @return string
 	 */
-	protected function removeGetParameters($strUrl)
+	protected function generateHiddenFields()
 	{
-		if ($GLOBALS['TL_CONFIG']['disableAlias'])
+		global $objPage;
+		$strTagEnding = ($objPage->outputFormat == 'html5') ? '>' : ' />';
+		$strBuffer = '';
+
+		foreach ($this->arrHiddenFields as $k=>$v)
 		{
-			return $strUrl;
+			$strBuffer .= sprintf('<input type="hidden" name="%s" value="%s"%s', $k, $v, $strTagEnding) . "\n";
 		}
 
-		// Strip GET params
-		if (($index = strpos($strUrl, '?')) !== false)
-		{
-			return substr($strUrl, 0, strpos($strUrl, '?'));
-		}
-
-		return $strUrl;
+		return $strBuffer;
 	}
 
 
