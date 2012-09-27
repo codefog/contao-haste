@@ -195,7 +195,7 @@ class HasteForm extends Frontend
 			case 'hiddenFields':
 				if (is_array($varValue))
 				{
-					$this->arrHiddenFields = array_is_assoc($varValue) ? $varValue : array();
+					$this->arrHiddenFields = $varValue;
 				}
 				break;
 
@@ -275,13 +275,13 @@ class HasteForm extends Frontend
 	 * @param string the field name
 	 * @param array the field data
 	 * @param string a field name (if the current should be injected before a reference field)
+	 * @throws Exception
 	 */
-	public function addField($strFieldName, $arrFieldData, $strInjectBefore=false)
+	public function addField($strFieldName, $arrFieldData, $strInjectBefore='')
 	{
-		if ($strInjectBefore)
+		if ($strInjectBefore != '')
 		{
-			$arrKeys = array_keys($this->arrFields);
-			$intIndex = array_search($strInjectBefore, $arrKeys);
+			$intIndex = array_search($strInjectBefore, array_keys($this->arrFields));
 
 			if (!$intIndex)
 			{
