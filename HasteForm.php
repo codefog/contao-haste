@@ -96,6 +96,12 @@ class HasteForm extends Frontend
 	 */
 	protected $blnHasFieldsets = false;
 
+	/**
+	 * HasteForm version
+	 * @var string
+	 */
+	private static $strVersion = '1.0.0';
+
 
 	/**
 	 * Initialize the object
@@ -671,6 +677,16 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 	public function removeGetParameters()
 	{
 		$this->arrHiddenFields = array();
+	}
+
+
+	/**
+	 * Get the HasteForm version
+	 * @return string
+	 */
+	public static function getVersion()
+	{
+		return self::$strVersion;
 	}
 
 
