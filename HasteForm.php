@@ -277,6 +277,41 @@ class HasteForm extends Frontend
 
 
 	/**
+	 * Load the fields from the back end form generator
+	 * @param int the form generator form id
+	 * @param array	Form config that gets merged with the form data from the database
+	 * @param array an array of fields you want to skip
+	 * @throws Exception
+	 */
+	public function loadFieldsFromFormGeneratorId($intId, $arrConfig=array(), $arrExclude=array())
+	{
+		$objDB = Database::getInstance();
+		$this->loadDataContainer('tl_form');
+		$this->loadDataContainer('tl_form_field');
+
+		$arrFormData = array_merge($objDB->prepare('SELECT * FROM tl_form WHERE id=?')->execute($intId)->fetchAssoc(), $arrConfig);
+
+		// Form not found
+		if (!$arrFormData['id'])
+		{
+			throw new Exception('Form generator id "' . $intId . '" not found!');
+		}
+
+		$objFields = $objDB->prepare("SELECT * FROM tl_form_field WHERE pid=? AND invisible='' ORDER BY sorting")->execute($intId);
+
+		while ($objFields->next())
+		{
+			if (in_array($objFields->name, $arrExclude))
+			{
+				continue;
+			}
+
+			$this->addField($objFields->name, $objFields->row());
+		}
+	}
+
+
+	/**
 	 * Add a field to the fields array (optionally after a defined one)
 	 * @param string the field name
 	 * @param array the field data
