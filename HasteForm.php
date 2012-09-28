@@ -257,16 +257,16 @@ class HasteForm extends Frontend
 	/**
 	 * Load the fields from a back end DCA
 	 * @param string the DCA table name
-	 * @param array an array of fields you want to skip (optional)
+	 * @param array an array of fields you want to skip
 	 */
-	public function loadFieldsFromDca($strTable, $arrExclulde=array())
+	public function loadFieldsFromDca($strTable, $arrExclude=array())
 	{
 		$this->loadLanguageFile($strTable);
 		$this->loadDataContainer($strTable);
 
 		foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strFieldName => $arrFieldData)
 		{
-			if (in_array($strFieldName, $arrExclulde))
+			if (in_array($strFieldName, $arrExclude))
 			{
 				continue;
 			}
