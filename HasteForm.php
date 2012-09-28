@@ -283,7 +283,7 @@ class HasteForm extends Frontend
 	 * @param array an array of fields you want to skip
 	 * @throws Exception
 	 */
-	public function loadFieldsFromFormGeneratorId($intId, $arrConfig=array(), $arrExclude=array())
+	public function loadFieldsFromFormGenerator($intId, $arrConfig=array(), $arrExclude=array())
 	{
 		$objDB = Database::getInstance();
 		$this->loadDataContainer('tl_form');
