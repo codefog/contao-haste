@@ -286,13 +286,10 @@ class HasteForm extends Frontend
 	 * Load the fields from the back end form generator
 	 * @param int the form generator form id
 	 * @param array an array of fields you want to skip
-	 * @throws Exception
 	 */
 	public function loadFieldsFromFormGenerator($intId, $arrExclude=array())
 	{
-		$this->loadDataContainer('tl_form_field');
-
-		$objFields = Database::getInstance()->prepare("SELECT * FROM tl_form_field WHERE pid=? AND invisible='' ORDER BY sorting")->execute($intId);
+		$objFields = $this->Database->prepare("SELECT * FROM tl_form_field WHERE pid=? AND name!=''" . (!BE_USER_LOGGED_IN ? " AND invisible=''" : "") . " ORDER BY sorting")->execute($intId);
 
 		while ($objFields->next())
 		{
