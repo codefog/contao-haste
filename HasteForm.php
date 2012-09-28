@@ -115,15 +115,12 @@ class HasteForm extends Frontend
 		global $objPage;
 		$this->strFormId = is_numeric($strId) ? 'form_' . $strId : $strId;
 		$this->arrFields = $arrFields;
+		$this->blnSubmitted = (($this->method == 'get' && count($_GET) > 0) || $this->Input->post('FORM_SUBMIT') == $this->strFormId);
 
-		$this->arrConfiguration['method'] = 'post';
-		$this->arrConfiguration['submit'] = $GLOBALS['TL_LANG']['MSC']['submit'];
-		$this->arrConfiguration['javascript'] = true;
+		$this->method = 'post';
+		$this->submit = $GLOBALS['TL_LANG']['MSC']['submit'];
+		$this->javascript = true;
 		$this->action = $this->getIndexFreeRequest();
-
-		// check if the form has been submitted
-		$blnIsGet = ($this->arrConfiguration['method'] == 'get' && count($_GET) > 0) ? true : false;
-		$this->blnSubmitted = ($blnIsGet || $this->Input->post('FORM_SUBMIT') == $this->strFormId);
 	}
 
 
@@ -149,7 +146,7 @@ class HasteForm extends Frontend
 				// Remove _GET parameters
 				if ($varValue == 'get')
 				{
-					$this->arrConfiguration['action'] = $this->removeGetParameters($this->arrConfiguration['action']);
+					$this->action = $this->removeGetParameters();
 				}
 				break;
 
@@ -174,26 +171,6 @@ class HasteForm extends Frontend
 					{
 						global $objPage;
 						$varValue = $this->generateFrontendUrl($objPage->row());
-					}
-				}
-
-				$varValue = ampersand($varValue);
-
-				// Move _GET parameters to the hidden fields
-				if ($this->arrConfiguration['method'] == 'get')
-				{
-					if (($intCut = strpos($varValue, '?')) !== false)
-					{
-						$arrChunks = parse_url($varValue);
-						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
-
-						foreach ($arrChunks as $chunk)
-						{
-							list($key, $value) = trimsplit('=', $chunk);
-							$this->arrHiddenFields[$key] = $value;
-						}
-
-						$varValue = substr($varValue, 0, $intCut);
 					}
 				}
 				break;
@@ -225,6 +202,35 @@ class HasteForm extends Frontend
 		{
 			case 'formId':
 				return $this->strFormId;
+				break;
+
+			case 'action':
+				$strUrl = ampersand($this->arrConfiguration['action']);
+
+				// Move _GET parameters to the hidden fields
+				if ($this->method == 'get')
+				{
+					if (($intCut = strpos($strUrl, '?')) !== false)
+					{
+						$arrChunks = parse_url($strUrl);
+						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
+
+						foreach ($arrChunks as $chunk)
+						{
+							list($key, $value) = trimsplit('=', $chunk);
+
+							// Skip the field if it is a regular field
+							if (!isset($this->arrFields[$key]))
+							{
+								$this->arrHiddenFields[$key] = $value;
+							}
+						}
+
+						$strUrl = substr($strUrl, 0, $intCut);
+					}
+				}
+
+				return $strUrl;
 				break;
 
 			case 'fields':
@@ -383,7 +389,7 @@ class HasteForm extends Frontend
 			// Update the configuration if a form has upload fields
 			if ($strClass == 'FormFileUpload')
 			{
-				$this->arrConfiguration['hasUploads'] = true;
+				$this->hasUploads = true;
 			}
 
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];
@@ -400,7 +406,7 @@ class HasteForm extends Frontend
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
 
 			// Set current widget value if this is a GET request
-			if ($this->arrConfiguration['method'] == 'get')
+			if ($this->method == 'get')
 			{
 				$objWidget->value = $this->Input->get($arrField['name']);
 			}
@@ -572,7 +578,7 @@ class HasteForm extends Frontend
 	{
 		if (array_key_exists($strWidget, $this->arrWidgets))
 		{
-			return ($this->arrConfiguration['method'] == 'post') ? $this->arrWidgets[$strWidget]->value : $this->Input->get($strWidget);
+			return ($this->method == 'post') ? $this->arrWidgets[$strWidget]->value : $this->Input->get($strWidget);
 		}
 
 		return null;
@@ -622,10 +628,10 @@ class HasteForm extends Frontend
 		$this->initializeWidgets();
 
 		$objTemplate->formId = $this->strFormId;
-		$objTemplate->method = $this->arrConfiguration['method'];
-		$objTemplate->action = $this->arrConfiguration['action'];
-		$objTemplate->enctype = $this->arrConfiguration['hasUploads'] ? 'multipart/form-data' : 'application/x-www-form-urlencoded';
-		$objTemplate->submit = $this->arrConfiguration['submit'];
+		$objTemplate->method = $this->method;
+		$objTemplate->action = $this->action;
+		$objTemplate->enctype = $this->hasUploads ? 'multipart/form-data' : 'application/x-www-form-urlencoded';
+		$objTemplate->submit = $this->submit;
 		$objTemplate->fields = $this->arrWidgets;
 		$objTemplate->hiddenFields = $this->generateHiddenFields();
 		$objTemplate->hasError = !$this->blnValid;
@@ -643,11 +649,11 @@ class HasteForm extends Frontend
 		list($tagEnding, $tagScriptStart, $tagScriptEnd) = ($objPage->outputFormat == 'html5') ? array('>', '<script>', '</script>') : array(' />', ('<script type="text/javascript">'."\n".'<!--//--><![CDATA[//><!--'), ('//--><!]]>'."\n".'</script>'));
 
 		$strBuffer = '
-<form action="' . $this->arrConfiguration['action'] . '" id="' . $this->strFormId . '" enctype="' . ($this->arrConfiguration['hasUploads'] ? 'multipart/form-data' : 'application/x-www-form-urlencoded') . '" method="' . $this->arrConfiguration['method'] . '">
+<form action="' . $this->action . '" id="' . $this->strFormId . '" enctype="' . ($this->hasUploads ? 'multipart/form-data' : 'application/x-www-form-urlencoded') . '" method="' . $this->method . '">
 <div class="formbody">';
 
 		// Generate required hidden inputs
-		if ($this->arrConfiguration['method'] == 'post')
+		if ($this->method == 'post')
 		{
 			$strBuffer .= '
 <input type="hidden" name="FORM_SUBMIT" value="' . $this->strFormId . '"' . $tagEnding . '
@@ -676,13 +682,13 @@ class HasteForm extends Frontend
 
 		$strBuffer .= '
 <div class="submit_container">
-<input type="submit" class="submit" value="' . $this->arrConfiguration['submit'] . '"' . $tagEnding . '
+<input type="submit" class="submit" value="' . $this->submit . '"' . $tagEnding . '
 </div>
 </div>
 </form>';
 
 		// Add a javascript if there is an error
-		if ($this->blnSubmitted && !$this->blnValid && $this->arrConfiguration['javascript'])
+		if ($this->blnSubmitted && !$this->blnValid && $this->javascript)
 		{
 			$strBuffer .= '
 ' . $tagScriptStart . '
@@ -700,7 +706,10 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 	 */
 	public function removeGetParameters()
 	{
-		$this->arrHiddenFields = array();
+		if ($this->method == 'get')
+		{
+			$this->arrHiddenFields = array();
+		}
 	}
 
 
