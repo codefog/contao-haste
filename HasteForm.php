@@ -668,7 +668,7 @@ class HasteForm extends Frontend
 				$strBuffer .= sprintf('<fieldset class="%s">', $objWidget->hasteFormFieldCSSClass);
 			}
 
-			$strBuffer .= '<div class="widget">' . $objWidget->parse() . '</div>';
+			$strBuffer .= '<div class="widget ' . $objWidget->name . '">' . $objWidget->parse() . '</div>';
 
 			// End fieldset if we should do that for this widget
 			if ($objWidget->hasteFormFieldSetEnd)
