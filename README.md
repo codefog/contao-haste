@@ -22,7 +22,7 @@ A lot of the following examples can be combined.
 For more internal details please read the source ;-)
 
 ### Simple form
-```
+```php
 <?php
 
 	$arrFields = array();
@@ -65,7 +65,7 @@ For more internal details please read the source ;-)
 
 ### HasteForm supports GET and POST
 
-```
+```php
 <?php
 
 	$objForm->method = 'get'; // 'post' is default
@@ -73,7 +73,7 @@ For more internal details please read the source ;-)
 
 ### Using a custom form template
 
-```
+```php
 <?php
 	// you can also work with a custom template if you don't like getting a string directly using generateForm()
 	// this passes the data to a custom FrontendTemplate instance where you have to make sure that fieldsets etc. are respected
@@ -82,7 +82,7 @@ For more internal details please read the source ;-)
 
 ### Adding a default captcha
 
-```
+```php
 <?php
 	// easily add a captcha if you like
 	$objForm->addCaptcha();
@@ -90,7 +90,7 @@ For more internal details please read the source ;-)
 
 ### Working with fieldsets
 
-```
+```php
 <?php
 	// you can start a new fieldset for every field. It will contain all the following widgets until the next field you call
 	// addFieldSet() upon or all widgets if you call it only for one field
@@ -99,7 +99,7 @@ For more internal details please read the source ;-)
 
 ### Load the form fields from a back end DCA
 
-```
+```php
 <?php
 	// you can exclude certain fields by passing an array of field names as second parameter
 	$objForm->loadFieldsFromDca('tl_content', $arrFieldsIdontNeed);
@@ -107,7 +107,7 @@ For more internal details please read the source ;-)
 
 ### Load the form fields from a form generator id
 
-```
+```php
 <?php
 	// this is really cool - simply load all the settings from a form generated with the form generator of Contao
 	$objForm->loadFieldsFromFormGenerator($intId, $arrFieldsIdontNeed);
@@ -115,7 +115,7 @@ For more internal details please read the source ;-)
 
 ### Adding and removing fields on a HasteForm instance
 
-```
+```php
 <?php
 	// you can add fields later at the very end or before any widget
 	// simply pass the field name, an array containing the configuration and optionally the field name of the widget you want to add your new widget in front of
@@ -131,7 +131,7 @@ For more internal details please read the source ;-)
 
 ### More cool stuff
 
-```
+```php
 <?php
 	// setting an action
 	$objForm->action = 12; // default is the same page. You can pass a string or an id which HasteForm will try to convert into a front end url
