@@ -173,6 +173,34 @@ class HasteForm extends Frontend
 						$varValue = $this->generateFrontendUrl($objPage->row());
 					}
 				}
+
+				// ampersand
+				$varValue = ampersand($varValue);
+
+				// Move _GET parameters to the hidden fields
+				if ($this->method == 'get')
+				{
+					if (($intCut = strpos($varValue, '?')) !== false)
+					{
+						$arrChunks = parse_url($varValue);
+						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
+
+						foreach ($arrChunks as $chunk)
+						{
+							list($key, $value) = trimsplit('=', $chunk);
+
+							// Skip the field if it is a regular field
+							if (!isset($this->arrFields[$key]))
+							{
+								$this->arrHiddenFields[$key] = $value;
+							}
+						}
+
+						$varValue = substr($varValue, 0, $intCut);
+					}
+				}
+
+				return $varValue;
 				break;
 
 			case 'hiddenFields':
@@ -205,32 +233,7 @@ class HasteForm extends Frontend
 				break;
 
 			case 'action':
-				$strUrl = ampersand($this->arrConfiguration['action']);
-
-				// Move _GET parameters to the hidden fields
-				if ($this->method == 'get')
-				{
-					if (($intCut = strpos($strUrl, '?')) !== false)
-					{
-						$arrChunks = parse_url($strUrl);
-						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
-
-						foreach ($arrChunks as $chunk)
-						{
-							list($key, $value) = trimsplit('=', $chunk);
-
-							// Skip the field if it is a regular field
-							if (!isset($this->arrFields[$key]))
-							{
-								$this->arrHiddenFields[$key] = $value;
-							}
-						}
-
-						$strUrl = substr($strUrl, 0, $intCut);
-					}
-				}
-
-				return $strUrl;
+				return $this->action;
 				break;
 
 			case 'fields':
