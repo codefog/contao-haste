@@ -174,7 +174,6 @@ class HasteForm extends Frontend
 					}
 				}
 
-				// ampersand
 				$varValue = ampersand($varValue);
 
 				// Move _GET parameters to the hidden fields
@@ -199,8 +198,6 @@ class HasteForm extends Frontend
 						$varValue = substr($varValue, 0, $intCut);
 					}
 				}
-
-				return $varValue;
 				break;
 
 			case 'hiddenFields':
@@ -230,10 +227,6 @@ class HasteForm extends Frontend
 		{
 			case 'formId':
 				return $this->strFormId;
-				break;
-
-			case 'action':
-				return $this->action;
 				break;
 
 			case 'fields':
@@ -753,15 +746,15 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 		}
 
 		$intTotal = count($this->arrWidgets);
-		$i=0;
+		$i = 0;
 		$strPrevious = '';
 
-		// Add hasteform specific properties("hasteFormFieldSetStart", "hasteFormFieldSetEnd") to every widget
+		// Add HasteForm specific properties (hasteFormFieldSetStart, hasteFormFieldSetEnd) to every widget
 		foreach ($this->arrWidgets as $objWidget)
 		{
 			if (in_array($objWidget->name, $this->arrFieldsets))
 			{
-				// if we have already added a fieldset to any widget, the previous needs to be closed
+				// If we have already added a fieldset to any widget, the previous needs to be closed
 				if ($strPrevious)
 				{
 					$this->arrWidgets[$strPrevious]->hasteFormFieldSetEnd = true;
