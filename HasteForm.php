@@ -387,13 +387,19 @@ class HasteForm extends Frontend
 
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];
 
-			// support the default value too
+			// Support the default value, too
 			$arrField['value'] = $arrField['default'];
 
-			// make sure it has a "name" attribute because it is mandatory
+			// Make sure it has a "name" attribute because it is mandatory
 			if (!isset($arrField['name']))
 			{
 				$arrField['name'] = $strFieldName;
+			}
+
+			// Make the fields tableless by default
+			if (!isset($arrField['eval']['tableless']))
+			{
+				$arrField['eval']['tableless'] = true;
 			}
 
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
