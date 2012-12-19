@@ -100,7 +100,7 @@ class HasteForm extends Frontend
 	 * HasteForm version
 	 * @var string
 	 */
-	private static $strVersion = '1.0.0';
+	private static $strVersion = '1.0.1';
 
 
 	/**
@@ -173,6 +173,31 @@ class HasteForm extends Frontend
 						$varValue = $this->generateFrontendUrl($objPage->row());
 					}
 				}
+
+				$varValue = ampersand($varValue);
+
+				// Move _GET parameters to the hidden fields
+				if ($this->method == 'get')
+				{
+					if (($intCut = strpos($varValue, '?')) !== false)
+					{
+						$arrChunks = parse_url($varValue);
+						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
+
+						foreach ($arrChunks as $chunk)
+						{
+							list($key, $value) = trimsplit('=', $chunk);
+
+							// Skip the field if it is a regular field
+							if (!isset($this->arrFields[$key]))
+							{
+								$this->arrHiddenFields[$key] = $value;
+							}
+						}
+
+						$varValue = substr($varValue, 0, $intCut);
+					}
+				}
 				break;
 
 			case 'hiddenFields':
@@ -202,35 +227,6 @@ class HasteForm extends Frontend
 		{
 			case 'formId':
 				return $this->strFormId;
-				break;
-
-			case 'action':
-				$strUrl = ampersand($this->arrConfiguration['action']);
-
-				// Move _GET parameters to the hidden fields
-				if ($this->method == 'get')
-				{
-					if (($intCut = strpos($strUrl, '?')) !== false)
-					{
-						$arrChunks = parse_url($strUrl);
-						$arrChunks = trimsplit('&amp;', $arrChunks['query']);
-
-						foreach ($arrChunks as $chunk)
-						{
-							list($key, $value) = trimsplit('=', $chunk);
-
-							// Skip the field if it is a regular field
-							if (!isset($this->arrFields[$key]))
-							{
-								$this->arrHiddenFields[$key] = $value;
-							}
-						}
-
-						$strUrl = substr($strUrl, 0, $intCut);
-					}
-				}
-
-				return $strUrl;
 				break;
 
 			case 'fields':
@@ -391,13 +387,19 @@ class HasteForm extends Frontend
 
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];
 
-			// support the default value too
+			// Support the default value, too
 			$arrField['value'] = $arrField['default'];
 
-			// make sure it has a "name" attribute because it is mandatory
+			// Make sure it has a "name" attribute because it is mandatory
 			if (!isset($arrField['name']))
 			{
 				$arrField['name'] = $strFieldName;
+			}
+
+			// Make the fields tableless by default
+			if (!isset($arrField['eval']['tableless']))
+			{
+				$arrField['eval']['tableless'] = true;
 			}
 
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
@@ -750,15 +752,15 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 		}
 
 		$intTotal = count($this->arrWidgets);
-		$i=0;
+		$i = 0;
 		$strPrevious = '';
 
-		// Add hasteform specific properties("hasteFormFieldSetStart", "hasteFormFieldSetEnd") to every widget
+		// Add HasteForm specific properties (hasteFormFieldSetStart, hasteFormFieldSetEnd) to every widget
 		foreach ($this->arrWidgets as $objWidget)
 		{
 			if (in_array($objWidget->name, $this->arrFieldsets))
 			{
-				// if we have already added a fieldset to any widget, the previous needs to be closed
+				// If we have already added a fieldset to any widget, the previous needs to be closed
 				if ($strPrevious)
 				{
 					$this->arrWidgets[$strPrevious]->hasteFormFieldSetEnd = true;
