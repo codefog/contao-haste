@@ -388,7 +388,10 @@ class HasteForm extends Frontend
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];
 
 			// Support the default value, too
-			$arrField['value'] = $arrField['default'];
+			if (isset($arrField['default']))
+			{
+				$arrField['value'] = $arrField['default'];
+			}
 
 			// Make sure it has a "name" attribute because it is mandatory
 			if (!isset($arrField['name']))

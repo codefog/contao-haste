@@ -1,6 +1,12 @@
 HasteForm Changelog
 ===================
 
+Version 1.0.2 (????-??-??)
+------------------------------
+
+### Fixed
+- The field value was set incorrectly (see #16)
+
 Version 1.0.1 (2012-12-14)
 ------------------------------
 
