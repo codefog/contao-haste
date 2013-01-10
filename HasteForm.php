@@ -734,7 +734,7 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 
 		foreach ($this->arrHiddenFields as $k=>$v)
 		{
-			$strBuffer .= sprintf('<input type="hidden" name="%s" value="%s"%s', $k, $v, $strTagEnding) . "\n";
+			$strBuffer .= sprintf('<input type="hidden" name="%s" value="%s"%s', $k, $v['value'], $strTagEnding) . "\n";
 		}
 
 		return $strBuffer;
