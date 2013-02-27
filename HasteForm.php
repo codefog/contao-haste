@@ -282,6 +282,8 @@ class HasteForm extends Frontend
 	 * Load the fields from the back end form generator
 	 * @param int the form generator form id
 	 * @param array an array of fields you want to skip
+	 *
+	 * @deprecated Do not use this method. It doesn't work.
 	 */
 	public function loadFieldsFromFormGenerator($intId, $arrExclude=array())
 	{
