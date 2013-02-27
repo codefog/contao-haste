@@ -100,7 +100,7 @@ class HasteForm extends Frontend
 	 * HasteForm version
 	 * @var string
 	 */
-	private static $strVersion = '1.0.1';
+	private static $strVersion = '1.0.2';
 
 
 	/**
