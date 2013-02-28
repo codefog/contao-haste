@@ -638,7 +638,7 @@ class HasteForm extends Frontend
 		$objTemplate->submit = $this->submit;
 		$objTemplate->fields = $this->arrWidgets;
 		$objTemplate->hiddenFields = $this->generateHiddenFields();
-		$objTemplate->hasError = !$this->blnValid;
+		$objTemplate->hasError = ($this->isSubmitted && !$this->blnValid);
 	}
 
 
