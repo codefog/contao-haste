@@ -6,11 +6,13 @@ About
 
 HasteForm has been designed to ease working with Contao forms in the front end.
 
+This extension is compatible with Contao 3. For extension compatible with Contao 2 please use version 1.x.
+
 
 Contributors
 -------------------
 
-* Kamil Kuzminski <kamil.kuzminski@gmail.com>
+* Kamil Kuzminski <kamil.kuzminski@codefog.pl>
 * Yanick Witschi <yanick.witschi@terminal42.ch>
 * Andreas Schempp <andreas.schempp@terminal42.ch>
 
@@ -103,14 +105,6 @@ For more internal details please read the source ;-)
 <?php
 	// you can exclude certain fields by passing an array of field names as second parameter
 	$objForm->loadFieldsFromDca('tl_content', $arrFieldsIdontNeed);
-```
-
-### Load the form fields from a form generator id
-
-```php
-<?php
-	// this is really cool - simply load all the settings from a form generated with the form generator of Contao
-	$objForm->loadFieldsFromFormGenerator($intId, $arrFieldsIdontNeed);
 ```
 
 ### Adding and removing fields on a HasteForm instance

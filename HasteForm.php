@@ -1,45 +1,28 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
 /**
- * Contao Open Source CMS
- * Copyright (C) 2005-2011 Leo Feyer
- *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
- *
- * PHP version 5
- * @copyright  Kamil Kuzminski 2011-2012
- * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
- * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
- * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
- * @package    Haste
- * @license    LGPL
+ * haste extension for Contao Open Source CMS
+ * 
+ * Copyright (C) 2011-2013 Codefog
+ * 
+ * @package haste
+ * @link    http://codefog.pl
+ * @author  Kamil Kuzminski <kamil.kuzminski@codefog.pl>
+ * @author  Yanick Witschi <yanick.witschi@terminal42.ch>
+ * @author  Andreas Schempp <andreas.schempp@terminal42.ch>
+ * @license LGPL
  */
+
+
+namespace Contao;
 
 
 /**
  * Class HasteForm
  *
- * @copyright  Kamil Kuzminski 2011-2012
- * @author     Kamil Kuzminski <kamil.kuzminski@gmail.com>
- * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
- * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
- * @package    Haste
+ * Provide methods to handle custom forms.
  */
-class HasteForm extends Frontend
+class HasteForm extends \Frontend
 {
 
 	/**
@@ -100,7 +83,7 @@ class HasteForm extends Frontend
 	 * HasteForm version
 	 * @var string
 	 */
-	private static $strVersion = '1.0.2';
+	private static $strVersion = '2.0.0';
 
 
 	/**
@@ -115,7 +98,7 @@ class HasteForm extends Frontend
 		global $objPage;
 		$this->strFormId = is_numeric($strId) ? 'form_' . $strId : $strId;
 		$this->arrFields = $arrFields;
-		$this->blnSubmitted = (($this->method == 'get' && count($_GET) > 0) || $this->Input->post('FORM_SUBMIT') == $this->strFormId);
+		$this->blnSubmitted = (($this->method == 'get' && count($_GET) > 0) || \Input::post('FORM_SUBMIT') == $this->strFormId);
 
 		$this->method = 'post';
 		$this->submit = $GLOBALS['TL_LANG']['MSC']['submit'];
@@ -128,7 +111,7 @@ class HasteForm extends Frontend
 	 * Set an object property
 	 * @param string
 	 * @param mixed
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function __set($strKey, $varValue)
 	{
@@ -140,7 +123,7 @@ class HasteForm extends Frontend
 
 				if (!in_array($varValue, array('get', 'post')))
 				{
-					throw new Exception(sprintf('Invalid form method "%s"!', $varValue));
+					throw new \Exception(sprintf('Invalid form method "%s"!', $varValue));
 				}
 
 				// Remove _GET parameters
@@ -159,9 +142,7 @@ class HasteForm extends Frontend
 				// Generate a frontend URL
 				if (is_numeric($varValue))
 				{
-					$objRedirectPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=?")
-													  ->limit(1)
-													  ->execute($varValue);
+					$objRedirectPage = \PageModel::findByPk($varValue);
 
 					if ($objRedirectPage->numRows)
 					{
@@ -279,34 +260,11 @@ class HasteForm extends Frontend
 
 
 	/**
-	 * Load the fields from the back end form generator
-	 * @param int the form generator form id
-	 * @param array an array of fields you want to skip
-	 *
-	 * @deprecated Do not use this method. It doesn't work.
-	 */
-	public function loadFieldsFromFormGenerator($intId, $arrExclude=array())
-	{
-		$objFields = $this->Database->prepare("SELECT * FROM tl_form_field WHERE pid=? AND name!=''" . (!BE_USER_LOGGED_IN ? " AND invisible=''" : "") . " ORDER BY sorting")->execute($intId);
-
-		while ($objFields->next())
-		{
-			if (in_array($objFields->name, $arrExclude))
-			{
-				continue;
-			}
-
-			$this->addField($objFields->name, $objFields->row());
-		}
-	}
-
-
-	/**
 	 * Add a field to the fields array (optionally after a defined one)
 	 * @param string the field name
 	 * @param array the field data
 	 * @param string a field name (if the current should be injected before a reference field)
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function addField($strFieldName, $arrFieldData, $strInjectBefore='')
 	{
@@ -316,7 +274,7 @@ class HasteForm extends Frontend
 
 			if (!$intIndex)
 			{
-				throw new Exception('The field "' . $strInjectBefore . '" is not yet defined!');
+				throw new \Exception('The field "' . $strInjectBefore . '" is not yet defined!');
 			}
 
 			$arrNew = array();
@@ -344,13 +302,13 @@ class HasteForm extends Frontend
 	 * Start a new fieldset group after a given fieldname
 	 * It will include either all widgets if only applied once or all widgets until the field where you call this method again
 	 * @param string widget field name
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function addFieldSet($strField)
 	{
 		if (in_array($strField, $this->arrFieldsets))
 		{
-			throw new Exception(sprintf('There already exists a fieldset starting at the field "%s"!', $strField));
+			throw new \Exception(sprintf('There already exists a fieldset starting at the field "%s"!', $strField));
 		}
 
 		$this->blnHasFieldsets = true;
@@ -461,7 +419,7 @@ class HasteForm extends Frontend
 						{
 							$varValue = $this->$callback[0]->$callback[1]($varValue, $this);
 						}
-						catch (Exception $e)
+						catch (\Exception $e)
 						{
 							$objWidget->class = 'error';
 							$objWidget->addError($e->getMessage());
@@ -498,9 +456,9 @@ class HasteForm extends Frontend
 	 *   Check if value of the $field1 is lower/equal/higher than value of $field2.
 	 *   Available comparisons: !=, ==, >, >=, <, <=
 	 * @param object
-	 * @throws Exception
+	 * @throws \Exception
 	 */
-	public function customValidation(Widget &$objWidget)
+	public function customValidation(\Widget &$objWidget)
 	{
 		// Check if the field is mandatory depending on the value of other field
 		if (is_array($objWidget->mandatoryOn) && count($objWidget->mandatoryOn) && array_is_assoc($objWidget->mandatoryOn))
@@ -521,7 +479,7 @@ class HasteForm extends Frontend
 			{
 				if (($this->arrWidgets[$field]->value != '') && !is_numeric($this->arrWidgets[$field]->value))
 				{
-					throw new Exception(sprintf('Field "%s" must have a numeric value!', $this->arrWidgets[$field]->label));
+					throw new \Exception(sprintf('Field "%s" must have a numeric value!', $this->arrWidgets[$field]->label));
 				}
 
 				switch ($comparison)
