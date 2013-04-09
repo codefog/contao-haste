@@ -100,7 +100,7 @@ class HasteForm extends Frontend
 	 * HasteForm version
 	 * @var string
 	 */
-	private static $strVersion = '1.0.1';
+	private static $strVersion = '1.0.2';
 
 
 	/**
@@ -282,6 +282,8 @@ class HasteForm extends Frontend
 	 * Load the fields from the back end form generator
 	 * @param int the form generator form id
 	 * @param array an array of fields you want to skip
+	 *
+	 * @deprecated Do not use this method. It doesn't work.
 	 */
 	public function loadFieldsFromFormGenerator($intId, $arrExclude=array())
 	{
@@ -388,7 +390,10 @@ class HasteForm extends Frontend
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];
 
 			// Support the default value, too
-			$arrField['value'] = $arrField['default'];
+			if (isset($arrField['default']))
+			{
+				$arrField['value'] = $arrField['default'];
+			}
 
 			// Make sure it has a "name" attribute because it is mandatory
 			if (!isset($arrField['name']))
@@ -633,7 +638,7 @@ class HasteForm extends Frontend
 		$objTemplate->submit = $this->submit;
 		$objTemplate->fields = $this->arrWidgets;
 		$objTemplate->hiddenFields = $this->generateHiddenFields();
-		$objTemplate->hasError = !$this->blnValid;
+		$objTemplate->hasError = ($this->isSubmitted && !$this->blnValid);
 	}
 
 
