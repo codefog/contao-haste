@@ -302,9 +302,10 @@ class HasteForm extends \Frontend
 	 * Start a new fieldset group after a given fieldname
 	 * It will include either all widgets if only applied once or all widgets until the field where you call this method again
 	 * @param string widget field name
+	 * @param string legend
 	 * @throws \Exception
 	 */
-	public function addFieldSet($strField)
+	public function addFieldSet($strField, $strLegend=false)
 	{
 		if (in_array($strField, $this->arrFieldsets))
 		{
@@ -312,7 +313,11 @@ class HasteForm extends \Frontend
 		}
 
 		$this->blnHasFieldsets = true;
-		$this->arrFieldsets[] = $strField;
+		$this->arrFieldsets[$strField]['name'] = $strField;
+		if ($strLegend)
+		{
+			$this->arrFieldsets[$strField]['legend'] = $strLegend;
+		}
 	}
 
 
@@ -631,6 +636,7 @@ class HasteForm extends \Frontend
 			if ($objWidget->hasteFormFieldSetStart)
 			{
 				$strBuffer .= sprintf('<fieldset class="%s">', $objWidget->hasteFormFieldCSSClass);
+				$strBuffer .= (($objWidget->legend) ? sprintf('<legend>%s</legend>', $objWidget->legend) : '');
 			}
 
 			$strBuffer .= '<div class="widget ' . $objWidget->name . '">' . $objWidget->parse() . '</div>';
@@ -731,6 +737,7 @@ window.scrollTo(null, ($(\''. $this->strFormId . '\').getElement(\'p.error\').ge
 
 				$objWidget->hasteFormFieldSetStart = true;
 				$objWidget->hasteFormFieldCSSClass = 'fs_' . array_search($objWidget->name, $this->arrFieldsets);
+				$objWidget->legend = ($this->arrFieldsets[$objWidget->name]['legend']) ? $this->arrFieldsets[$objWidget->name]['legend'] : '';
 			}
 
 			// Close the last fieldset
