@@ -231,7 +231,7 @@ class HasteForm extends \Frontend
 				break;
 
 			default:
-				return $this->arrConfiguration[$strKey];
+				return isset($this->arrConfiguration[$strKey]) ? $this->arrConfiguration[$strKey] : parent::__get($strKey);
 				break;
 		}
 	}
