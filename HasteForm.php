@@ -307,13 +307,15 @@ class HasteForm extends \Frontend
 	 */
 	public function addFieldSet($strField, $strLegend=false)
 	{
-		if (in_array($strField, $this->arrFieldsets))
+		if (isset($this->arrFieldsets[$strField]))
 		{
 			throw new \Exception(sprintf('There already exists a fieldset starting at the field "%s"!', $strField));
 		}
 
 		$this->blnHasFieldsets = true;
 		$this->arrFieldsets[$strField]['name'] = $strField;
+
+		// Add legend
 		if ($strLegend)
 		{
 			$this->arrFieldsets[$strField]['legend'] = $strLegend;
