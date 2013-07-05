@@ -2,9 +2,9 @@
 
 /**
  * haste extension for Contao Open Source CMS
- * 
+ *
  * Copyright (C) 2011-2013 Codefog
- * 
+ *
  * @package haste
  * @link    http://codefog.pl
  * @author  Kamil Kuzminski <kamil.kuzminski@codefog.pl>
@@ -579,7 +579,7 @@ class HasteForm extends \Frontend
 		{
 			$this->arrFields['captcha'] = array_merge_recursive(array
 			(
-				'name'      => 'captcha',
+				'name'      => 'captcha_' . $this->strFormId,
 				'label'     => $GLOBALS['TL_LANG']['MSC']['securityQuestion'],
 				'inputType' => 'captcha',
 				'eval'      => array('mandatory'=>true)
