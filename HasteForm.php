@@ -103,7 +103,7 @@ class HasteForm extends \Frontend
 		$this->method = 'post';
 		$this->submit = $GLOBALS['TL_LANG']['MSC']['submit'];
 		$this->javascript = true;
-		$this->action = $this->getIndexFreeRequest();
+		$this->action = ampersand(\Environment::get('indexFreeRequest'));
 	}
 
 
@@ -341,7 +341,7 @@ class HasteForm extends \Frontend
 			$strClass = $GLOBALS['TL_FFL'][$arrField['inputType']];
 
 			// Continue if the class is not defined
-			if (!$this->classFileExists($strClass))
+			if (!class_exists($strClass))
 			{
 				continue;
 			}
@@ -372,7 +372,7 @@ class HasteForm extends \Frontend
 				$arrField['eval']['tableless'] = true;
 			}
 
-			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
+			$objWidget = new $strClass(\Widget::getAttributesFromDca($arrField, $arrField['name'], $arrField['value']));
 
 			// Set current widget value if this is a GET request
 			if ($this->method == 'get')
