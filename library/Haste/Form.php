@@ -272,7 +272,7 @@ class Form extends \Controller
     public function createWidgets()
     {
         // Do nothing if already generated
-        if (!empty($this->arrWidgets) && $this->intState == self::STATE_CLEAN) {
+        if (!empty($this->arrWidgets) && $this->intState === self::STATE_CLEAN) {
             return;
         }
 
@@ -315,6 +315,8 @@ class Form extends \Controller
 
         if ($this->blnHasUploads) {
             $this->strEnctype = 'multipart/form-data';
+        } else {
+            $this->strEnctype = 'application/x-www-form-urlencoded';
         }
 
         $this->intState == self::STATE_CLEAN;
