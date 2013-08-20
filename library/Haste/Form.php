@@ -150,7 +150,7 @@ class Form extends \Controller
      * @param   string  The form field name
      * @param   array   The DCA representation of the field
      */
-    public function addFormField($strName, $arrDca)
+    public function addFormField($strName, array $arrDca)
     {
         $this->checkFormFieldNameIsValid($strName);
 
