@@ -48,7 +48,7 @@ class Form extends \Controller
     protected $blnHasUploads = false;
 
     /**
-     * Form fields
+     * Form fields in the representation AFTER the Widget::getAttributesFromDca() call
      * @var array
      */
     protected $arrFormFields = array();
@@ -152,35 +152,33 @@ class Form extends \Controller
      */
     public function addFormField($strName, $arrDca)
     {
-        if (is_numeric($strName)) {
-            throw new \InvalidArgumentException('You cannot use a numeric form field name.');
+        $this->checkFormFieldNameIsValid($strName);
+
+        // Make sure it has a "name" attribute because it is mandatory
+        if (!isset($arrDca['name'])) {
+            $arrDca['name'] = $strName;
         }
 
-        if (in_array($strName, $this->arrFormFields)) {
-            throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
+        // Support the default value, too
+        if (isset($arrDca['default']) && !isset($arrDca['value'])) {
+            $arrDca['value'] = $arrDca['default'];
         }
+
+        // Make the field tableless by default
+        if (!isset($arrDca['eval']['tableless'])) {
+            $arrDca['eval']['tableless'] = true;
+        }
+
+        $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
+
+        if (!class_exists($strClass)) {
+            throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrDca['inputType']));
+        }
+
+        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
 
         $this->arrFormFields[$strName] = $arrDca;
         $this->intState = self::STATE_DIRTY;
-    }
-
-    /**
-     * Removes a form field
-     * @param   string  The form field name
-     */
-    public function removeFormField($strName)
-    {
-        unset($this->arrFormFields[$strName]);
-        $this->intState = self::STATE_DIRTY;
-    }
-
-    /**
-     * Checks if there is a form field with a given name
-     * @param   string  The form field name
-     */
-    public function hasFormField($strName)
-    {
-        return isset($this->arrFormFields[$strName]);
     }
 
     /**
@@ -230,8 +228,6 @@ class Form extends \Controller
         foreach ($arrFields as $k => $v) {
             $this->addFormField($k, $v);
         }
-
-        $this->intState = self::STATE_DIRTY;
     }
 
     /**
@@ -251,7 +247,19 @@ class Form extends \Controller
             // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
             $strName = $objFields->name ?: 'field_' . $objFields->id;
 
-            $arrFields[$strName] = $objFields->row();
+            $arrDca = $objFields->row();
+
+            // Make sure it has a "name" attribute because it is mandatory
+            if (!isset($arrDca['name'])) {
+                $arrDca['name'] = $strName;
+            }
+
+            // Make the field tableless by default
+            if (!isset($arrDca['eval']['tableless'])) {
+                $arrDca['eval']['tableless'] = true;
+            }
+
+            $arrFields[$strName] = $arrDca;
         }
 
         if ($objCallback) {
@@ -259,10 +267,29 @@ class Form extends \Controller
         }
 
         foreach ($arrFields as $k => $v) {
-            $this->addFormField($k, $v);
+            $this->arrFormFields[$k] = $v;
         }
 
         $this->intState = self::STATE_DIRTY;
+    }
+
+    /**
+     * Removes a form field
+     * @param   string  The form field name
+     */
+    public function removeFormField($strName)
+    {
+        unset($this->arrFormFields[$strName]);
+        $this->intState = self::STATE_DIRTY;
+    }
+
+    /**
+     * Checks if there is a form field with a given name
+     * @param   string  The form field name
+     */
+    public function hasFormField($strName)
+    {
+        return isset($this->arrFormFields[$strName]);
     }
 
     /**
@@ -279,28 +306,13 @@ class Form extends \Controller
         // Initialize widgets
         foreach ($this->arrFormFields as $strName => $arrField) {
 
-            $strClass = $GLOBALS['TL_FFL'][$arrField['inputType']];
+            $strClass = $GLOBALS['TL_FFL'][$arrField['type']];
 
             if (!class_exists($strClass)) {
-                throw new \RuntimeException(sprintf('The class "%s" for inputType "%s" could not be found.', $strClass, $arrField['inputType']));
+                throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrField['type']));
             }
 
-            // Make sure it has a "name" attribute because it is mandatory
-            if (!isset($arrField['name'])) {
-                $arrField['name'] = $strName;
-            }
-
-            // Support the default value, too
-            if (isset($arrField['default']) && !isset($arrField['value'])) {
-                $arrField['value'] = $arrField['default'];
-            }
-
-            // Make the fields tableless by default
-            if (!isset($arrField['eval']['tableless'])) {
-                $arrField['eval']['tableless'] = true;
-            }
-
-            $objWidget = new $strClass($strClass::getAttributesFromDca($arrField, $arrField['name'], $arrField['value']));
+            $objWidget = new $strClass($arrField);
 
             if ($objWidget instanceof \uploadable) {
                 $this->blnHasUploads = true;
@@ -415,5 +427,20 @@ class Form extends \Controller
     public function __toString()
     {
         return $this->generateAsString();
+    }
+
+    /**
+     * Check for a valid form field name
+     * @param   string  The form field name
+     */
+    protected function checkFormFieldNameIsValid($strName)
+    {
+        if (is_numeric($strName)) {
+            throw new \InvalidArgumentException('You cannot use a numeric form field name.');
+        }
+
+        if (in_array($strName, $this->arrFormFields)) {
+            throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
+        }
     }
 }
