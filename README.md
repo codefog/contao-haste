@@ -6,7 +6,7 @@ About
 
 HasteForm has been designed to ease working with Contao forms in the front end.
 
-This extension is compatible with Contao 3. For extension compatible with Contao 2 please use version 1.x.
+This extension is compatible with Contao 3.1+ only.
 
 
 Contributors
@@ -16,6 +16,11 @@ Contributors
 * Yanick Witschi <yanick.witschi@terminal42.ch>
 * Andreas Schempp <andreas.schempp@terminal42.ch>
 
+Dependencies
+-------------------
+
+* NamespaceClassLoader: https://github.com/terminal42/contao-NamespaceClassLoader
+
 
 Examples
 ------------
@@ -23,120 +28,110 @@ Examples
 A lot of the following examples can be combined.
 For more internal details please read the source ;-)
 
-### Simple form
+### Preparing a form instance
 ```php
 <?php
 
-	$arrFields = array();
-	$arrFields['year'] = array
-	(
-		'name'			=> 'year',
-		'label'			=> 'Year',
-		'inputType'		=> 'text',
-		'eval'			=> array('mandatory'=>true, 'rgxp'=>'digit')
-	);
-	
-	// the checkbox is really annoying. It took me a few minutes to get what I wanted so I leave it here for the record
-	$arrFields['termsOfUse'] = array
-	(
-		'name'			=> 'termsOfUse',
-		'label'			=> array('This is the <legend>', 'This is the <label>'),
-		'inputType'		=> 'checkbox',
-		'eval'			=> array('mandatory'=>true)
-	);
-	
-	// first param is the form id
-	$objForm = new HasteForm('someid', $arrFields);
+    // First param is the form id
+    // Second is either GET or POST
+    // Third is a closure that decides when your form is submitted
+    $objForm = new \Haste\Form('someid', 'POST', function($haste) {
+        return \Input::post('FORM_SUBMIT') === $haste->getFormId();
+    });
 
-	// The submit button
-	$objForm->submit = 'Submit form';
+    // Haste will never decide for you when the form has been submitted.
+    // You have to tell it! Let's have a look at an example using GET
+    // Haste will turn into the submitted state as soon as the GET param
+    // "foo" contains the value "bar"
+    $objForm = new \Haste\Form('someid', 'GET', function() {
+        return \Input::get('foo') === 'bar';
+    });
 
-	// validate() also checks whether the form has been submitted
-	if ($objForm->validate())
-	{
-		// fetch all form data
-		$arrData = $objForm->fetchAll();
+    // A form needs an action. By default it's the current Contao page you
+    // place your Haste form on, but you can either set your own URI:
+    $objForm->setFormActionFromUri('https://foo.bar/somewhere.html');
 
-		// fetch the value of one specific field
-		$varValue = $objForm->fetch('year');
-	}
+    // Or you can pass a page ID that Haste will turn into an URI for your
+    // convenience:
+    $objForm->setFormActionFromPageId(42);
 
-	// get the form as string
-	echo $objForm->generateForm();
+    // Now let's add form fields:
+    $objForm->addFormField('year', array(
+        'label'         => 'Year',
+        'inputType'     => 'text',
+        'eval'          => array('mandatory'=>true, 'rgxp'=>'digit')
+    ));
+
+    // Need a checkbox?
+    $objForm->addFormField('termsOfUse', array(
+        'label'         => array('This is the <legend>', 'This is the <label>'),
+        'inputType'     => 'checkbox',
+        'eval'          => array('mandatory'=>true)
+    ));
+
+    // Let's add  a submit button
+    $objForm->addFormField('submit', array(
+      'label'     => 'Submit form',
+      'inputType' => 'submit'
+    ));
+
+    // For the ease of use we do provide two helpers for the submit button and captcha field
+    $objForm->addSubmitFormField('submit', 'Submit form');
+    $objForm->addCaptchaFormField('captcha');
+
 ```
 
-### HasteForm supports GET and POST
+### Generating the form
+Now that you have your form instance ready, you can generate the markup for it
+and validate the user inputs etc.
 
 ```php
 <?php
 
-	$objForm->method = 'get'; // 'post' is default
+    // validate() also checks whether the form has been submitted
+    if ($objForm->validate()) {
+
+        // Do whatever you want to do.
+        // Read from POST: \Input::post('year');
+        // Read from GET: \Input::get('year');
+    }
+
+    // Get the form as string
+    echo $objForm->generateAsString();
+    // or just
+    echo $objForm;
+
+    // You can also pass your own Template instance
+    $objMyTemplate = new \FrontendTemplate('mytemplate');
+    $objForm->addToTemplate($objMyTemplate);
+    echo $objMyTemplate->parse();
 ```
 
-### Using a custom form template
+### Add the form fields from a back end DCA
 
 ```php
 <?php
-	// you can also work with a custom template if you don't like getting a string directly using generateForm()
-	// this passes the data to a custom FrontendTemplate instance where you have to make sure that fieldsets etc. are respected
-	$objForm->addFormToTemplate($objTemplate);
+    // you can exclude or modify certain fields by passing a closure as second
+    // parameter
+    $objForm->addFieldsFromDca('tl_content', function(&$arrFields) {
+        unset($arrFields['idontwantyou']);
+    });
 ```
 
-### Adding a default captcha
+### Add the form fields from a form generator form ID
 
 ```php
 <?php
-	// easily add a captcha if you like
-	$objForm->addCaptcha();
+    // you can exclude or modify certain fields by passing a closure as second
+    // parameter
+    $objForm->addFieldsFromFormGenerator(42, function(&$arrFields) {
+        unset($arrFields['idontwantyou']);
+    });
 ```
 
-### Working with fieldsets
+### Removing fields on a form instance
 
 ```php
 <?php
-	// you can start a new fieldset for every field. It will contain all the following widgets until the next field you call
-	// addFieldSet() upon or all widgets if you call it only for one field
-	$objForm->addFieldSet('year');
-```
-
-### Load the form fields from a back end DCA
-
-```php
-<?php
-	// you can exclude certain fields by passing an array of field names as second parameter
-	$objForm->loadFieldsFromDca('tl_content', $arrFieldsIdontNeed);
-```
-
-### Adding and removing fields on a HasteForm instance
-
-```php
-<?php
-	// you can add fields later at the very end or before any widget
-	// simply pass the field name, an array containing the configuration and optionally the field name of the widget you want to add your new widget in front of
-	$objForm->addField('firstname',	array
-								(
-									'label'     => 'First name',
-									// etc.
-								), 'beforeFieldName');
-
-	// and obviously remove a specific field
-	$objForm->removeField('firstname');
-```
-
-### More cool stuff
-
-```php
-<?php
-	// setting an action
-	$objForm->action = 12; // default is the same page. You can pass a string or an id which HasteForm will try to convert into a front end url
-
-	// getting the fields
-	$arrFields = $objForm->fields;
-
-	// getting the widgets
-	$arrWidgets = $objForm->widgets;
-
-	// most of the times validate() is enough but sometimes you might need to separately know whether the form has been submitted without validating
-	$blnSubmitted = $objForm->isSubmitted;
-
+    $objForm->removeFormField('firstname');
 ```

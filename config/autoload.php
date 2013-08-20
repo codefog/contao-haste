@@ -1,7 +1,7 @@
 <?php
 
 /**
- * haste extension for Contao Open Source CMS
+ * Haste for Contao Open Source CMS
  * 
  * Copyright (C) 2011-2013 Codefog
  * 
@@ -15,9 +15,6 @@
 
 
 /**
- * Register classes
+ * Register namespace
  */
-ClassLoader::addClasses(array
-(
-	'Contao\HasteForm' => 'system/modules/haste/HasteForm.php'
-));
+NamespaceClassLoader::add('Haste', 'system/modules/haste/library');
