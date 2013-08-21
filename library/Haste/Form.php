@@ -368,8 +368,10 @@ class Form extends \Controller
             if ($objWidget->hasErrors()) {
                 $this->blnValid = false;
             }
-
-            $objWidget->value = $varValue;
+            elseif ($objWidget->submitInput())
+			{
+				$objWidget->value = $varValue;
+			}
         }
 
         return $this->blnValid;
