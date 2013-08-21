@@ -369,9 +369,9 @@ class Form extends \Controller
                 $this->blnValid = false;
             }
             elseif ($objWidget->submitInput())
-			{
-				$objWidget->value = $varValue;
-			}
+            {
+                $objWidget->value = $varValue;
+            }
         }
 
         return $this->blnValid;
