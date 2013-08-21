@@ -128,6 +128,15 @@ class Form extends \Controller
     }
 
     /**
+     * Get the form action
+     * @param   string  The URI
+     */
+    public function getFormAction()
+    {
+        return $this->strFormAction;
+    }
+
+    /**
      * Gets the form ID
      * @return  string The form ID
      */
