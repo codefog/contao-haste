@@ -60,6 +60,12 @@ class Form extends \Controller
     protected $arrWidgets = array();
 
     /**
+     * Validators
+     * @var array
+     */
+    protected $arrValidators = array();
+
+    /**
      * Enctype
      * @var string
      */
@@ -302,6 +308,18 @@ class Form extends \Controller
     }
 
     /**
+     * Add a validator to the form field
+     * @param   string  The form field name
+     * @param   Closure A closure that will be called on widget validation
+     */
+    public function addValidator($strName, \Closure $objCallback)
+    {
+        if ($this->hasFormField($strName)) {
+            $this->arrValidators[$strName][] = $objCallback;
+        }
+    }
+
+    /**
      * Create the widget instances
      * @throws RuntimeException
      */
@@ -357,6 +375,14 @@ class Form extends \Controller
 
         foreach ($this->arrWidgets as $strName => $objWidget) {
             $objWidget->validate();
+
+            // Run custom validators
+            if (isset($this->arrValidators[$strName])) {
+                foreach ($this->arrValidators[$strName] as $objCallback) {
+                    $objCallback($objWidget);
+                }
+            }
+
             $varValue = $objWidget->value;
             $rgxp = $this->arrFields[$strName]['eval']['rgxp'];
 
