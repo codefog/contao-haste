@@ -34,4 +34,9 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($strFormAction, $this->instance->getFormAction());
     }
+
+    public function testFormId()
+    {
+        $this->assertEquals('someid', $this->instance->getFormId());
+    }
 }
