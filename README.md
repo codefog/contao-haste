@@ -1,6 +1,8 @@
 HasteForm
 ======================
 
+[![Build Status](https://travis-ci.org/codefog/contao-haste.png)](https://travis-ci.org/codefog/contao-haste.png)
+
 About
 -----
 
