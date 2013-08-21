@@ -39,4 +39,15 @@ class FormTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals('someid', $this->instance->getFormId());
     }
+
+    public function testIsSubmitted()
+    {
+        $this->assertTrue($this->instance->isSubmitted());
+
+        $objForm = new Form('someid', 'POST', function() {
+            return false;
+        });
+
+        $this->assertFalse($objForm->isSubmitted());
+    }
 }
