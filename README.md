@@ -90,7 +90,12 @@ and validate the user inputs etc.
     // validate() also checks whether the form has been submitted
     if ($objForm->validate()) {
 
-        // Do whatever you want to do.
+		// Get the submitted and parsed data:
+		$arrData = $this->getData();
+
+		// Get the raw data:
+		$arrData = $this->getData(true);
+
         // Read from POST: \Input::post('year');
         // Read from GET: \Input::get('year');
     }

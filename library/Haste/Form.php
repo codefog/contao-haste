@@ -427,6 +427,27 @@ class Form extends \Controller
     }
 
     /**
+     * Return the submitted data as an array
+     * @param  boolean If true, the method will return the raw data
+     * @return array
+     */
+    public function getData($blnRaw = false)
+    {
+        if (!$this->blnSubmitted) {
+            return array();
+        }
+
+        $arrData = array();
+        $method = strtolower($this->strMethod);
+
+        foreach ($this->arrWidgets as $strName => $objWidget) {
+            $arrData[$strName] = $blnRaw ? \Input::$method($strName) : $objWidget->value;
+        }
+
+        return $arrData;
+    }
+
+    /**
      * Add form to a template
      * @param   FrontendTemplate
      */
