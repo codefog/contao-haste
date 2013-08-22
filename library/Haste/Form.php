@@ -85,12 +85,12 @@ class Form extends \Controller
 
     /**
      * Initialize the form
-     * @param   string  The ID of the form
-     * @param   string  The HTTP Method GET or POST
-     * @param   Closure A closure that checks if the form has been submitted
+     * @param   string   The ID of the form
+     * @param   string   The HTTP Method GET or POST
+     * @param   callable A callable that checks if the form has been submitted
      * @throws  InvalidArgumentException
      */
-    public function __construct($strId, $strMethod, \Closure $objSubmitCheck)
+    public function __construct($strId, $strMethod, $varSubmitCheck)
     {
         if (is_numeric($strId)) {
             throw new \InvalidArgumentException('You cannot use a numeric form id.');
@@ -102,8 +102,12 @@ class Form extends \Controller
             throw new \InvalidArgumentException('The method has to be either GET or POST.');
         }
 
+        if (!is_callable($varSubmitCheck)) {
+            throw new \InvalidArgumentException('The submit check must be callable.');
+        }
+
         $this->strMethod = $strMethod;
-        $this->blnSubmitted = $objSubmitCheck($this);
+        $this->blnSubmitted = call_user_func($varSubmitCheck, $this);
 
         // The form action can be set using several helper methods but by default it's just
         // pointing to the current page
@@ -226,18 +230,17 @@ class Form extends \Controller
 
     /**
      * Add form fields from a back end DCA
-     * @param   string  The DCA table name
-     * @param   Closure A closure that will be called on the array before adding (remove fields if you like)
+     * @param   string   The DCA table name
+     * @param   callable A callable that will be called on the array before adding (remove fields if you like)
      */
-    public function addFieldsFromDca($strTable, \Closure $objCallback = null)
+    public function addFieldsFromDca($strTable, $varCallback = null)
     {
         \System::loadLanguageFile($strTable);
-        // Only because of that little call we have to extend Controller
         $this->loadDataContainer($strTable);
-
         $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
-        if ($objCallback) {
-            $objCallback($arrFields);
+
+        if (is_callable($varCallback)) {
+            call_user_func($varCallback, $arrFields);
         }
 
         foreach ($arrFields as $k => $v) {
@@ -247,10 +250,10 @@ class Form extends \Controller
 
     /**
      * Add form fields from a back end form generator form ID
-     * @param   int     The form generator form ID
-     * @param   Closure A closure that will be called on the array before adding (remove fields if you like)
+     * @param   int      The form generator form ID
+     * @param   callable A callable that will be called on the array before adding (remove fields if you like)
      */
-    public function addFieldsFromFormGenerator($intId, \Closure $objCallback = null)
+    public function addFieldsFromFormGenerator($intId, $varCallback = null)
     {
         if (($objFields = \FormFieldModel::findPublishedByPid($intId)) === null) {
             return;
@@ -277,8 +280,8 @@ class Form extends \Controller
             $arrFields[$strName] = $arrDca;
         }
 
-        if ($objCallback) {
-            $objCallback($arrFields);
+        if (is_callable($varCallback)) {
+            call_user_func($varCallback, $arrFields);
         }
 
         foreach ($arrFields as $k => $v) {
@@ -309,13 +312,13 @@ class Form extends \Controller
 
     /**
      * Add a validator to the form field
-     * @param   string  The form field name
-     * @param   Closure A closure that will be called on widget validation
+     * @param   string   The form field name
+     * @param   callable A callable that will be called on widget validation
      */
-    public function addValidator($strName, \Closure $objCallback)
+    public function addValidator($strName, $varCallback)
     {
-        if ($this->hasFormField($strName)) {
-            $this->arrValidators[$strName][] = $objCallback;
+        if ($this->hasFormField($strName) && is_callable($varCallback)) {
+            $this->arrValidators[$strName][] = $varCallback;
         }
     }
 
@@ -378,8 +381,8 @@ class Form extends \Controller
 
             // Run custom validators
             if (isset($this->arrValidators[$strName])) {
-                foreach ($this->arrValidators[$strName] as $objCallback) {
-                    $objCallback($objWidget);
+                foreach ($this->arrValidators[$strName] as $varCallback) {
+                    call_user_func($varCallback, $objWidget);
                 }
             }
 
