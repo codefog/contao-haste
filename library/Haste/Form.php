@@ -253,11 +253,12 @@ class Form extends \Controller
      * Add form fields from a back end form generator form ID
      * @param   int      The form generator form ID
      * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @throws  \InvalidArgumentException
      */
     public function addFieldsFromFormGenerator($intId, $varCallback = null)
     {
         if (($objFields = \FormFieldModel::findPublishedByPid($intId)) === null) {
-            return;
+            throw new \InvalidArgumentException('Form generator ID "' . $intId . '" does not exist.');
         }
 
         $arrFields = array();
