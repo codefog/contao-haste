@@ -387,18 +387,6 @@ class Form extends \Controller
             }
 
             $varValue = $objWidget->value;
-            $rgxp = $this->arrFields[$strName]['eval']['rgxp'];
-
-            // Convert date formats into timestamps
-            if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $varValue != '') {
-                try {
-                    $objDate = new \Date($varValue, $GLOBALS['objPage']->{$rgxp . 'Format'});
-                    $varValue = $objDate->tstamp;
-                }
-                catch (\OutOfBoundsException $e) {
-                    $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $varValue));
-                }
-            }
 
             // Save callback
             if (is_array($this->arrFields[$strName]['save_callback'])) {
