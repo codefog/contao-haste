@@ -33,7 +33,7 @@ For more internal details please read the source ;-)
 
     // First param is the form id
     // Second is either GET or POST
-    // Third is a closure that decides when your form is submitted
+    // Third is a callable that decides when your form is submitted
     $objForm = new \Haste\Form('someid', 'POST', function($haste) {
         return \Input::post('FORM_SUBMIT') === $haste->getFormId();
     });
@@ -115,7 +115,7 @@ and validate the user inputs etc.
 
 ```php
 <?php
-    // you can exclude or modify certain fields by passing a closure as second
+    // you can exclude or modify certain fields by passing a callable as second
     // parameter
     $objForm->addFieldsFromDca('tl_content', function(&$arrFields) {
         unset($arrFields['idontwantyou']);
@@ -126,7 +126,7 @@ and validate the user inputs etc.
 
 ```php
 <?php
-    // you can exclude or modify certain fields by passing a closure as second
+    // you can exclude or modify certain fields by passing a callable as second
     // parameter
     $objForm->addFieldsFromFormGenerator(42, function(&$arrFields) {
         unset($arrFields['idontwantyou']);
