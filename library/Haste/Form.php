@@ -88,7 +88,7 @@ class Form extends \Controller
      * @param   string   The ID of the form
      * @param   string   The HTTP Method GET or POST
      * @param   callable A callable that checks if the form has been submitted
-     * @throws  InvalidArgumentException
+     * @throws  \InvalidArgumentException
      */
     public function __construct($strId, $strMethod, $varSubmitCheck)
     {
@@ -126,7 +126,7 @@ class Form extends \Controller
     /**
      * Set the form action from a Contao page ID
      * @param   int  The page ID
-     * @throws  InvalidArgumentException
+     * @throws  \InvalidArgumentException
      */
     public function setFormActionFromPageId($intId)
     {
@@ -168,6 +168,7 @@ class Form extends \Controller
      * Adds a form field
      * @param   string  The form field name
      * @param   array   The DCA representation of the field
+     * @throws  \RuntimeException
      */
     public function addFormField($strName, array $arrDca)
     {
@@ -324,7 +325,7 @@ class Form extends \Controller
 
     /**
      * Create the widget instances
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     public function createWidgets()
     {
@@ -463,6 +464,8 @@ class Form extends \Controller
      * Return the submitted data of a specific form field
      * @param   string   The form field name
      * @return  mixed    The value of the widget
+     * @throws  \BadMethodCallException
+     * @throws  \InvalidArgumentException
      */
     public function fetch($strName)
     {
@@ -513,6 +516,7 @@ class Form extends \Controller
     /**
      * Check for a valid form field name
      * @param   string  The form field name
+     * @throws  \InvalidArgumentException
      */
     protected function checkFormFieldNameIsValid($strName)
     {
