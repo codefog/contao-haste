@@ -427,27 +427,6 @@ class Form extends \Controller
     }
 
     /**
-     * Return the submitted data as an array
-     * @param  boolean If true, the method will return the raw data
-     * @return array
-     */
-    public function getData($blnRaw = false)
-    {
-        if (!$this->blnSubmitted) {
-            return array();
-        }
-
-        $arrData = array();
-        $method = strtolower($this->strMethod);
-
-        foreach ($this->arrWidgets as $strName => $objWidget) {
-            $arrData[$strName] = $blnRaw ? \Input::$method($strName) : $objWidget->value;
-        }
-
-        return $arrData;
-    }
-
-    /**
      * Add form to a template
      * @param   FrontendTemplate
      */
@@ -490,6 +469,48 @@ class Form extends \Controller
         }
 
         return $objTemplate->parse();
+    }
+
+    /**
+     * Return the submitted data of a specific form field
+     * @param   string   The form field name
+     * @return  mixed    The value of the widget
+     */
+    public function fetch($strName)
+    {
+        if (!$this->blnSubmitted) {
+            throw new \BadMethodCallException('How do you want me to fetch data from an unsubmitted form?');
+        }
+
+        if ($this->strMethod !== 'POST') {
+            throw new \BadMethodCallException('Widgets only support fetching POST values. Use the Contao Input class for other purposes.');
+        }
+
+        if (!isset($this->arrWidgets[$strName])) {
+            throw new \InvalidArgumentException('The widget with name "' . $strName . '" does not exist.');
+        }
+
+        return $this->arrWidgets[$strName]->value;
+    }
+
+    /**
+     * Return the submitted data as an associative array
+     * @param   callable    A callable that should be used to fetch the data instead of the built in functionality
+     * @return  array
+     */
+    public function fetchAll($varCallback=null)
+    {
+        $arrData = array();
+
+        foreach ($this->arrWidgets as $strName => $objWidget) {
+            if (is_callable($varCallback)) {
+                $arrData[$strName] = call_user_func($varCallback, $strName, $objWidget);
+            } else {
+                $arrData[$strName] = $this->fetch($strName);
+            }
+        }
+
+        return $arrData;
     }
 
     /**

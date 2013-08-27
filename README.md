@@ -90,11 +90,16 @@ and validate the user inputs etc.
     // validate() also checks whether the form has been submitted
     if ($objForm->validate()) {
 
-		// Get the submitted and parsed data:
-		$arrData = $this->getData();
+        // Get the submitted and parsed data of a field (only works with POST):
+        $arrData = $this->fetch('year');
 
-		// Get the raw data:
-		$arrData = $this->getData(true);
+        // Get all the submitted and parsed data (only works with POST):
+        $arrData = $this->fetchAll();
+
+        // For your convenience you can also use a callable to walk over all widgets
+        $arrData = $this->fetchAll(function($strName, $objWidget) {
+            return \Input::postRaw($strName);
+        });
 
         // Read from POST: \Input::post('year');
         // Read from GET: \Input::get('year');
