@@ -471,7 +471,7 @@ class Form extends \Controller
      * Generate a form and return it as HTML string
      * @return string
      */
-    public function generateAsString()
+    public function generate()
     {
         $this->createWidgets();
 
@@ -498,7 +498,7 @@ class Form extends \Controller
      */
     public function __toString()
     {
-        return $this->generateAsString();
+        return $this->generate();
     }
 
     /**

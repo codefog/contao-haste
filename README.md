@@ -101,7 +101,7 @@ and validate the user inputs etc.
     }
 
     // Get the form as string
-    echo $objForm->generateAsString();
+    echo $objForm->generate();
     // or just
     echo $objForm;
 
