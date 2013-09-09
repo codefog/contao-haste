@@ -91,13 +91,13 @@ and validate the user inputs etc.
     if ($objForm->validate()) {
 
         // Get the submitted and parsed data of a field (only works with POST):
-        $arrData = $this->fetch('year');
+        $arrData = $objForm->fetch('year');
 
         // Get all the submitted and parsed data (only works with POST):
-        $arrData = $this->fetchAll();
+        $arrData = $objForm->fetchAll();
 
         // For your convenience you can also use a callable to walk over all widgets
-        $arrData = $this->fetchAll(function($strName, $objWidget) {
+        $arrData = $objForm->fetchAll(function($strName, $objWidget) {
             return \Input::postRaw($strName);
         });
 
