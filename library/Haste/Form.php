@@ -258,7 +258,7 @@ class Form extends \Controller
     public function addFieldsFromFormGenerator($intId, $varCallback = null)
     {
         if (($objFields = \FormFieldModel::findPublishedByPid($intId)) === null) {
-            throw new \InvalidArgumentException('Form generator ID "' . $intId . '" does not exist.');
+            throw new \InvalidArgumentException('Form ID "' . $intId . '" does not exist or has no published fields.');
         }
 
         $arrFields = array();
