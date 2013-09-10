@@ -173,6 +173,15 @@ class Form extends \Controller
     }
 
     /**
+     * Check if there are uploads
+     * @return  boolean
+     */
+    public function hasUploads()
+    {
+        return $this->blnHasUploads;
+    }
+
+    /**
      * Adds a form field
      * @param   string  The form field name
      * @param   array   The DCA representation of the field
