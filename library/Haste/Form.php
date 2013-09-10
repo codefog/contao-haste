@@ -42,6 +42,12 @@ class Form extends \Controller
     protected $blnSubmitted;
 
     /**
+     * Render forms tableless
+     * @var boolean
+     */
+    protected $blnTableless = true;
+
+    /**
      * True if the form has uploads
      * @var boolean
      */
@@ -88,9 +94,10 @@ class Form extends \Controller
      * @param   string   The ID of the form
      * @param   string   The HTTP Method GET or POST
      * @param   callable A callable that checks if the form has been submitted
+     * @param   boolean Whether to render the form tableless or not
      * @throws  \InvalidArgumentException
      */
-    public function __construct($strId, $strMethod, $varSubmitCheck)
+    public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless=true)
     {
         if (is_numeric($strId)) {
             throw new \InvalidArgumentException('You cannot use a numeric form id.');
@@ -108,6 +115,7 @@ class Form extends \Controller
 
         $this->strMethod = $strMethod;
         $this->blnSubmitted = call_user_func($varSubmitCheck, $this);
+        $this->blnTableless = $blnTableless;
 
         // The form action can be set using several helper methods but by default it's just
         // pointing to the current page
@@ -182,11 +190,6 @@ class Form extends \Controller
         // Support the default value, too
         if (isset($arrDca['default']) && !isset($arrDca['value'])) {
             $arrDca['value'] = $arrDca['default'];
-        }
-
-        // Make the field tableless by default
-        if (!isset($arrDca['eval']['tableless'])) {
-            $arrDca['eval']['tableless'] = true;
         }
 
         $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
@@ -272,11 +275,6 @@ class Form extends \Controller
             // Make sure it has a "name" attribute because it is mandatory
             if (!isset($arrDca['name'])) {
                 $arrDca['name'] = $strName;
-            }
-
-            // Make the field tableless by default
-            if (!isset($arrDca['eval']['tableless'])) {
-                $arrDca['eval']['tableless'] = true;
             }
 
             $arrFields[$strName] = $arrDca;
@@ -435,10 +433,26 @@ class Form extends \Controller
         $objTemplate->formId = $this->strFormId;
         $objTemplate->method = $this->strMethod;
         $objTemplate->enctype = $this->strEnctype;
-        $objTemplate->fields = $this->arrWidgets;
+        $objTemplate->widgets = $this->arrWidgets;
         $objTemplate->valid = $this->blnValid;
         $objTemplate->submitted = $this->blnSubmitted;
         $objTemplate->hasUploads = $this->blnHasUploads;
+        $objTemplate->tableless = $this->blnTableless;
+
+        $arrWidgets = $this->splitHiddenAndVisibleWidgets();
+
+        // Generate hidden form fields
+        foreach ($arrWidgets['hidden'] as $objWidget) {
+            $objTemplate->hidden .= $objWidget->parse();
+        }
+
+        // Generate visible form fields
+        foreach ($arrWidgets['visible'] as $objWidget) {
+            $objTemplate->fields .= $objWidget->parse();
+        }
+
+        $objTemplate->hiddenWidgets  = $arrWidgets['hidden'];
+        $objTemplate->visibleWidgets = $arrWidgets['visible'];
 
         $objTemplate->hasteFormInstance = $this;
     }
@@ -453,21 +467,23 @@ class Form extends \Controller
 
         $objTemplate = new \FrontendTemplate('form');
         $objTemplate->class = 'hasteform_' . $this->strFormId;
-        $objTemplate->tableless = true;
+        $objTemplate->tableless = $this->blnTableless;
         $objTemplate->action = $this->strFormAction;
         $objTemplate->formId = $this->strFormId;
         $objTemplate->method = strtolower($this->strMethod);
         $objTemplate->enctype = $this->strEnctype;
         $objTemplate->formSubmit = $this->strFormId;
 
-        // Generate all form fields
-        foreach ($this->arrWidgets as $objWidget) {
-            if ($objWidget instanceof \FormHidden) {
-                $objTemplate->fields .= $objWidget->parse();
-                continue;
-            }
+        $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
-            $objTemplate->fields .= '<div class="widget ' . $objWidget->name . '">' . $objWidget->parse() . '</div>';
+        // Generate hidden form fields
+        foreach ($arrWidgets['hidden'] as $objWidget) {
+            $objTemplate->hidden .= $objWidget->parse();
+        }
+
+        // Generate visible form fields
+        foreach ($arrWidgets['visible'] as $objWidget) {
+            $objTemplate->fields .= $objWidget->parse();
         }
 
         return $objTemplate->parse();
@@ -550,5 +566,20 @@ class Form extends \Controller
     protected function generateRowClass($intIndex, $intTotal)
     {
         return 'row_' . $intIndex . (($intIndex == 0) ? ' row_first' : (($intIndex == ($intTotal - 1)) ? ' row_last' : '')) . ((($intIndex % 2) == 0) ? ' even' : ' odd');
+    }
+
+    /**
+     * Splits hidden and visible widgets
+     * @return array
+     */
+    protected function splitHiddenAndVisibleWidgets()
+    {
+        $arrResult = array();
+        foreach ($this->arrWidgets as $objWidget) {
+            $strKey = ($objWidget instanceof \FormHidden) ? 'hidden' : 'visible';
+            $arrResult[$strKey][] = $objWidget;
+        }
+
+        return $arrResult;
     }
 }

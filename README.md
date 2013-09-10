@@ -34,6 +34,7 @@ For more internal details please read the source ;-)
     // First param is the form id
     // Second is either GET or POST
     // Third is a callable that decides when your form is submitted
+    // You can pass an optional fourth parameter (true by default) to turn the form into a table based one
     $objForm = new \Haste\Form('someid', 'POST', function($haste) {
         return \Input::post('FORM_SUBMIT') === $haste->getFormId();
     });
