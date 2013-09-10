@@ -335,6 +335,9 @@ class Form extends \Controller
             return;
         }
 
+        $intTotal = count($this->arrFormFields);
+        $i = 0;
+
         // Initialize widgets
         foreach ($this->arrFormFields as $strName => $arrField) {
 
@@ -344,6 +347,9 @@ class Form extends \Controller
                 throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrField['type']));
             }
 
+            $arrField['tableless']  = $this->blnTableless;
+            $arrField['rowClass']   = $this->generateRowClass($i, $intTotal);
+
             $objWidget = new $strClass($arrField);
 
             if ($objWidget instanceof \uploadable) {
@@ -351,6 +357,7 @@ class Form extends \Controller
             }
 
             $this->arrWidgets[$strName] = $objWidget;
+            $i++;
         }
 
         if ($this->strMethod == 'GET' && $this->blnHasUploads) {
@@ -533,5 +540,15 @@ class Form extends \Controller
         if (in_array($strName, $this->arrFormFields)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
         }
+    }
+
+    /**
+     * Generates a the row CSS class for the widget
+     * @param   int Current index
+     * @param   int Total number of widgets
+     */
+    protected function generateRowClass($intIndex, $intTotal)
+    {
+        return 'row_' . $intIndex . (($intIndex == 0) ? ' row_first' : (($intIndex == ($intTotal - 1)) ? ' row_last' : '')) . ((($intIndex % 2) == 0) ? ' even' : ' odd');
     }
 }
