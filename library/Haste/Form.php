@@ -455,6 +455,11 @@ class Form extends \Controller
 
         // Generate all form fields
         foreach ($this->arrWidgets as $objWidget) {
+            if ($objWidget instanceof \FormHidden) {
+                $objTemplate->fields .= $objWidget->parse();
+                continue;
+            }
+
             $objTemplate->fields .= '<div class="widget ' . $objWidget->name . '">' . $objWidget->parse() . '</div>';
         }
 
