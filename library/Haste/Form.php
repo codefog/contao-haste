@@ -368,7 +368,7 @@ class Form extends \Controller
             $this->strEnctype = 'application/x-www-form-urlencoded';
         }
 
-        $this->intState == self::STATE_CLEAN;
+        $this->intState = self::STATE_CLEAN;
     }
 
     /**
