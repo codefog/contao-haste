@@ -320,6 +320,16 @@ class Form extends \Controller
     }
 
     /**
+     * Returns a widget instance if existing
+     * @param   string  The form field name
+     * @return  \Widget
+     */
+    public function getWidget($strName)
+    {
+        return $this->arrWidgets[$strName];
+    }
+
+    /**
      * Add a validator to the form field
      * @param   string   The form field name
      * @param   callable A callable that will be called on widget validation
