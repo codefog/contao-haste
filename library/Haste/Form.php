@@ -302,6 +302,25 @@ class Form extends \Controller
     }
 
     /**
+     * Get a form field by a given name
+     * @param   string  The form field name
+     * @return  array
+     */
+    public function getFormField($strName)
+    {
+        return $this->arrFormFields[$strName];
+    }
+
+    /**
+     * Get all form fields
+     * @return  array
+     */
+    public function getFormFields()
+    {
+        return $this->arrFormFields;
+    }
+
+    /**
      * Removes a form field
      * @param   string  The form field name
      */
