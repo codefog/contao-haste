@@ -215,6 +215,17 @@ class Form extends \Controller
     }
 
     /**
+     * Add multiple form fields
+     * @param   array
+     */
+    public function addFormFields($arrFormFields)
+    {
+        foreach ($arrFormFields as $strName => $arrDca) {
+            $this->addFormField($strName, $arrDca);
+        }
+    }
+
+    /**
      * Helper method to easily add a captcha field
      * @param   string  The form field name
      */
