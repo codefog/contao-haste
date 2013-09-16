@@ -1,11 +1,11 @@
 HasteForm Changelog
 ===================
 
-Version 2.0.0 (????-??-??)
+Version 2.0.0 (2013-09-16)
 ------------------------------
-This is a complete rewrite of HasteForm and thus incompatible with its
-previous versions. In addition to that, it is also only compatible with
-Contao versions 3.1+.
+
+### General
+- This is a complete rewrite of HasteForm and thus incompatible with its previous versions. In addition to that, it is also only compatible with Contao versions 3.1+.
 
 Version 1.0.2 (2013-04-09)
 ------------------------------
