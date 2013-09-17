@@ -8,7 +8,7 @@ class Form extends \Controller
     /**
      * HasteForm version
      */
-    const VERSION = '2.0.0';
+    const VERSION = '2.0.1';
 
     /**
      * State of the form
