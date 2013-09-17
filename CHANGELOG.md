@@ -4,6 +4,9 @@ HasteForm Changelog
 Version 2.0.1 (????-??-??)
 ------------------------------
 
+### Fixed
+- Added missing parent::__construct() call which prevented Contao from loading configuration objects
+
 Version 2.0.0 (2013-09-16)
 ------------------------------
 

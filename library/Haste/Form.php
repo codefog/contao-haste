@@ -99,6 +99,8 @@ class Form extends \Controller
      */
     public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless=true)
     {
+        parent::__construct();
+
         if (is_numeric($strId)) {
             throw new \InvalidArgumentException('You cannot use a numeric form id.');
         }
