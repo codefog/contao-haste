@@ -267,7 +267,7 @@ class Form extends \Controller
         $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
 
         if (is_callable($varCallback)) {
-            call_user_func($varCallback, $arrFields);
+            $arrFields = call_user_func($varCallback, $arrFields);
         }
 
         foreach ($arrFields as $k => $v) {
