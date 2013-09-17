@@ -627,9 +627,9 @@ class Form extends \Controller
     protected function splitHiddenAndVisibleWidgets()
     {
         $arrResult = array();
-        foreach ($this->arrWidgets as $objWidget) {
+        foreach ($this->arrWidgets as $k => $objWidget) {
             $strKey = ($objWidget instanceof \FormHidden) ? 'hidden' : 'visible';
-            $arrResult[$strKey][] = $objWidget;
+            $arrResult[$strKey][$k] = $objWidget;
         }
 
         return $arrResult;

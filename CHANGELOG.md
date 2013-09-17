@@ -7,6 +7,7 @@ Version 2.0.1 (????-??-??)
 ### Fixed
 - Added missing parent::__construct() call which prevented Contao from loading configuration objects
 - Fixed adding fields from DCA not working because of reference
+- Fixed missing key in widget arrays
 
 Version 2.0.0 (2013-09-16)
 ------------------------------
