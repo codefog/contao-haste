@@ -122,9 +122,10 @@ and validate the user inputs etc.
 ```php
 <?php
     // you can exclude or modify certain fields by passing a callable as second
-    // parameter
-    $objForm->addFieldsFromDca('tl_content', function(&$arrFields) {
+    // parameter and return your modified fields array
+    $objForm->addFieldsFromDca('tl_content', function($arrFields) {
         unset($arrFields['idontwantyou']);
+        return $arrFields;
     });
 ```
 

@@ -8,7 +8,7 @@ class Form extends \Controller
     /**
      * HasteForm version
      */
-    const VERSION = '2.0.0';
+    const VERSION = '2.0.1';
 
     /**
      * State of the form
@@ -99,6 +99,8 @@ class Form extends \Controller
      */
     public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless=true)
     {
+        parent::__construct();
+
         if (is_numeric($strId)) {
             throw new \InvalidArgumentException('You cannot use a numeric form id.');
         }
@@ -265,7 +267,7 @@ class Form extends \Controller
         $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
 
         if (is_callable($varCallback)) {
-            call_user_func($varCallback, $arrFields);
+            $arrFields = call_user_func($varCallback, $arrFields);
         }
 
         foreach ($arrFields as $k => $v) {
@@ -625,9 +627,9 @@ class Form extends \Controller
     protected function splitHiddenAndVisibleWidgets()
     {
         $arrResult = array();
-        foreach ($this->arrWidgets as $objWidget) {
+        foreach ($this->arrWidgets as $k => $objWidget) {
             $strKey = ($objWidget instanceof \FormHidden) ? 'hidden' : 'visible';
-            $arrResult[$strKey][] = $objWidget;
+            $arrResult[$strKey][$k] = $objWidget;
         }
 
         return $arrResult;

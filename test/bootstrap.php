@@ -2,6 +2,10 @@
 
 class Controller
 {
+    public function __construct()
+    {
+        // I am a dummy
+    }
     public function loadDataContainer($strName)
     {
         // I am a dummy
