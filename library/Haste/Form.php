@@ -8,7 +8,7 @@ class Form extends \Controller
     /**
      * HasteForm version
      */
-    const VERSION = '2.0.1';
+    const VERSION = '2.0.2';
 
     /**
      * State of the form
@@ -494,12 +494,12 @@ class Form extends \Controller
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
         // Generate hidden form fields
-        foreach ($arrWidgets['hidden'] as $objWidget) {
+        foreach ((array) $arrWidgets['hidden'] as $objWidget) {
             $objTemplate->hidden .= $objWidget->parse();
         }
 
         // Generate visible form fields
-        foreach ($arrWidgets['visible'] as $objWidget) {
+        foreach ((array) $arrWidgets['visible'] as $objWidget) {
             $objTemplate->fields .= $objWidget->parse();
         }
 
