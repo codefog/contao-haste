@@ -4,6 +4,9 @@ HasteForm Changelog
 Version 2.0.2 (2013-10-??)
 ------------------------------
 
+### Fixed
+- Fixed possible error on foreach
+
 Version 2.0.1 (2013-09-30)
 ------------------------------
 
