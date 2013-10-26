@@ -266,11 +266,11 @@ class Form extends \Controller
         $this->loadDataContainer($strTable);
         $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
 
-        if (is_callable($varCallback)) {
-            $arrFields = call_user_func($varCallback, $arrFields);
-        }
-
         foreach ($arrFields as $k => $v) {
+            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
+                continue;
+            }
+
             $this->addFormField($k, $v);
         }
     }
@@ -303,11 +303,12 @@ class Form extends \Controller
             $arrFields[$strName] = $arrDca;
         }
 
-        if (is_callable($varCallback)) {
-            call_user_func($varCallback, $arrFields);
-        }
-
         foreach ($arrFields as $k => $v) {
+
+            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
+                continue;
+            }
+
             $this->arrFormFields[$k] = $v;
         }
 
