@@ -210,6 +210,25 @@ class Form extends \Controller
             throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrDca['inputType']));
         }
 
+        if (is_array($arrDca['save_callback'])) {
+            $arrCallbacks = $arrDca['save_callback'];
+            $this->addValidator($strName, function($objWidget) use ($arrCallbacks) {
+                foreach ($arrCallbacks as $callback) {
+                    try {
+                        if (is_array($callback)) {
+                            $objCallback = System::importStatic($callback[0]);
+                            $objWidget->value = $objCallback->$callback[1]($objWidget->value, $this);
+                        } elseif (is_callable($callback)) {
+                            $objWidget->value = $callback($objWidget->value, $this);
+                        }
+                    } catch (\Exception $e) {
+                        $objWidget->class = 'error';
+                        $objWidget->addError($e->getMessage());
+                    }
+                }
+            });
+        }
+
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
 
         $this->arrFormFields[$strName] = $arrDca;
@@ -447,21 +466,6 @@ class Form extends \Controller
             }
 
             $varValue = $objWidget->value;
-
-            // Save callback
-            if (is_array($this->arrFields[$strName]['save_callback'])) {
-                foreach ($this->arrFields[$strName]['save_callback'] as $callback) {
-                    $objCallback = System::importStatic($callback[0]);
-
-                    try {
-                        $varValue = $objCallback->$callback[1]($varValue, $this);
-                    }
-                    catch (\Exception $e) {
-                        $objWidget->class = 'error';
-                        $objWidget->addError($e->getMessage());
-                    }
-                }
-            }
 
             if ($objWidget->hasErrors()) {
                 $this->blnValid = false;
