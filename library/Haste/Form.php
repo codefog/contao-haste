@@ -121,7 +121,7 @@ class Form extends \Controller
 
         // The form action can be set using several helper methods but by default it's just
         // pointing to the current page
-        $this->strFormAction = \Controller::generateFrontendUrl($GLOBALS['objPage']->row());
+        $this->strFormAction = \Environment::get('request');
     }
 
     /**

@@ -47,7 +47,7 @@ For more internal details please read the source ;-)
         return \Input::get('foo') === 'bar';
     });
 
-    // A form needs an action. By default it's the current Contao page you
+    // A form needs an action. By default it's the current request URI you
     // place your Haste form on, but you can either set your own URI:
     $objForm->setFormActionFromUri('https://foo.bar/somewhere.html');
 
