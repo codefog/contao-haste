@@ -370,7 +370,7 @@ class Form extends \Controller
      */
     public function addValidator($strName, $varCallback)
     {
-        if ($this->hasFormField($strName) && is_callable($varCallback)) {
+        if (is_callable($varCallback)) {
             $this->arrValidators[$strName][] = $varCallback;
         }
     }
