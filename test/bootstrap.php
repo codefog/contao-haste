@@ -23,6 +23,14 @@ class Database_Result
     }
 }
 
+class Environment
+{
+    public static function get($strParam)
+    {
+        // I am a dummy
+    }
+}
+
 $GLOBALS['objPage'] = new Database_Result();
 
 include_once __DIR__ . '/../library/Haste/Form.php';
