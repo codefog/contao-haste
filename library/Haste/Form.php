@@ -127,15 +127,19 @@ class Form extends \Controller
     /**
      * Set the form action directly
      * @param   string  The URI
+     * @return   Form
      */
     public function setFormActionFromUri($strUri)
     {
         $this->strFormAction = $strUri;
+
+        return $this;
     }
 
     /**
      * Set the form action from a Contao page ID
      * @param   int  The page ID
+     * @return   Form
      * @throws  \InvalidArgumentException
      */
     public function setFormActionFromPageId($intId)
@@ -146,6 +150,7 @@ class Form extends \Controller
 
         $this->strFormAction = \Controller::generateFrontendUrl($objPage->row());
 
+        return $this;
     }
 
     /**
@@ -188,6 +193,7 @@ class Form extends \Controller
      * Adds a form field
      * @param   string  The form field name
      * @param   array   The DCA representation of the field
+     * @return  Form
      * @throws  \RuntimeException
      */
     public function addFormField($strName, array $arrDca)
@@ -233,17 +239,22 @@ class Form extends \Controller
 
         $this->arrFormFields[$strName] = $arrDca;
         $this->intState = self::STATE_DIRTY;
+
+        return $this;
     }
 
     /**
      * Add multiple form fields
      * @param   array
+     * @return  Form
      */
     public function addFormFields($arrFormFields)
     {
         foreach ($arrFormFields as $strName => $arrDca) {
             $this->addFormField($strName, $arrDca);
         }
+
+        return $this;
     }
 
     /**
@@ -278,6 +289,7 @@ class Form extends \Controller
      * Add form fields from a back end DCA
      * @param   string   The DCA table name
      * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @return  Form
      */
     public function addFieldsFromDca($strTable, $varCallback = null)
     {
@@ -292,12 +304,15 @@ class Form extends \Controller
 
             $this->addFormField($k, $v);
         }
+
+        return $this;
     }
 
     /**
      * Add form fields from a back end form generator form ID
      * @param   int      The form generator form ID
      * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @return  Form
      * @throws  \InvalidArgumentException
      */
     public function addFieldsFromFormGenerator($intId, $varCallback = null)
@@ -332,6 +347,8 @@ class Form extends \Controller
         }
 
         $this->intState = self::STATE_DIRTY;
+
+        return $this;
     }
 
     /**
@@ -356,11 +373,14 @@ class Form extends \Controller
     /**
      * Removes a form field
      * @param   string  The form field name
+     * @return  Form
      */
     public function removeFormField($strName)
     {
         unset($this->arrFormFields[$strName]);
         $this->intState = self::STATE_DIRTY;
+
+        return $this;
     }
 
     /**
@@ -386,17 +406,21 @@ class Form extends \Controller
      * Add a validator to the form field
      * @param   string   The form field name
      * @param   callable A callable that will be called on widget validation
+     * @return  Form
      */
     public function addValidator($strName, $varCallback)
     {
         if (is_callable($varCallback)) {
             $this->arrValidators[$strName][] = $varCallback;
         }
+
+        return $this;
     }
 
     /**
      * Create the widget instances
-     * @throws \RuntimeException
+     * @return  Form
+     * @throws  \RuntimeException
      */
     public function createWidgets()
     {
@@ -441,6 +465,8 @@ class Form extends \Controller
         }
 
         $this->intState = self::STATE_CLEAN;
+
+        return $this;
     }
 
     /**
@@ -481,6 +507,7 @@ class Form extends \Controller
     /**
      * Add form to a template
      * @param   FrontendTemplate
+     * @return  Form
      */
     public function addToTemplate(\FrontendTemplate $objTemplate)
     {
@@ -512,6 +539,8 @@ class Form extends \Controller
         $objTemplate->visibleWidgets = $arrWidgets['visible'];
 
         $objTemplate->hasteFormInstance = $this;
+
+        return $this;
     }
 
     /**
