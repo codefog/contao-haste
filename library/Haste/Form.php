@@ -66,6 +66,12 @@ class Form extends \Controller
     protected $arrWidgets = array();
 
     /**
+     * Bound model
+     * @var \Model
+     */
+    protected $objModel = null;
+
+    /**
      * Validators
      * @var array
      */
@@ -205,9 +211,16 @@ class Form extends \Controller
             $arrDca['name'] = $strName;
         }
 
-        // Support the default value, too
-        if (isset($arrDca['default']) && !isset($arrDca['value'])) {
-            $arrDca['value'] = $arrDca['default'];
+        // Support default values
+        if (!$this->isSubmitted()) {
+            if (isset($arrDca['default']) && !isset($arrDca['value'])) {
+                $arrDca['value'] = $arrDca['default'];
+            }
+
+            // Try to load the default value from bound Model
+            if ($this->objModel !== null) {
+                $arrDca['value'] = $this->objModel->$strName;
+            }
         }
 
         $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
@@ -255,6 +268,30 @@ class Form extends \Controller
         }
 
         return $this;
+    }
+
+    /**
+     * Binds a model instance to the form. If there is data, haste form will add
+     * the present values as default values.
+     * @param   \Model
+     */
+    public function bindModel(\Model $objModel)
+    {
+        $this->objModel = $objModel;
+    }
+
+    /**
+     * Gets the bound model
+     * @return   \Model
+     * @throws   \BadMethodCallException
+     */
+    public function getBoundModel()
+    {
+        if ($this->objModel === null) {
+            throw new \BadMethodCallException('There was no bound instance of "Model" found!');
+        }
+
+        return $this->objModel;
     }
 
     /**
@@ -498,6 +535,11 @@ class Form extends \Controller
             }
             elseif ($objWidget->submitInput()) {
                 $objWidget->value = $varValue;
+
+                // Bind to Model instance
+                if ($this->objModel !== null) {
+                    $this->objModel->$strName = $varValue;
+                }
             }
         }
 

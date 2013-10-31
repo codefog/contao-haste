@@ -146,3 +146,24 @@ and validate the user inputs etc.
 <?php
     $objForm->removeFormField('firstname');
 ```
+
+### Bind models to the form
+You can easily bind a Contao Model instance to the form to ease working with them.
+Haste form will try to load and preset the data from the model if there is already
+some and will also store the values to the model.
+However, it will *not* call `->save()` on the model so you can still do with it
+whatever you like.
+
+```php
+<?php
+    // Presets values from page ID 42
+    $objModel = \PageModel::findByPk(42);
+    $objForm->bindModel($objModel);
+
+    $objForm->addFieldsFromDca('tl_page');
+
+    if ($objForm->validate()) {
+        // The model will now contain the changes so you can save it
+        $objModel->save();
+    }
+```
