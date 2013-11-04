@@ -19,7 +19,7 @@
 
 namespace Haste\Weight;
 
-interface WeightInterface
+interface Weighable
 {
 
     /**

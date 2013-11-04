@@ -19,7 +19,7 @@
 
 namespace Haste\Weight;
 
-class Weight implements WeightInterface
+class Weight implements Weighable
 {
 
     /**

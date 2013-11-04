@@ -47,7 +47,7 @@ class Scale
      * Add weight to the scale
      * @param   WeightInterface
      */
-    public function add(WeightInterface $objWeight)
+    public function add(Weighable $objWeight)
     {
         $this->arrWeight[] = $objWeight;
 
@@ -60,7 +60,7 @@ class Scale
      * @param   WeightInterface
      * @return  self
      */
-    public function remove(WeightInterface $objWeight)
+    public function remove(Weighable $objWeight)
     {
         $key = array_search($objWeight, $this->arrWeight, true);
 
@@ -103,7 +103,7 @@ class Scale
      * @param   WeightInterface
      * @return  bool
      */
-    public function isLessThan(WeightInterface $objWeight)
+    public function isLessThan(Weighable $objWeight)
     {
         return $this->amountIn($objWeight->getWeightUnit()) < $objWeight->getWeightValue();
     }
@@ -113,7 +113,7 @@ class Scale
      * @param   WeightInterface
      * @return  bool
      */
-    public function isEqualOrLessThan(WeightInterface $objWeight)
+    public function isEqualOrLessThan(Weighable $objWeight)
     {
         return $this->amountIn($objWeight->getWeightUnit()) <= $objWeight->getWeightValue();
     }
@@ -123,7 +123,7 @@ class Scale
      * @param   WeightInterface
      * @return  bool
      */
-    public function isMoreThan(WeightInterface $objWeight)
+    public function isMoreThan(Weighable $objWeight)
     {
         return $this->amountIn($objWeight->getWeightUnit()) > $objWeight->getWeightValue();
     }
@@ -133,7 +133,7 @@ class Scale
      * @param   WeightInterface
      * @return  bool
      */
-    public function isEqualOrMoreThan(WeightInterface $objWeight)
+    public function isEqualOrMoreThan(Weighable $objWeight)
     {
         return $this->amountIn($objWeight->getWeightUnit()) >= $objWeight->getWeightValue();
     }
