@@ -28,19 +28,19 @@ class ZodiacSign
      * @var array
      */
     protected $arrSigns = array(
-        0   => 'capricorn',
-        20  => 'aquarius',
-        51  => 'pisces',
-        78  => 'aries',
-        111 => 'taurus',
-        140 => 'gemini',
-        172 => 'cancer',
-        203 => 'leo',
-        235 => 'virgo',
-        266 => 'libra',
-        296 => 'scorpio',
-        326 => 'sagittarius',
-        356 => 'capricorn',
+        0       => 'capricorn',
+        120     => 'aquarius',
+        219     => 'pisces',
+        321     => 'aries',
+        420     => 'taurus',
+        521     => 'gemini',
+        621     => 'cancer',
+        723     => 'leo',
+        823     => 'virgo',
+        923     => 'libra',
+        1023    => 'scorpio',
+        1122    => 'sagittarius',
+        1222    => 'capricorn',
     );
 
     /**
@@ -65,7 +65,7 @@ class ZodiacSign
      */
     public function getLatin()
     {
-        $day = $this->objDate->format('z');
+        $day = $this->objDate->format('nj');
 
         foreach (array_keys($this->arrSigns) as $k) {
             if ($k > $day) {
@@ -75,7 +75,7 @@ class ZodiacSign
             $key = $k;
         }
 
-        return static::$arrSigns[$key];
+        return $this->arrSigns[$key];
     }
 
     /**
