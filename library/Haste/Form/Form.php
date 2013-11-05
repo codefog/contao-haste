@@ -1,6 +1,6 @@
 <?php
 
-namespace Haste;
+namespace Haste\Form;
 
 
 class Form extends \Controller
