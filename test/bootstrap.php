@@ -91,5 +91,3 @@ class PageModel extends Model
 }
 
 $GLOBALS['objPage'] = new Database_Result();
-
-include_once __DIR__ . '/../library/Haste/Form.php';

@@ -9,7 +9,9 @@
 
 namespace Haste\Test;
 
-use Haste\Form;
+include_once __DIR__ . '/../../../../../library/Haste/Form/Form.php';
+
+use Haste\Form\Form;
 
 class FormTest extends \PHPUnit_Framework_TestCase
 {
@@ -24,7 +26,7 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
     public function testInstance()
     {
-        $this->assertInstanceOf('\Haste\Form', $this->instance);
+        $this->assertInstanceOf('\Haste\Form\Form', $this->instance);
     }
 
     public function testSetFormActionFromUri()
