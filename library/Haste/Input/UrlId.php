@@ -20,7 +20,7 @@
 namespace Haste\Input;
 
 
-class UrlId extends Input
+class UrlId
 {
 
     /**
@@ -30,7 +30,7 @@ class UrlId extends Input
      */
     public static function get($strKey)
     {
-        $strValue = static::getAutoItem($strKey);
+        $strValue = Input::getAutoItem($strKey);
 
         return (int) strtok($strValue, '-');
     }
@@ -41,12 +41,11 @@ class UrlId extends Input
      * @param   int
      * @param   string
      */
-    public static function validateName($strKey, $strName)
+    public static function validate($strKey, $intId, $strName)
     {
-        $intId = static::get($strKey);
         $strValid = $intId . '-' . standardize($strName);
 
-        if (static::getAutoItem($strKey) != $strValid) {
+        if (Input::getAutoItem($strKey) != $strValid) {
             global $objPage;
 
             $strParams = '/' . $strValid;
