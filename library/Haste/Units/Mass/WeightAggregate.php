@@ -17,7 +17,7 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  */
 
-namespace Haste\Weight;
+namespace Haste\Units\Mass;
 
 interface WeightAggregate
 {
