@@ -22,3 +22,4 @@ Haste is a collection of tools and classes to ease working with Contao.
 
 - [Date](docs/Date/index.md)
 - [Form](docs/Form/Form.md)
+- [Input](docs/Input/index.md)
