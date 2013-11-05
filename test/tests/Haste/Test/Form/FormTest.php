@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace Haste\Test;
+namespace Haste\Test\Form;
 
 include_once __DIR__ . '/../../../../../library/Haste/Form/Form.php';
 
