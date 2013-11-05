@@ -20,7 +20,7 @@
 namespace Haste\Input;
 
 
-class Id extends Input
+class UrlId extends Input
 {
 
     /**

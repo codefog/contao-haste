@@ -26,7 +26,7 @@ http://example.com/item/12-news-title.html
 ```php
 <?php
 
-$intId = \Haste\Input\Id::get('items');
+$intId = \Haste\Input\UrlId::get('items');
 $objItem = \NewsModel::findByPk($intId);
 
 if (null === $objItem) {
@@ -34,7 +34,7 @@ if (null === $objItem) {
 }
 
 // Validate the news title in the URL
-\Haste\Input\Id::validateName('items', $objItem->title);
+\Haste\Input\UrlId::validateName('items', $objItem->title);
 ```
 
 If the given name is not correct, (e.g. it would be "the-news-title"), the
