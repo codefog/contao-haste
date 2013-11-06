@@ -1,6 +1,6 @@
 # Haste Http
 
-Various classes easy HTTP handling.
+Various classes to ease HTTP handling.
 
 
 ## Examples ##
