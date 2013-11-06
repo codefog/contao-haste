@@ -6,11 +6,6 @@ namespace Haste\Form;
 class Form extends \Controller
 {
     /**
-     * HasteForm version
-     */
-    const VERSION = '2.0.2';
-
-    /**
      * State of the form
      * Can be either clean or dirty
      */
