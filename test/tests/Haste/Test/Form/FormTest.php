@@ -66,8 +66,8 @@ class FormTest extends \PHPUnit_Framework_TestCase
         $objModel = new \PageModel();
         $this->instance->bindModel($objModel);
 
-        $_POST['pageTitle'] = 'My page title test';
-        $_POST['jumpTo'] = 42;
+        \Input::setPost('pageTitle', 'My page title test');
+        \Input::setPost('jumpTo', 42);
 
         if ($this->instance->validate()) {
             $objBoundModel = $this->instance->getBoundModel();

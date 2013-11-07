@@ -4,21 +4,49 @@ error_reporting(E_ERROR);
 
 $GLOBALS['TL_FFL']['text'] = 'FormTextField';
 
-class FormTextField
+class Widget
 {
-    public $name;
-    public $value;
+    protected $arrData = array();
+    protected $varValue = null;
 
     public function __construct($arrData)
     {
-        $this->name = $arrData['name'];
-        $this->value = $arrData['value'];
+        foreach ($arrData as $k => $v) {
+            $this->$k = $v;
+        }
+    }
+
+    public function __get($key)
+    {
+        switch ($key) {
+            case 'value':
+                return $this->varValue;
+        }
+
+        return $this->$key;
+    }
+
+    public function __set($key, $value)
+    {
+        switch ($key) {
+            case 'value':
+                $this->varValue = $value;
+                break;
+            default:
+                $this->$key = $value;
+        }
     }
 
     public function validate()
     {
-        $this->value = $_POST[$this->name];
+        $varValue = $this->validator(\Input::post($this->name));
+        $this->value = $varValue;
         return true;
+    }
+
+    public function validator($value)
+    {
+        return $value;
     }
 
     public function hasErrors()
@@ -31,12 +59,20 @@ class FormTextField
         return true;
     }
 
+    public function addError($error)
+    {
+        // I am a dummy
+    }
+
     public static function getAttributesFromDca($arrDca)
     {
         $arrDca['type'] = $arrDca['inputType'];
         return $arrDca;
     }
 }
+
+class FormTextField extends Widget {}
+class TextField extends Widget {}
 
 class Controller
 {
@@ -69,10 +105,27 @@ class Environment
     }
 }
 
-class Model
+class Input
 {
-
+    public static function get($key)
+    {
+        return $_GET[$key];
+    }
+    public static function setGet($key, $value)
+    {
+        $_GET[$key] = $value;
+    }
+    public static function post($key)
+    {
+        return $_POST[$key];
+    }
+    public static function setPost($key, $value)
+    {
+        $_POST[$key] = $value;
+    }
 }
+
+class Model {}
 
 class PageModel extends Model
 {
