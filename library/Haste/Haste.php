@@ -29,8 +29,9 @@ class Haste extends \Controller
     public static function getInstance()
     {
         if (null === static::$objInstance) {
-            static::initialize();
             static::$objInstance = new static();
         }
+
+        return static::$objInstance;
     }
 }
