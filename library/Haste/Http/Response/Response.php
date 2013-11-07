@@ -166,7 +166,7 @@ class Response
 
         // Fix charset
         $strContentType = $this->getHeader('Content-Type');
-        if (strpos($strContentType, 'charset') !== false) {
+        if (strpos($strContentType, 'charset') === false) {
             $this->setHeader('Content-Type', $strContentType . '; charset=' . $GLOBALS['TL_CONFIG']['characterSet']);
         }
 
