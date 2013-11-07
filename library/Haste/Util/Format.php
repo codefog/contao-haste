@@ -60,9 +60,8 @@ class Format
      */
     public static function dcaLabel($strTable, $strField)
     {
-        if (!is_array($GLOBALS['TL_DCA'][$strTable])) {
-            throw new \UnderflowException('DCA for "'.$strTable.'" is not loaded');
-        }
+        \System::loadLanguageFile($strTable);
+        \Haste\Haste::getInstance()->call('loadDataContainer', $strTable);
 
         if (!empty($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'])) {
             $strLabel = is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label']) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'];
@@ -89,9 +88,8 @@ class Format
     {
         $varValue = deserialize($varValue);
 
-        if (!is_array($GLOBALS['TL_DCA'][$strTable])) {
-            throw new \UnderflowException('DCA for "'.$strTable.'" is not loaded');
-        }
+        \System::loadLanguageFile($strTable);
+        \Haste\Haste::getInstance()->call('loadDataContainer', $strTable);
 
         // Get field value
         if (strlen($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['foreignKey'])) {
