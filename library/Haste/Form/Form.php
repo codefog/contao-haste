@@ -523,17 +523,13 @@ class Form extends \Controller
                 }
             }
 
-            $varValue = $objWidget->value;
-
             if ($objWidget->hasErrors()) {
                 $this->blnValid = false;
             }
             elseif ($objWidget->submitInput()) {
-                $objWidget->value = $varValue;
-
                 // Bind to Model instance
                 if ($this->objModel !== null) {
-                    $this->objModel->$strName = $varValue;
+                    $this->objModel->$strName =  $objWidget->value;
                 }
             }
         }
