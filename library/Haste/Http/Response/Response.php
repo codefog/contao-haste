@@ -113,7 +113,7 @@ class Response
         }
 
         // Set default Content-Type
-        $this->setHeader('Content-Type', 'text-plain');
+        $this->setHeader('Content-Type', 'text/plain');
     }
 
     /**
