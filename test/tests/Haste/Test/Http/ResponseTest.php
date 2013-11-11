@@ -43,6 +43,12 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertSame((string) $objResponse, "HTTP/1.1 201 Created\nContent-Type: application/json; charset=utf-8\nContent-Length: 13\n\n{\"foo\":\"bar\"}");
     }
 
+    public function testEmptyJsonOutput()
+    {
+        $objResponse = new JsonResponse(array());
+        $this->assertSame((string) $objResponse, "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\nContent-Length: 2\n\n[]");
+    }
+
     public function testXmlOutput()
     {
         $objResponse = new XmlResponse('<foo><bar>indeed</bar></foo>', 304);
