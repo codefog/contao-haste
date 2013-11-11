@@ -255,7 +255,6 @@ class Response
         }
 
         $strOutput .= "\n" . $this->strContent;
-        var_dump('test2', $this->strContent);
         return $strOutput;
     }
 }
