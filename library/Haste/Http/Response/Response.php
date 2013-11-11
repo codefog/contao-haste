@@ -106,7 +106,7 @@ class Response
     public function __construct($strContent = '', $intStatus = 200)
     {
         $this->intStatus  = (int) $intStatus;
-        $this->strContent = $this->setContent($strContent);
+        $this->setContent($strContent);
 
         if (!in_array($this->intStatus, array_keys(self::$arrStatuses))) {
             throw new \InvalidArgumentException('The status code "' . $this->intStatus . '" is invalid!');
