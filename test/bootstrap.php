@@ -88,6 +88,11 @@ class Controller
     {
         // I am a dummy
     }
+
+    public function replaceInsertTags($strText)
+    {
+        return $strText;
+    }
 }
 class Database_Result
 {
