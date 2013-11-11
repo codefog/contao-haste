@@ -1,6 +1,6 @@
 <?php
 
-namespace Haste\Response;
+namespace Haste\Http\Response;
 
 use Haste\Util\InsertTag;
 
