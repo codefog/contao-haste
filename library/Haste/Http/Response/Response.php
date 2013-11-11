@@ -162,6 +162,15 @@ class Response
     }
 
     /**
+     * Gets the status code
+     * @return  int Status code
+     */
+    public function getStatusCode()
+    {
+        return $this->intStatus;
+    }
+
+    /**
      * Send the response
      * @param   boolean Exit script
      * @return  Response|null
