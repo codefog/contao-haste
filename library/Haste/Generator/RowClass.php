@@ -61,16 +61,16 @@ class RowClass
             throw new \InvalidArgumentException('Name is missing');
         }
 
-        $this->strName = (string) $strName;
         $this->intOptions += static::NAME;
+        $this->strName = standardize((string) $strName);
 
         return $this;
     }
 
     public function addArrayKey($strPrefix='')
     {
-        $this->strKeyPrefix = (string) $strPrefix;
         $this->intOptions += static::KEY;
+        $this->strKeyPrefix = standardize((string) $strPrefix);
 
         return $this;
     }
@@ -81,24 +81,24 @@ class RowClass
             throw new \InvalidArgumentException('Prefix is missing');
         }
 
-        $this->strCountPrefix = (string) $strPrefix;
         $this->intOptions += static::COUNT;
+        $this->strCountPrefix = standardize((string) $strPrefix);
 
         return $this;
     }
 
     public function addEvenOdd($strPrefix='')
     {
-        $this->strEvenOddPrefix = (string) $strPrefix;
         $this->intOptions += static::EVENODD;
+        $this->strEvenOddPrefix = standardize((string) $strPrefix);
 
         return $this;
     }
 
     public function addFirstLast($strPrefix='')
     {
-        $this->strFirstLastPrefix = (string) $strPrefix;
         $this->intOptions += static::FIRSTLAST;
+        $this->strFirstLastPrefix = standardize((string) $strPrefix);
 
         return $this;
     }
