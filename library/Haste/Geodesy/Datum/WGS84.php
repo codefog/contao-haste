@@ -73,21 +73,21 @@ class WGS84 implements GeodeticDatum
      */
     public static function findAddressOnGoogleMaps($strStreet, $strPostal, $strCity, $strCountry)
     {
-		$strAddress = sprintf('%s, %s %s %s', $dc->activeRecord->street, $dc->activeRecord->postal, $dc->activeRecord->city, $dc->activeRecord->country);
-		$strAddress = urlencode($strAddress);
+        $strAddress = sprintf('%s, %s %s %s', $strStreet, $strPostal, $strCity, $strCountry);
+        $strAddress = urlencode($strAddress);
 
-		// Get the coordinates
-		$objRequest = new \Request();
-		$objRequest->send('http://maps.googleapis.com/maps/api/geocode/json?address=' . $strAddress . '&sensor=false');
+        // Get the coordinates
+        $objRequest = new \Request();
+        $objRequest->send('http://maps.googleapis.com/maps/api/geocode/json?address=' . $strAddress . '&sensor=false');
 
-		// Request failed
-		if ($objRequest->hasError()) {
-			\System::log('Could not get coordinates for: ' . $strAddress . ' (' . $objRequest->response . ')', __METHOD__, TL_ERROR);
+        // Request failed
+        if ($objRequest->hasError()) {
+            \System::log('Could not get coordinates for: ' . $strAddress . ' (' . $objRequest->response . ')', __METHOD__, TL_ERROR);
 
-			return null;
-		}
+            return null;
+        }
 
-		$objResponse = json_decode($objRequest->response);
+        $objResponse = json_decode($objRequest->response);
 
         return new static($objResponse->results[0]->geometry->location->lat, $objResponse->results[0]->geometry->location->lng);
     }
