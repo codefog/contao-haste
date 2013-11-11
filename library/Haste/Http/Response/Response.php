@@ -237,4 +237,25 @@ class Response
             header($strName . ': ' . $strContent);
         }
     }
+
+    /**
+     * Prints the response
+     * @return  string
+     */
+    public function __toString()
+    {
+        $strOutput = '';
+        $this->prepareResponse();
+        $strVersion = ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.0') ? '1.0' : '1.1';
+        $strOutput .= sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, self::$arrStatuses[$this->intStatus]) . "\n";
+
+        // Headers
+        foreach ($this->arrHeaders as $strName => $strContent) {
+            $strOutput .= $strName . ': ' . $strContent . "\n";
+        }
+
+        $strOutput .= "\n" . $this->strContent;
+        var_dump('test2', $this->strContent);
+        return $strOutput;
+    }
 }
