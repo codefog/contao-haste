@@ -26,7 +26,7 @@ class JsonResponse extends Response
     {
         parent::__construct('', $intStatus);
 
-        $this->strContent = $this->setContent($arrContent);
+        $this->setContent($arrContent);
         $this->setHeader('Content-Type', 'application/json');
     }
 
