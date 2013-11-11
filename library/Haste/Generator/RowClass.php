@@ -61,16 +61,16 @@ class RowClass
             throw new \InvalidArgumentException('Name is missing');
         }
 
-        $this->intOptions += static::NAME;
         $this->strName = standardize((string) $strName);
+        $this->intOptions = $this->intOptions | static::NAME;
 
         return $this;
     }
 
     public function addArrayKey($strPrefix='')
     {
-        $this->intOptions += static::KEY;
         $this->strKeyPrefix = standardize((string) $strPrefix);
+        $this->intOptions = $this->intOptions | static::KEY;
 
         return $this;
     }
@@ -81,24 +81,24 @@ class RowClass
             throw new \InvalidArgumentException('Prefix is missing');
         }
 
-        $this->intOptions += static::COUNT;
         $this->strCountPrefix = standardize((string) $strPrefix);
+        $this->intOptions = $this->intOptions | static::COUNT;
 
         return $this;
     }
 
     public function addEvenOdd($strPrefix='')
     {
-        $this->intOptions += static::EVENODD;
         $this->strEvenOddPrefix = standardize((string) $strPrefix);
+        $this->intOptions = $this->intOptions | static::EVENODD;
 
         return $this;
     }
 
     public function addFirstLast($strPrefix='')
     {
-        $this->intOptions += static::FIRSTLAST;
         $this->strFirstLastPrefix = standardize((string) $strPrefix);
+        $this->intOptions = $this->intOptions | static::FIRSTLAST;
 
         return $this;
     }
@@ -106,7 +106,7 @@ class RowClass
     public function addGridRows($intPerColumn)
     {
         $this->intColumns = (int) $intPerColumn;
-        $this->intOptions += static::ROW;
+        $this->intOptions = $this->intOptions | static::ROW;
 
         return $this;
     }
@@ -114,7 +114,7 @@ class RowClass
     public function addGridCols($intPerColumn)
     {
         $this->intColumns = (int) $intPerColumn;
-        $this->intOptions += static::COL;
+        $this->intOptions = $this->intOptions | static::COL;
 
         return $this;
     }
