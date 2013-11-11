@@ -144,3 +144,7 @@ class PageModel extends Model
 }
 
 $GLOBALS['objPage'] = new Database_Result();
+
+function standardize($varValue) {
+    return $varValue;
+}
