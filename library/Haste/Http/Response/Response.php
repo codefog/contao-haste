@@ -180,14 +180,7 @@ class Response
         // Clean the output buffer
         ob_end_clean();
 
-        // Content-Length
-        $this->setHeader('Content-Length', strlen($this->strContent));
-
-        // Fix charset
-        $strContentType = $this->getHeader('Content-Type');
-        if (strpos($strContentType, 'charset') === false) {
-            $this->setHeader('Content-Type', $strContentType . '; charset=' . $GLOBALS['TL_CONFIG']['characterSet']);
-        }
+        $this->prepareResponse();
 
         // Send
         $this->sendHeaders();
@@ -208,6 +201,22 @@ class Response
     {
         // Replace insert tags
         $this->strContent = InsertTag::replaceRecursively($strContent);
+    }
+
+    /**
+     * Prepare response
+     */
+    protected function prepareResponse()
+    {
+        // Content-Length
+        $this->setHeader('Content-Length', strlen($this->strContent));
+
+        // Fix charset
+        $strContentType = $this->getHeader('Content-Type');
+        if (strpos($strContentType, 'charset') === false) {
+            $strCharset = $GLOBALS['TL_CONFIG']['characterSet'] ?: 'utf-8';
+            $this->setHeader('Content-Type', $strContentType . '; charset=' . $strCharset);
+        }
     }
 
     /**
