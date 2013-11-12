@@ -21,7 +21,7 @@ class HtmlResponse extends Response
      * @param   integer The response HTTP status code
      * @throws  \InvalidArgumentException When the HTTP status code is not valid
      */
-    public function __construct($strContent, $intStatus = 200)
+    public function __construct($strContent = '', $intStatus = 200)
     {
         parent::__construct($strContent, $intStatus);
 

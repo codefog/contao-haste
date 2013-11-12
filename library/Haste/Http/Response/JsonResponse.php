@@ -22,7 +22,7 @@ class JsonResponse extends Response
      * @param   integer The response HTTP status code
      * @throws  \InvalidArgumentException When the HTTP status code is not valid
      */
-    public function __construct(array $arrContent, $intStatus = 200)
+    public function __construct(array $arrContent = array(), $intStatus = 200)
     {
         parent::__construct('', $intStatus);
 
