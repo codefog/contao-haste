@@ -182,7 +182,7 @@ class Response
     }
 
     /**
-     * Prepares the content
+     * Sets the content
      * @param   string
      */
     protected function setContent($strContent)
@@ -194,7 +194,7 @@ class Response
     /**
      * Prepare response
      */
-    protected function prepareResponse()
+    protected function prepare()
     {
         // Content-Length
         $this->setHeader('Content-Length', strlen($this->strContent));
@@ -236,7 +236,7 @@ class Response
         // Clean the output buffer
         ob_end_clean();
 
-        $this->prepareResponse();
+        $this->prepare();
 
         // Send
         $this->sendHeaders();
@@ -256,7 +256,7 @@ class Response
     public function __toString()
     {
         $strOutput = '';
-        $this->prepareResponse();
+        $this->prepare();
         $strVersion = ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.0') ? '1.0' : '1.1';
         $strOutput .= sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, self::$arrStatuses[$this->intStatus]) . "\n";
 
