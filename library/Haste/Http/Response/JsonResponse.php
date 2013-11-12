@@ -32,12 +32,12 @@ class JsonResponse extends Response
 
     /**
      * Prepares the content
-     * @param   string
+     * @param   array
      */
-    protected function setContent($strContent)
+    public function setContent($arrContent)
     {
-        // Replace insert tags
-        $arrContent = InsertTag::replaceRecursively($strContent);
-        $this->strContent = json_encode($arrContent);
+        $strContent = json_encode($arrContent);
+
+        parent::setContent($strContent);
     }
 }

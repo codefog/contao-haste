@@ -185,10 +185,13 @@ class Response
      * Sets the content
      * @param   string
      */
-    protected function setContent($strContent)
+    public function setContent($strContent)
     {
         // Replace insert tags
         $this->strContent = InsertTag::replaceRecursively($strContent);
+
+        // Content-Length
+        $this->setHeader('Content-Length', strlen($this->strContent));
     }
 
     /**
@@ -196,9 +199,6 @@ class Response
      */
     protected function prepare()
     {
-        // Content-Length
-        $this->setHeader('Content-Length', strlen($this->strContent));
-
         // Fix charset
         $strContentType = $this->getHeader('Content-Type');
         if (strpos($strContentType, 'charset') === false) {
