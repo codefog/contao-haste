@@ -111,16 +111,11 @@ class Response
      * Creates a new HTTP response
      * @param   string The response content
      * @param   integer The response HTTP status code
-     * @throws  \InvalidArgumentException When the HTTP status code is not valid
      */
     public function __construct($strContent = '', $intStatus = 200)
     {
-        $this->intStatus  = (int) $intStatus;
         $this->setContent($strContent);
-
-        if (!in_array($this->intStatus, array_keys(self::$arrStatuses))) {
-            throw new \InvalidArgumentException('The status code "' . $this->intStatus . '" is invalid!');
-        }
+        $this->setStatusCode($intStatus);
 
         // Set default Content-Type
         $this->setHeader('Content-Type', 'text/plain');
@@ -168,6 +163,22 @@ class Response
     public function getStatusCode()
     {
         return $this->intStatus;
+    }
+
+    /**
+     * Set the status code
+     * @param   int
+     * @throws  \InvalidArgumentException When the HTTP status code is not valid
+     */
+    public function setStatusCode($intCode)
+    {
+        $intCode = (int) $intCode;
+
+        if (!in_array($intCode, array_keys(self::$arrStatuses))) {
+            throw new \InvalidArgumentException('The status code "' . $intCode . '" is invalid!');
+        }
+
+        $this->intStatus = $intCode;
     }
 
     /**

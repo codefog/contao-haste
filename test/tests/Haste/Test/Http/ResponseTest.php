@@ -62,4 +62,21 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(100, $objResponse->getStatusCode());
         $this->assertSame((string) $objResponse, "HTTP/1.1 100 Continue\nContent-Type: text/html; charset=utf-8\nContent-Length: 64\n\n<!DOCTYPE html><html lang=\"en\"><head></head><body></body></html>");
     }
+
+    public function testSetStatusCode()
+    {
+        $objResponse = new Response('Foobar', 500);
+        $this->assertSame(500, $objResponse->getStatusCode());
+        $objResponse->setStatusCode(200);
+        $this->assertSame(200, $objResponse->getStatusCode());
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSetStatusCodeException()
+    {
+        $objResponse = new Response('Foobar', 200);
+        $objResponse->setStatusCode(7000);
+    }
 }
