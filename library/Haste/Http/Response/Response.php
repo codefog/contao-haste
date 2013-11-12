@@ -171,29 +171,6 @@ class Response
     }
 
     /**
-     * Send the response
-     * @param   boolean Exit script
-     * @return  Response|null
-     */
-    public function send($blnExit = true)
-    {
-        // Clean the output buffer
-        ob_end_clean();
-
-        $this->prepareResponse();
-
-        // Send
-        $this->sendHeaders();
-        echo $this->strContent;
-
-        if ($blnExit) {
-            exit;
-        }
-
-        return $this;
-    }
-
-    /**
      * Prepares the content
      * @param   string
      */
@@ -236,6 +213,29 @@ class Response
         foreach ($this->arrHeaders as $strName => $strContent) {
             header($strName . ': ' . $strContent);
         }
+    }
+
+    /**
+     * Send the response
+     * @param   boolean Exit script
+     * @return  Response|null
+     */
+    public function send($blnExit = true)
+    {
+        // Clean the output buffer
+        ob_end_clean();
+
+        $this->prepareResponse();
+
+        // Send
+        $this->sendHeaders();
+        echo $this->strContent;
+
+        if ($blnExit) {
+            exit;
+        }
+
+        return $this;
     }
 
     /**
