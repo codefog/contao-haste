@@ -101,9 +101,9 @@ class Relations
             foreach ($arrDca['fields'] as $strField => $arrField) {
                 $strRelatedTable = static::getRelatedTable($arrField);
 
-				if ($strRelatedTable == '') {
-				    continue;
-				}
+                if ($strRelatedTable == '') {
+                    continue;
+                }
 
                 $strRelationTable = static::getTableName($strTable, $strRelatedTable);
 
@@ -112,7 +112,7 @@ class Relations
                     continue;
                 }
 
-				$arrQueries['CREATE'][] = "CREATE TABLE `" . $strRelationTable . "` (\n" .
+                $arrQueries['CREATE'][] = "CREATE TABLE `" . $strRelationTable . "` (\n" .
 "  `" . $strTable . "_id` int(10) unsigned NOT NULL default '0',\n" .
 "  `" . $strRelatedTable . "_id` int(10) unsigned NOT NULL default '0',\n" .
 "  KEY `" . $strTable . "_id` (`" . $strTable . "_id`),\n" .
@@ -131,7 +131,7 @@ class Relations
      */
     public static function getRelatedTable($arrConfig)
     {
-        if (!isset($arrConfig['relation']) || !isset($arrConfig['relation']['table']) || $arrConfig['relation']['type'] != 'haste-hasMany') {
+        if (!isset($arrConfig['relation']) || !isset($arrConfig['relation']['table']) || $arrConfig['relation']['type'] != 'haste-ManyToMany') {
             return '';
         }
 
