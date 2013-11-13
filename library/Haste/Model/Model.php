@@ -20,21 +20,21 @@ abstract class Model extends \Model
      */
     public function getRelated($strKey, array $arrOptions=array())
     {
-        $strRelatedTable = Relations::getRelatedTable($GLOBALS['TL_DCA'][static::$strTable]['fields'][$strKey]);
+        $arrRelation = Relations::getRelation(static::$strTable, $strKey);
 
-        if ($strRelatedTable != '') {
-            $strClass = static::getClassFromTable($strRelatedTable);
+        if ($arrRelation !== false) {
+            $strClass = static::getClassFromTable($arrRelation['related_table']);
 
             if (class_exists($strClass)) {
-                $arrIds = \Database::getInstance()->prepare("SELECT " . $strRelatedTable . "_id FROM " . Relations::getTableName(static::$strTable, $strRelatedTable) . " WHERE " . static::$strTable . "_id=?")
+                $arrIds = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
                                                   ->execute($this->id)
-                                                  ->fetchEach($strRelatedTable . '_id');
+                                                  ->fetchEach($arrRelation['related_field']);
 
                 if (empty($arrIds)) {
                     return null;
                 }
 
-                $objModel = $strClass::findBy(array("id IN(" . implode(",", array_map('intval', $arrIds)) . ")"), null, $arrOptions);
+                $objModel = $strClass::findBy(array($arrRelation['field'] . " IN('" . implode("','", $arrIds) . "')"), null, $arrOptions);
                 $this->arrRelated[$strKey] = $objModel;
             }
         }
