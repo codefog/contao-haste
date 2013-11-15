@@ -21,29 +21,36 @@ class Relations
      */
     public function addRelationCallbacks($strTable)
     {
+        $blnCallbacks = false;
+
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
             if (static::getRelation($strTable, $strField) !== false) {
-                $GLOBALS['TL_DCA'][$strTable]['config']['onsubmit_callback'][] = array('Haste\Model\Relations', 'updateRelatedRecords');
-                $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'deleteRelatedRecords');
-                break;
+                $blnCallbacks = true;
+
+                // Update the field configuration
+                $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['doNotSaveEmpty'] = true;
+                $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['load_callback'][] = array('Haste\Model\Relations', 'getRelatedRecords');
+                $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['save_callback'][] = array('Haste\Model\Relations', 'updateRelatedRecords');
             }
+        }
+
+        if ($blnCallbacks) {
+            $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'deleteRelatedRecords');
         }
     }
 
     /**
      * Update the records in related table
+     * @param mixed
      * @param \DataContainer
+     * @return mixed
      */
-    public function updateRelatedRecords(\DataContainer $dc)
+    public function updateRelatedRecords($varValue, \DataContainer $dc)
     {
-        foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
-            $arrRelation = static::getRelation($dc->table, $strField);
+        $arrRelation = static::getRelation($dc->table, $dc->field);
 
-            if ($arrRelation === false) {
-                continue;
-            }
-
-            $arrValues = deserialize($dc->activeRecord->$strField, true);
+        if ($arrRelation !== false) {
+            $arrValues = deserialize($varValue, true);
             $this->purgeRelatedRecords($arrRelation, $dc->id);
 
             foreach ($arrValues as $value) {
@@ -57,6 +64,8 @@ class Relations
                                         ->execute();
             }
         }
+
+        return null;
     }
 
     /**
@@ -74,6 +83,29 @@ class Relations
 
             $this->purgeRelatedRecords($arrRelation, $dc->id);
         }
+    }
+
+    /**
+     * Get related records of particular field
+     * @param mixed
+     * @param \DataContainer
+     * @return mixed
+     */
+    public function getRelatedRecords($varValue, \DataContainer $dc)
+    {
+        $arrRelation = static::getRelation($dc->table, $dc->field);
+
+        if ($arrRelation !== false) {
+            $varValue = array();
+            $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                                                 ->execute($dc->id);
+
+            while ($objValues->next()) {
+                $varValue[] = $objValues->$arrRelation['related_field'];
+            }
+        }
+
+        return $varValue;
     }
 
     /**
