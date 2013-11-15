@@ -27,7 +27,7 @@ abstract class Model extends \Model
 
             if (class_exists($strClass)) {
                 $arrIds = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                                  ->execute($this->id)
+                                                  ->execute($this->$arrRelation['reference'])
                                                   ->fetchEach($arrRelation['related_field']);
 
                 if (empty($arrIds)) {

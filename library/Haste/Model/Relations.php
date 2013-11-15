@@ -51,11 +51,11 @@ class Relations
 
         if ($arrRelation !== false) {
             $arrValues = deserialize($varValue, true);
-            $this->purgeRelatedRecords($arrRelation, $dc->id);
+            $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
 
             foreach ($arrValues as $value) {
                 $arrSet = array(
-                    $arrRelation['reference_field'] => $dc->id,
+                    $arrRelation['reference_field'] => $dc->$arrRelation['reference'],
                     $arrRelation['related_field'] => $value,
                 );
 
@@ -81,7 +81,7 @@ class Relations
                 continue;
             }
 
-            $this->purgeRelatedRecords($arrRelation, $dc->id);
+            $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
         }
     }
 
@@ -98,7 +98,7 @@ class Relations
         if ($arrRelation !== false) {
             $varValue = array();
             $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                                 ->execute($dc->id);
+                                                 ->execute($dc->$arrRelation['reference']);
 
             while ($objValues->next()) {
                 $varValue[] = $objValues->$arrRelation['related_field'];
@@ -166,11 +166,12 @@ class Relations
         $arrConfig['table'] = isset($arrField['relationTable']) ? $arrField['relationTable'] : static::getTableName($strTable, $arrField['table']);
 
         // The related field
+        $arrConfig['reference'] = isset($arrField['reference']) ? $arrField['reference'] : 'id';
         $arrConfig['field'] = isset($arrField['field']) ? $arrField['field'] : 'id';
 
         // Current table data
         $arrConfig['reference_table'] = $strTable;
-        $arrConfig['reference_field'] = str_replace('tl_', '', $strTable) . '_' . (isset($arrField['reference']) ? $arrField['reference'] : 'id');
+        $arrConfig['reference_field'] = str_replace('tl_', '', $strTable) . '_' . $arrConfig['reference'];
         $arrConfig['reference_sql'] = isset($arrField['referenceSql']) ? $arrField['referenceSql'] : "int(10) unsigned NOT NULL default '0'";
 
         // Related table data
