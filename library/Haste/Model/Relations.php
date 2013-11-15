@@ -16,6 +16,12 @@ class Relations
 {
 
     /**
+     * Relations cache
+     * @var array
+     */
+    private static $arrCache;
+
+    /**
      * Add the relation callbacks to DCA
      * @param string
      */
@@ -154,32 +160,37 @@ class Relations
      */
     public static function getRelation($strTable, $strField)
     {
-        $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
+        $strCacheKey = $strTable . '_' . $strField;
 
-        if (!is_array($arrField) || !isset($arrField['table']) || $arrField['type'] != 'haste-ManyToMany') {
-            return false;
+        if (!isset(static::$arrCache[$strCacheKey])) {
+            $varRelation = false;
+            $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
+
+            if (is_array($arrField) && isset($arrField['table']) && $arrField['type'] == 'haste-ManyToMany') {
+                $varRelation = array();
+
+                // The relations table
+                $varRelation['table'] = isset($arrField['relationTable']) ? $arrField['relationTable'] : static::getTableName($strTable, $arrField['table']);
+
+                // The related field
+                $varRelation['reference'] = isset($arrField['reference']) ? $arrField['reference'] : 'id';
+                $varRelation['field'] = isset($arrField['field']) ? $arrField['field'] : 'id';
+
+                // Current table data
+                $varRelation['reference_table'] = $strTable;
+                $varRelation['reference_field'] = str_replace('tl_', '', $strTable) . '_' . $varRelation['reference'];
+                $varRelation['reference_sql'] = isset($arrField['referenceSql']) ? $arrField['referenceSql'] : "int(10) unsigned NOT NULL default '0'";
+
+                // Related table data
+                $varRelation['related_table'] = $arrField['table'];
+                $varRelation['related_field'] = str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field'];
+                $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
+            }
+
+            static::$arrCache[$strCacheKey] = $varRelation;
         }
 
-        $arrConfig = array();
-
-        // The relations table
-        $arrConfig['table'] = isset($arrField['relationTable']) ? $arrField['relationTable'] : static::getTableName($strTable, $arrField['table']);
-
-        // The related field
-        $arrConfig['reference'] = isset($arrField['reference']) ? $arrField['reference'] : 'id';
-        $arrConfig['field'] = isset($arrField['field']) ? $arrField['field'] : 'id';
-
-        // Current table data
-        $arrConfig['reference_table'] = $strTable;
-        $arrConfig['reference_field'] = str_replace('tl_', '', $strTable) . '_' . $arrConfig['reference'];
-        $arrConfig['reference_sql'] = isset($arrField['referenceSql']) ? $arrField['referenceSql'] : "int(10) unsigned NOT NULL default '0'";
-
-        // Related table data
-        $arrConfig['related_table'] = $arrField['table'];
-        $arrConfig['related_field'] = str_replace('tl_', '', $arrField['table']) . '_' . $arrConfig['field'];
-        $arrConfig['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
-
-        return $arrConfig;
+        return static::$arrCache[$strCacheKey];
     }
 
     /**
