@@ -21,4 +21,5 @@ $GLOBALS['BE_FFL']['numberField'] = 'Haste\Number\BackendWidget';
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Haste\Model\Relations', 'addRelationCallbacks');
-$GLOBALS['TL_HOOKS']['sqlGetFromFile'][] = array('Haste\Model\Relations', 'addRelationTables');
+$GLOBALS['TL_HOOKS']['reviseTable'][]       = array('Haste\Model\Relations', 'reviseRelatedRecords');
+$GLOBALS['TL_HOOKS']['sqlGetFromFile'][]    = array('Haste\Model\Relations', 'addRelationTables');

@@ -42,6 +42,7 @@ class Relations
 
         if ($blnCallbacks) {
             $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'deleteRelatedRecords');
+            $GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'][] = array('Haste\Model\Relations', 'copyRelatedRecords');
         }
     }
 
@@ -92,6 +93,72 @@ class Relations
     }
 
     /**
+     * Copy the records in related table
+     * @param integer
+     * @param \DataContainer
+     */
+    public function copyRelatedRecords($intId, \DataContainer $dc)
+    {
+        foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
+            $arrRelation = static::getRelation($dc->table, $strField);
+
+            if ($arrRelation === false) {
+                continue;
+            }
+
+            $varReference = $intId;
+
+            // Get the reference value (if not an ID)
+            if ($arrRelation['reference'] != 'id') {
+                $objReference = \Database::getInstance()->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
+                                                        ->limit(1)
+                                                        ->execute($intId);
+
+                if ($objReference->numRows) {
+                    $varReference = $objReference->$arrRelation['reference'];
+                }
+            }
+
+            $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                                                 ->execute($dc->$arrRelation['reference']);
+
+            while ($objValues->next()) {
+                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
+                                        ->execute($varReference, $objValues->$arrRelation['related_field']);
+            }
+        }
+    }
+
+    /**
+     * Delete the related records on table revision
+     * @param string
+     * @param array
+     * @return boolean
+     */
+    public function reviseRelatedRecords($strTable, $arrIds)
+    {
+        if (empty($arrIds)) {
+            return false;
+        }
+
+        foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
+            $arrRelation = static::getRelation($strTable, $strField);
+
+            if ($arrRelation === false) {
+                continue;
+            }
+
+            $objDelete = \Database::getInstance()->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
+
+            while ($objDelete->next()) {
+                $this->purgeRelatedRecords($arrRelation, $objDelete->$arrRelation['reference']);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get related records of particular field
      * @param mixed
      * @param \DataContainer
@@ -117,12 +184,12 @@ class Relations
     /**
      * Purge the related records
      * @param array
-     * @param integer
+     * @param mixed
      */
-    protected function purgeRelatedRecords($arrRelation, $intId)
+    protected function purgeRelatedRecords($arrRelation, $varId)
     {
         \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                ->execute($intId);
+                                ->execute($varId);
     }
 
     /**
