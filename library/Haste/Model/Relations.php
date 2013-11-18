@@ -12,14 +12,14 @@
 
 namespace Haste\Model;
 
-class Relations
+class Relations extends \Backend
 {
 
     /**
      * Relations cache
      * @var array
      */
-    private static $arrCache;
+    private static $arrRelationsCache;
 
     /**
      * Add the relation callbacks to DCA
@@ -44,6 +44,8 @@ class Relations
             $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'deleteRelatedRecords');
             $GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'][] = array('Haste\Model\Relations', 'copyRelatedRecords');
         }
+
+        $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'cleanRelatedRecords');
     }
 
     /**
@@ -66,9 +68,9 @@ class Relations
                     $arrRelation['related_field'] => $value,
                 );
 
-                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
-                                        ->set($arrSet)
-                                        ->execute();
+                $this->Database->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                               ->set($arrSet)
+                               ->execute();
             }
         }
 
@@ -110,21 +112,58 @@ class Relations
 
             // Get the reference value (if not an ID)
             if ($arrRelation['reference'] != 'id') {
-                $objReference = \Database::getInstance()->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
-                                                        ->limit(1)
-                                                        ->execute($intId);
+                $objReference = $this->Database->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
+                                               ->limit(1)
+                                               ->execute($intId);
 
                 if ($objReference->numRows) {
                     $varReference = $objReference->$arrRelation['reference'];
                 }
             }
 
-            $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                                 ->execute($dc->$arrRelation['reference']);
+            $objValues = $this->Database->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                                        ->execute($dc->$arrRelation['reference']);
 
             while ($objValues->next()) {
-                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
-                                        ->execute($varReference, $objValues->$arrRelation['related_field']);
+                $this->Database->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
+                               ->execute($varReference, $objValues->$arrRelation['related_field']);
+            }
+        }
+    }
+
+    /**
+     * Clean the records in related table
+     * @param \DataContainer
+     */
+    public function cleanRelatedRecords(\DataContainer $dc)
+    {
+        // Only check the active modules
+		foreach ($this->Config->getActiveModules() as $strModule) {
+			$strDir = 'system/modules/' . $strModule . '/dca';
+
+			if (!is_dir(TL_ROOT . '/' . $strDir)) {
+				continue;
+			}
+
+			foreach (scan(TL_ROOT . '/' . $strDir) as $strFile) {
+				if (substr($strFile, -4) != '.php') {
+					continue;
+				}
+
+                $this->loadDataContainer(substr($strFile, 0, -4));
+			}
+		}
+
+        foreach ($GLOBALS['TL_DCA'] as $strTable => $arrTable) {
+            foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
+                $arrRelation = static::getRelation($strTable, $strField);
+
+                if ($arrRelation === false || $arrRelation['related_table'] != $dc->table) {
+                    continue;
+                }
+
+                $this->Database->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
+                               ->execute($dc->$arrRelation['field']);
             }
         }
     }
@@ -148,7 +187,7 @@ class Relations
                 continue;
             }
 
-            $objDelete = \Database::getInstance()->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
+            $objDelete = $this->Database->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
 
             while ($objDelete->next()) {
                 $this->purgeRelatedRecords($arrRelation, $objDelete->$arrRelation['reference']);
@@ -170,8 +209,8 @@ class Relations
 
         if ($arrRelation !== false) {
             $varValue = array();
-            $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                                 ->execute($dc->$arrRelation['reference']);
+            $objValues = $this->Database->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                                        ->execute($dc->$arrRelation['reference']);
 
             while ($objValues->next()) {
                 $varValue[] = $objValues->$arrRelation['related_field'];
@@ -188,8 +227,8 @@ class Relations
      */
     protected function purgeRelatedRecords($arrRelation, $varId)
     {
-        \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                ->execute($varId);
+        $this->Database->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                       ->execute($varId);
     }
 
     /**
@@ -229,7 +268,7 @@ class Relations
     {
         $strCacheKey = $strTable . '_' . $strField;
 
-        if (!isset(static::$arrCache[$strCacheKey])) {
+        if (!isset(static::$arrRelationsCache[$strCacheKey])) {
             $varRelation = false;
             $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
 
@@ -254,10 +293,10 @@ class Relations
                 $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
             }
 
-            static::$arrCache[$strCacheKey] = $varRelation;
+            static::$arrRelationsCache[$strCacheKey] = $varRelation;
         }
 
-        return static::$arrCache[$strCacheKey];
+        return static::$arrRelationsCache[$strCacheKey];
     }
 
     /**
