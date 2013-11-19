@@ -41,4 +41,56 @@ abstract class Model extends \Model
 
         return parent::getRelated($strKey, $arrOptions);
     }
+
+    /**
+     * Get the reference values and return them as array
+     * @param string
+     * @param string
+     * @param mixed
+     * @return array
+     */
+    public static function getReferenceValues($strTable, $strField, $varValue)
+    {
+        $arrRelation = Relations::getRelation($strTable, $strField);
+
+        if ($arrRelation === false) {
+            throw new \Exception('Field ' . $strField . ' does not seem to be related!');
+        }
+
+        $arrValues = (array) $varValue;
+
+        if (empty($arrValues)) {
+            return array();
+        }
+
+        return \Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')")
+                                       ->execute()
+                                       ->fetchEach($arrRelation['reference_field']);
+    }
+
+    /**
+     * Get the related values and return them as array
+     * @param string
+     * @param string
+     * @param mixed
+     * @return array
+     */
+    public static function getRelatedValues($strTable, $strField, $varValue)
+    {
+        $arrRelation = Relations::getRelation($strTable, $strField);
+
+        if ($arrRelation === false) {
+            throw new \Exception('Field ' . $strField . ' does not seem to be related!');
+        }
+
+        $arrValues = (array) $varValue;
+
+        if (empty($arrValues)) {
+            return array();
+        }
+
+        return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')")
+                                       ->execute()
+                                       ->fetchEach($arrRelation['related_field']);
+    }
 }

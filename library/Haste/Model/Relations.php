@@ -208,13 +208,7 @@ class Relations extends \Backend
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
-            $varValue = array();
-            $objValues = $this->Database->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                        ->execute($dc->$arrRelation['reference']);
-
-            while ($objValues->next()) {
-                $varValue[] = $objValues->$arrRelation['related_field'];
-            }
+            $varValue = Model::getRelatedValues($dc->table, $dc->field,$dc->$arrRelation['reference']);
         }
 
         return $varValue;
