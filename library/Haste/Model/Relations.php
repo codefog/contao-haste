@@ -266,6 +266,11 @@ class Relations extends \Backend
      */
     public static function getRelation($strTable, $strField)
     {
+        if (!isset($GLOBALS['TL_DCA'][$strTable])) {
+            $objSelf = new self();
+            $objSelf->loadDataContainer($strTable);
+        }
+
         $strCacheKey = $strTable . '_' . $strField;
 
         if (!isset(static::$arrRelationsCache[$strCacheKey])) {
