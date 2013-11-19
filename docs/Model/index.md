@@ -48,3 +48,11 @@ Then call it as usual
 ```php
 $objRelated = $objModel->getRelated('my_field');
 ```
+
+You can also fetch the related or reference values manually:
+
+```php
+$arrRelated = static::getRelatedValues('tl_table_one', 'my_field', 123);
+
+$arrReference = static::getReferenceValues('tl_table_one', 'my_field', array(1, 2, 3));
+```
