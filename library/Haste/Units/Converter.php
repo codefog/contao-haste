@@ -45,7 +45,13 @@ abstract class Converter
         return static::$arrFactors[$strUnit];
     }
 
-    abstract public static function getAll();
+    public static function getAll()
+    {
+        throw new \BadMethodCallException('getAll() must be implemented by a concrete child class.');
+    }
 
-    abstract public static function getBase();
+    public static function getBase()
+    {
+        throw new \BadMethodCallException('getBase() must be implemented by a concrete child class.');
+    }
 }
