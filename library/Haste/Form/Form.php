@@ -182,6 +182,15 @@ class Form extends \Controller
     }
 
     /**
+     * Gets the encoding type
+     * @return  string
+     */
+    public function getEnctype()
+    {
+        return $this->strEnctype;
+    }
+
+    /**
      * Check if the form has been submitted
      * @return  boolean
      */
