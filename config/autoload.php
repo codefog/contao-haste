@@ -1,16 +1,13 @@
 <?php
 
 /**
- * Haste for Contao Open Source CMS
- * 
- * Copyright (C) 2011-2013 Codefog
- * 
- * @package haste
- * @link    http://codefog.pl
- * @author  Kamil Kuzminski <kamil.kuzminski@codefog.pl>
- * @author  Yanick Witschi <yanick.witschi@terminal42.ch>
- * @author  Andreas Schempp <andreas.schempp@terminal42.ch>
- * @license LGPL
+ * Haste utilities for Contao Open Source CMS
+ *
+ * Copyright (C) 2012-2013 Codefog & terminal42 gmbh
+ *
+ * @package    Haste
+ * @link       http://github.com/codefog/contao-haste/
+ * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
 

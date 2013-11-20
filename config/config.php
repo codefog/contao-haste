@@ -1,20 +1,13 @@
 <?php
 
 /**
- * Contao Open Source CMS
- * Copyright (C) 2005-2013 Leo Feyer
+ * Haste utilities for Contao Open Source CMS
  *
- * Formerly known as TYPOlight Open Source CMS.
+ * Copyright (C) 2012-2013 Codefog & terminal42 gmbh
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- *
- * PHP version 5
- * @copyright  terminal42 gmbh 2013
- * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
- * @license    http://opensource.org/licenses/lgpl-3.0.html
+ * @package    Haste
+ * @link       http://github.com/codefog/contao-haste/
+ * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
 
@@ -22,3 +15,11 @@
  * Backend widgets
  */
 $GLOBALS['BE_FFL']['numberField'] = 'Haste\Number\BackendWidget';
+
+
+/**
+ * Hooks
+ */
+$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Haste\Model\Relations', 'addRelationCallbacks');
+$GLOBALS['TL_HOOKS']['reviseTable'][]       = array('Haste\Model\Relations', 'reviseRelatedRecords');
+$GLOBALS['TL_HOOKS']['sqlGetFromFile'][]    = array('Haste\Model\Relations', 'addRelationTables');
