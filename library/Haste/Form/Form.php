@@ -196,6 +196,9 @@ class Form extends \Controller
      */
     public function hasUploads()
     {
+        // We need to create the widgets to know if we have uploads
+        $this->createWidgets();
+
         return $this->blnHasUploads;
     }
 
