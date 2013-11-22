@@ -1,6 +1,12 @@
 HasteForm Changelog
 ===================
 
+Version 3.0.0 (2013-11-22)
+------------------------------
+
+### General
+- Added miscellaneous classes and rewritten a huge part of Haste
+
 Version 2.0.2 (2013-10-10)
 ------------------------------
 
