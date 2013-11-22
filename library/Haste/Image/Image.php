@@ -22,12 +22,11 @@ class Image
      * @param string
      * @param string
      */
-    public static function addWatermark($image, $watermark, $position='br', $target=null)
+    public static function addWatermark($image, $watermark, $position = 'br', $target = null)
     {
         $image = urldecode($image);
 
-        if (!is_file(TL_ROOT . '/' . $image) || !is_file(TL_ROOT . '/' . $watermark))
-        {
+        if (!is_file(TL_ROOT . '/' . $image) || !is_file(TL_ROOT . '/' . $watermark)) {
             return $image;
         }
 
@@ -35,21 +34,17 @@ class Image
         $strCacheName = 'assets/images/' . substr($objFile->filename, -1) . '/' . $objFile->filename . '-' . substr(md5($watermark . '-' . $position . '-' . $objFile->mtime), 0, 8) . '.' . $objFile->extension;
 
         // Return the path of the new image if it exists already
-        if (is_file(TL_ROOT . '/' . $strCacheName))
-        {
+        if (is_file(TL_ROOT . '/' . $strCacheName)) {
             return $strCacheName;
         }
 
         // !HOOK: override image watermark routine
-        if (isset($GLOBALS['TL_HOOKS']['watermarkImage']) && is_array($GLOBALS['TL_HOOKS']['watermarkImage']))
-        {
-            foreach ($GLOBALS['TL_HOOKS']['watermarkImage'] as $callback)
-            {
+        if (isset($GLOBALS['TL_HOOKS']['watermarkImage']) && is_array($GLOBALS['TL_HOOKS']['watermarkImage'])) {
+            foreach ($GLOBALS['TL_HOOKS']['watermarkImage'] as $callback) {
                 $objCallback = \System::importStatic($callback[0]);
                 $return = $objCallback->$callback[1]($image, $watermark, $position, $target);
 
-                if (is_string($return))
-                {
+                if (is_string($return)) {
                     return $return;
                 }
             }
@@ -58,80 +53,70 @@ class Image
         $arrGdinfo = gd_info();
 
         // Load image
-        switch ($objFile->extension)
-        {
+        switch ($objFile->extension) {
             case 'gif':
-                if ($arrGdinfo['GIF Read Support'])
-                {
+                if ($arrGdinfo['GIF Read Support']) {
                     $strImage = imagecreatefromgif(TL_ROOT . '/' . $image);
                 }
                 break;
 
             case 'jpg':
             case 'jpeg':
-                if ($arrGdinfo['JPG Support'] || $arrGdinfo['JPEG Support'])
-                {
+                if ($arrGdinfo['JPG Support'] || $arrGdinfo['JPEG Support']) {
                     $strImage = imagecreatefromjpeg(TL_ROOT . '/' . $image);
                 }
                 break;
 
             case 'png':
-                if ($arrGdinfo['PNG Support'])
-                {
+                if ($arrGdinfo['PNG Support']) {
                     $strImage = imagecreatefrompng(TL_ROOT . '/' . $image);
                 }
                 break;
         }
 
         // Image could not be read
-        if (!$strImage)
-        {
+        if (!$strImage) {
             return $image;
         }
 
         $objWatermark = new \File($watermark);
+        $resWatermark = null;
 
         // Load watermark
-        switch ($objWatermark->extension)
-        {
+        switch ($objWatermark->extension) {
             case 'gif':
-                if ($arrGdinfo['GIF Read Support'])
-                {
-                    $strWatermark = imagecreatefromgif(TL_ROOT . '/' . $watermark);
+                if ($arrGdinfo['GIF Read Support']) {
+                    $resWatermark = imagecreatefromgif(TL_ROOT . '/' . $watermark);
                 }
                 break;
 
             case 'jpg':
             case 'jpeg':
-                if ($arrGdinfo['JPG Support'] || $arrGdinfo['JPEG Support'])
-                {
-                    $strWatermark = imagecreatefromjpeg(TL_ROOT . '/' . $watermark);
+                if ($arrGdinfo['JPG Support'] || $arrGdinfo['JPEG Support']) {
+                    $resWatermark = imagecreatefromjpeg(TL_ROOT . '/' . $watermark);
                 }
                 break;
 
             case 'png':
-                if ($arrGdinfo['PNG Support'])
-                {
-                    $strWatermark = imagecreatefrompng(TL_ROOT . '/' . $watermark);
+                if ($arrGdinfo['PNG Support']) {
+                    $resWatermark = imagecreatefrompng(TL_ROOT . '/' . $watermark);
                 }
                 break;
         }
 
         // Image could not be read
-        if (!$strWatermark)
-        {
+        if (!is_resource($resWatermark)) {
             return $image;
         }
 
-        switch ($position)
-        {
+        switch ($position) {
             case 'tl':
                 $x = 0;
                 $y = 0;
                 break;
 
             case 'tc':
-                $x = ($objFile->width/2) - ($objWatermark->width/2);
+                $x = ($objFile->width / 2) - ($objWatermark->width / 2);
                 $y = 0;
                 break;
 
@@ -141,8 +126,8 @@ class Image
                 break;
 
             case 'cc':
-                $x = ($objFile->width/2) - ($objWatermark->width/2);
-                $y = ($objFile->height/2) - ($objWatermark->height/2);
+                $x = ($objFile->width / 2) - ($objWatermark->width / 2);
+                $y = ($objFile->height / 2) - ($objWatermark->height / 2);
                 break;
 
             case 'bl':
@@ -151,7 +136,7 @@ class Image
                 break;
 
             case 'bc':
-                $x = ($objFile->width/2) - ($objWatermark->width/2);
+                $x = ($objFile->width / 2) - ($objWatermark->width / 2);
                 $y = $objFile->height - $objWatermark->height;
                 break;
 
@@ -162,17 +147,15 @@ class Image
                 break;
         }
 
-        imagecopy($strImage, $strWatermark, $x, $y, 0, 0, $objWatermark->width, $objWatermark->height);
+        imagecopy($strImage, $resWatermark, $x, $y, 0, 0, $objWatermark->width, $objWatermark->height);
 
         // Fallback to PNG if GIF ist not supported
-        if ($objFile->extension == 'gif' && !$arrGdinfo['GIF Create Support'])
-        {
+        if ($objFile->extension == 'gif' && !$arrGdinfo['GIF Create Support']) {
             $objFile->extension = 'png';
         }
 
         // Create the new image
-        switch ($objFile->extension)
-        {
+        switch ($objFile->extension) {
             case 'gif':
                 imagegif($strImage, TL_ROOT . '/' . $strCacheName);
                 break;
@@ -189,11 +172,10 @@ class Image
 
         // Destroy the temporary images
         imagedestroy($strImage);
-        imagedestroy($strWatermark);
+        imagedestroy($resWatermark);
 
         // Resize the original image
-        if ($target)
-        {
+        if ($target) {
             $objFiles = \Files::getInstance();
             $objFiles->copy($strCacheName, $target);
 
@@ -201,8 +183,7 @@ class Image
         }
 
         // Set the file permissions when the Safe Mode Hack is used
-        if ($GLOBALS['TL_CONFIG']['useFTP'])
-        {
+        if ($GLOBALS['TL_CONFIG']['useFTP']) {
             $objFiles = \Files::getInstance();
             $objFiles->chmod($strCacheName, 0644);
         }
