@@ -110,37 +110,47 @@ class Image
         }
 
         switch ($position) {
-            case 'tl':
+            case 'left_top':
                 $x = 0;
                 $y = 0;
                 break;
 
-            case 'tc':
+            case 'center_top':
                 $x = ($objFile->width / 2) - ($objWatermark->width / 2);
                 $y = 0;
                 break;
 
-            case 'tr':
+            case 'right_top':
                 $x = $objFile->width - $objWatermark->width;
                 $y = 0;
                 break;
 
-            case 'cc':
+            case 'left_center':
+                $x = 0;
+                $y = ($objFile->height / 2) - ($objWatermark->height / 2);
+                break;
+
+            case 'center_center':
                 $x = ($objFile->width / 2) - ($objWatermark->width / 2);
                 $y = ($objFile->height / 2) - ($objWatermark->height / 2);
                 break;
 
-            case 'bl':
+            case 'right_center':
+                $x = $objFile->width - $objWatermark->width;
+                $y = ($objFile->height / 2) - ($objWatermark->height / 2);
+                break;
+
+            case 'left_bottom':
                 $x = 0;
                 $y = $objFile->height - $objWatermark->height;
                 break;
 
-            case 'bc':
+            case 'center_bottom':
                 $x = ($objFile->width / 2) - ($objWatermark->width / 2);
                 $y = $objFile->height - $objWatermark->height;
                 break;
 
-            case 'br':
+            case 'right_bottom':
             default:
                 $x = $objFile->width - $objWatermark->width;
                 $y = $objFile->height - $objWatermark->height;
