@@ -1,15 +1,19 @@
 <?php
 
-namespace Haste;
+/**
+ * Haste utilities for Contao Open Source CMS
+ *
+ * Copyright (C) 2012-2013 Codefog & terminal42 gmbh
+ *
+ * @package    Haste
+ * @link       http://github.com/codefog/contao-haste/
+ * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
+ */
 
+namespace Haste\Form;
 
 class Form extends \Controller
 {
-    /**
-     * HasteForm version
-     */
-    const VERSION = '2.0.2';
-
     /**
      * State of the form
      * Can be either clean or dirty
@@ -64,6 +68,12 @@ class Form extends \Controller
      * @var array
      */
     protected $arrWidgets = array();
+
+    /**
+     * Bound model
+     * @var \Model
+     */
+    protected $objModel = null;
 
     /**
      * Validators
@@ -121,21 +131,25 @@ class Form extends \Controller
 
         // The form action can be set using several helper methods but by default it's just
         // pointing to the current page
-        $this->strFormAction = \Controller::generateFrontendUrl($GLOBALS['objPage']->row());
+        $this->strFormAction = \Environment::get('request');
     }
 
     /**
      * Set the form action directly
      * @param   string  The URI
+     * @return   Form
      */
     public function setFormActionFromUri($strUri)
     {
         $this->strFormAction = $strUri;
+
+        return $this;
     }
 
     /**
      * Set the form action from a Contao page ID
      * @param   int  The page ID
+     * @return   Form
      * @throws  \InvalidArgumentException
      */
     public function setFormActionFromPageId($intId)
@@ -146,6 +160,7 @@ class Form extends \Controller
 
         $this->strFormAction = \Controller::generateFrontendUrl($objPage->row());
 
+        return $this;
     }
 
     /**
@@ -167,6 +182,15 @@ class Form extends \Controller
     }
 
     /**
+     * Gets the encoding type
+     * @return  string
+     */
+    public function getEnctype()
+    {
+        return $this->strEnctype;
+    }
+
+    /**
      * Check if the form has been submitted
      * @return  boolean
      */
@@ -181,6 +205,9 @@ class Form extends \Controller
      */
     public function hasUploads()
     {
+        // We need to create the widgets to know if we have uploads
+        $this->createWidgets();
+
         return $this->blnHasUploads;
     }
 
@@ -188,6 +215,7 @@ class Form extends \Controller
      * Adds a form field
      * @param   string  The form field name
      * @param   array   The DCA representation of the field
+     * @return  Form
      * @throws  \RuntimeException
      */
     public function addFormField($strName, array $arrDca)
@@ -199,9 +227,16 @@ class Form extends \Controller
             $arrDca['name'] = $strName;
         }
 
-        // Support the default value, too
-        if (isset($arrDca['default']) && !isset($arrDca['value'])) {
-            $arrDca['value'] = $arrDca['default'];
+        // Support default values
+        if (!$this->isSubmitted()) {
+            if (isset($arrDca['default']) && !isset($arrDca['value'])) {
+                $arrDca['value'] = $arrDca['default'];
+            }
+
+            // Try to load the default value from bound Model
+            if ($this->objModel !== null) {
+                $arrDca['value'] = $this->objModel->$strName;
+            }
         }
 
         $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
@@ -210,21 +245,79 @@ class Form extends \Controller
             throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrDca['inputType']));
         }
 
+        if (is_array($arrDca['save_callback'])) {
+            $arrCallbacks = $arrDca['save_callback'];
+            $this->addValidator($strName, function($objWidget) use ($arrCallbacks) {
+                foreach ($arrCallbacks as $callback) {
+                    try {
+                        if (is_array($callback)) {
+                            $objCallback = System::importStatic($callback[0]);
+                            $objWidget->value = $objCallback->$callback[1]($objWidget->value, $this);
+                        } elseif (is_callable($callback)) {
+                            $objWidget->value = $callback($objWidget->value, $this);
+                        }
+                    } catch (\Exception $e) {
+                        $objWidget->class = 'error';
+                        $objWidget->addError($e->getMessage());
+                    }
+                }
+            });
+        }
+
+        // Convert date formats into timestamps
+        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
+            $this->addValidator($strName, function($objWidget) use ($arrDca) {
+                if ($objWidget->value != '') {
+                	$objDate = new Date($objWidget->value, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                	$objWidget->value = $objDate->tstamp;
+                }
+            });
+        }
+
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
 
         $this->arrFormFields[$strName] = $arrDca;
         $this->intState = self::STATE_DIRTY;
+
+        return $this;
     }
 
     /**
      * Add multiple form fields
      * @param   array
+     * @return  Form
      */
     public function addFormFields($arrFormFields)
     {
         foreach ($arrFormFields as $strName => $arrDca) {
             $this->addFormField($strName, $arrDca);
         }
+
+        return $this;
+    }
+
+    /**
+     * Binds a model instance to the form. If there is data, haste form will add
+     * the present values as default values.
+     * @param   \Model
+     */
+    public function bindModel(\Model $objModel)
+    {
+        $this->objModel = $objModel;
+    }
+
+    /**
+     * Gets the bound model
+     * @return   \Model
+     * @throws   \BadMethodCallException
+     */
+    public function getBoundModel()
+    {
+        if ($this->objModel === null) {
+            throw new \BadMethodCallException('There was no bound instance of "Model" found!');
+        }
+
+        return $this->objModel;
     }
 
     /**
@@ -259,6 +352,7 @@ class Form extends \Controller
      * Add form fields from a back end DCA
      * @param   string   The DCA table name
      * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @return  Form
      */
     public function addFieldsFromDca($strTable, $varCallback = null)
     {
@@ -266,19 +360,22 @@ class Form extends \Controller
         $this->loadDataContainer($strTable);
         $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
 
-        if (is_callable($varCallback)) {
-            $arrFields = call_user_func($varCallback, $arrFields);
-        }
-
         foreach ($arrFields as $k => $v) {
+            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
+                continue;
+            }
+
             $this->addFormField($k, $v);
         }
+
+        return $this;
     }
 
     /**
      * Add form fields from a back end form generator form ID
      * @param   int      The form generator form ID
      * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @return  Form
      * @throws  \InvalidArgumentException
      */
     public function addFieldsFromFormGenerator($intId, $varCallback = null)
@@ -303,15 +400,18 @@ class Form extends \Controller
             $arrFields[$strName] = $arrDca;
         }
 
-        if (is_callable($varCallback)) {
-            call_user_func($varCallback, $arrFields);
-        }
-
         foreach ($arrFields as $k => $v) {
+
+            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
+                continue;
+            }
+
             $this->arrFormFields[$k] = $v;
         }
 
         $this->intState = self::STATE_DIRTY;
+
+        return $this;
     }
 
     /**
@@ -336,11 +436,14 @@ class Form extends \Controller
     /**
      * Removes a form field
      * @param   string  The form field name
+     * @return  Form
      */
     public function removeFormField($strName)
     {
         unset($this->arrFormFields[$strName]);
         $this->intState = self::STATE_DIRTY;
+
+        return $this;
     }
 
     /**
@@ -366,17 +469,21 @@ class Form extends \Controller
      * Add a validator to the form field
      * @param   string   The form field name
      * @param   callable A callable that will be called on widget validation
+     * @return  Form
      */
     public function addValidator($strName, $varCallback)
     {
-        if ($this->hasFormField($strName) && is_callable($varCallback)) {
+        if (is_callable($varCallback)) {
             $this->arrValidators[$strName][] = $varCallback;
         }
+
+        return $this;
     }
 
     /**
      * Create the widget instances
-     * @throws \RuntimeException
+     * @return  Form
+     * @throws  \RuntimeException
      */
     public function createWidgets()
     {
@@ -421,6 +528,8 @@ class Form extends \Controller
         }
 
         $this->intState = self::STATE_CLEAN;
+
+        return $this;
     }
 
     /**
@@ -445,28 +554,14 @@ class Form extends \Controller
                 }
             }
 
-            $varValue = $objWidget->value;
-
-            // Save callback
-            if (is_array($this->arrFields[$strName]['save_callback'])) {
-                foreach ($this->arrFields[$strName]['save_callback'] as $callback) {
-                    $objCallback = System::importStatic($callback[0]);
-
-                    try {
-                        $varValue = $objCallback->$callback[1]($varValue, $this);
-                    }
-                    catch (\Exception $e) {
-                        $objWidget->class = 'error';
-                        $objWidget->addError($e->getMessage());
-                    }
-                }
-            }
-
             if ($objWidget->hasErrors()) {
                 $this->blnValid = false;
             }
             elseif ($objWidget->submitInput()) {
-                $objWidget->value = $varValue;
+                // Bind to Model instance
+                if ($this->objModel !== null) {
+                    $this->objModel->$strName =  $objWidget->value;
+                }
             }
         }
 
@@ -476,6 +571,7 @@ class Form extends \Controller
     /**
      * Add form to a template
      * @param   FrontendTemplate
+     * @return  Form
      */
     public function addToTemplate(\FrontendTemplate $objTemplate)
     {
@@ -507,6 +603,8 @@ class Form extends \Controller
         $objTemplate->visibleWidgets = $arrWidgets['visible'];
 
         $objTemplate->hasteFormInstance = $this;
+
+        return $this;
     }
 
     /**
