@@ -32,7 +32,7 @@ class Image
         }
 
         $objFile = new \File($image);
-        $strCacheName = 'system/html/' . $objFile->filename . '-' . substr(md5($watermark . '-' . $position . '-' . $objFile->mtime), 0, 8) . '.' . $objFile->extension;
+        $strCacheName = 'assets/images/' . substr($objFile->filename, -1) . '/' . $objFile->filename . '-' . substr(md5($watermark . '-' . $position . '-' . $objFile->mtime), 0, 8) . '.' . $objFile->extension;
 
         // Return the path of the new image if it exists already
         if (is_file(TL_ROOT . '/' . $strCacheName))
