@@ -49,7 +49,7 @@ abstract class Model extends \Model
      * @param mixed
      * @return array
      */
-    public static function getReferenceValues($strTable, $strField, $varValue)
+    public static function getReferenceValues($strTable, $strField, $varValue=null)
     {
         $arrRelation = Relations::getRelation($strTable, $strField);
 
@@ -59,11 +59,7 @@ abstract class Model extends \Model
 
         $arrValues = (array) $varValue;
 
-        if (empty($arrValues)) {
-            return array();
-        }
-
-        return \Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')")
+        return \Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')") : ""))
                                        ->execute()
                                        ->fetchEach($arrRelation['reference_field']);
     }
@@ -75,7 +71,7 @@ abstract class Model extends \Model
      * @param mixed
      * @return array
      */
-    public static function getRelatedValues($strTable, $strField, $varValue)
+    public static function getRelatedValues($strTable, $strField, $varValue=null)
     {
         $arrRelation = Relations::getRelation($strTable, $strField);
 
@@ -85,11 +81,7 @@ abstract class Model extends \Model
 
         $arrValues = (array) $varValue;
 
-        if (empty($arrValues)) {
-            return array();
-        }
-
-        return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')")
+        return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')") : ""))
                                        ->execute()
                                        ->fetchEach($arrRelation['related_field']);
     }
