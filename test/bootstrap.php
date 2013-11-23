@@ -86,7 +86,7 @@ class Controller
     }
     public function generateFrontendUrl($strName)
     {
-        // I am a dummy
+        return $strName;
     }
 
     public function replaceInsertTags($strText)
