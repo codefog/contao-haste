@@ -162,7 +162,7 @@ class Relations extends \Backend
     public function cleanRelatedRecords(\DataContainer $dc)
     {
         // Only check the active modules
-        foreach ($this->Config->getActiveModules() as $strModule) {
+        foreach (\ModuleLoader::getActive() as $strModule) {
             $strDir = 'system/modules/' . $strModule . '/dca';
 
             if (!is_dir(TL_ROOT . '/' . $strDir)) {
