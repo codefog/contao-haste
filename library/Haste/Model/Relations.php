@@ -157,14 +157,22 @@ class Relations extends \Backend
 
     /**
      * Clean the records in related table
-     * @param \DataContainer
-     * @param mixed
+     * @throws \RuntimeException
      */
-    public function cleanRelatedRecords($dc, $tmp=null)
+    public function cleanRelatedRecords()
     {
-        // Hook for DC_Folder driver. See #37
-        if (!$dc instanceof \DataContainer) {
-            $dc = $tmp;
+        $dc = null;
+
+        // Try to find the \DataContainer instance (see #37)
+        foreach (func_get_args() as $arg) {
+            if ($arg instanceof \DataContainer) {
+                $dc = $arg;
+                break;
+            }
+        }
+
+        if ($dc === null) {
+            throw new \RuntimeException('Sorry but there seems to be no valid DataContainer instance!');
         }
 
         // Only check the active modules
