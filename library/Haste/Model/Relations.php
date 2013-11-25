@@ -158,9 +158,15 @@ class Relations extends \Backend
     /**
      * Clean the records in related table
      * @param \DataContainer
+     * @param mixed
      */
-    public function cleanRelatedRecords(\DataContainer $dc)
+    public function cleanRelatedRecords($dc, $tmp=null)
     {
+        // Hook for DC_Folder driver. See #37
+        if (!$dc instanceof DataContainer) {
+            $dc = $tmp;
+        }
+
         // Only check the active modules
         foreach (\ModuleLoader::getActive() as $strModule) {
             $strDir = 'system/modules/' . $strModule . '/dca';
