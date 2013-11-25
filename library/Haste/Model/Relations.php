@@ -163,7 +163,7 @@ class Relations extends \Backend
     public function cleanRelatedRecords($dc, $tmp=null)
     {
         // Hook for DC_Folder driver. See #37
-        if (!$dc instanceof DataContainer) {
+        if (!$dc instanceof \DataContainer) {
             $dc = $tmp;
         }
 
