@@ -1,6 +1,12 @@
 HasteForm Changelog
 ===================
 
+Version 3.0.1 (2013-11-25)
+------------------------------
+
+### Fixed
+- Fixed the problem with deleting files in DC_Folder (see #37)
+
 Version 3.0.0 (2013-11-22)
 ------------------------------
 
