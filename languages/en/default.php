@@ -24,6 +24,11 @@
 $GLOBALS['TL_LANG']['ERR']['numberInputNotAllowed'] = 'Enter a valid number (e.g. 5\'000, 5.00, 5,00, 5\'000.00)';
 
 /**
+ * Miscellaneous
+ */
+$GLOBALS['TL_LANG']['HST']['advanced_filter'] = 'Advanced filter:';
+
+/**
  * Weight Units
  * http://www.metric-conversions.org/weight/weight-conversions.htm
  */
