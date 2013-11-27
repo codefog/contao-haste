@@ -174,7 +174,7 @@ class Response
     {
         $intCode = (int) $intCode;
 
-        if (!in_array($intCode, array_keys(self::$arrStatuses))) {
+        if (!in_array($intCode, array_keys(static::$arrStatuses))) {
             throw new \InvalidArgumentException('The status code "' . $intCode . '" is invalid!');
         }
 
@@ -218,7 +218,7 @@ class Response
 
         // Status
         $strVersion = ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.0') ? '1.0' : '1.1';
-        header(sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, self::$arrStatuses[$this->intStatus]));
+        header(sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, static::$arrStatuses[$this->intStatus]));
 
         // Headers
         foreach ($this->arrHeaders as $strName => $strContent) {
@@ -258,7 +258,7 @@ class Response
         $strOutput = '';
         $this->prepare();
         $strVersion = ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.0') ? '1.0' : '1.1';
-        $strOutput .= sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, self::$arrStatuses[$this->intStatus]) . "\n";
+        $strOutput .= sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, static::$arrStatuses[$this->intStatus]) . "\n";
 
         // Headers
         foreach ($this->arrHeaders as $strName => $strContent) {
