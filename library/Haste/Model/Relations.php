@@ -33,6 +33,10 @@ class Relations extends \Backend
      */
     public function addRelationCallbacks($strTable)
     {
+        if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
+            return;
+        }
+
         $blnCallbacks = false;
 
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
@@ -107,6 +111,10 @@ class Relations extends \Backend
      */
     public function deleteRelatedRecords(\DataContainer $dc)
     {
+        if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'])) {
+            return;
+        }
+
         foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
             $arrRelation = static::getRelation($dc->table, $strField);
 
@@ -125,6 +133,10 @@ class Relations extends \Backend
      */
     public function copyRelatedRecords($intId, \DataContainer $dc)
     {
+        if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'])) {
+            return;
+        }
+
         foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
             $arrRelation = static::getRelation($dc->table, $strField);
 
@@ -193,6 +205,10 @@ class Relations extends \Backend
         }
 
         foreach ($GLOBALS['TL_DCA'] as $strTable => $arrTable) {
+            if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
+                continue;
+            }
+
             foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
                 $arrRelation = static::getRelation($strTable, $strField);
 
@@ -214,7 +230,7 @@ class Relations extends \Backend
      */
     public function reviseRelatedRecords($strTable, $arrIds)
     {
-        if (empty($arrIds)) {
+        if (empty($arrIds) || !isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
             return false;
         }
 
@@ -271,7 +287,11 @@ class Relations extends \Backend
     public function addRelationTables($arrTables)
     {
         foreach ($GLOBALS['TL_DCA'] as $strTable => $arrDca) {
-            foreach ($arrDca['fields'] as $strField => $arrField) {
+            if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
+                continue;
+            }
+
+            foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
                 $arrRelation = static::getRelation($strTable, $strField);
 
                 if ($arrRelation === false) {
