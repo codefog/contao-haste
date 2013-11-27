@@ -164,6 +164,28 @@ class Form extends \Controller
     }
 
     /**
+     * Preserve the current GET parameters by adding them as hidden fields
+     * @param array
+     */
+    public function preserveGetParameters($arrExclude=array())
+    {
+        foreach ($_GET as $k => $v) {
+            if (in_array($k, $arrExclude)) {
+                continue;
+            }
+
+            if (array_key_exists($k, $this->arrFormFields)) {
+                continue;
+            }
+
+            $this->addFormField($k, array(
+                'inputType' => 'hidden',
+                'value' => \Input::get($k)
+            ));
+        }
+    }
+
+    /**
      * Get the form action
      * @param   string  The URI
      */

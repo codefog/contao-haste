@@ -32,6 +32,12 @@ For more internal details please read the source ;-)
         return \Input::get('foo') === 'bar';
     });
 
+    // You can optionally preserve the current GET parameters.
+    // They will be added as hidden fields to the current form.
+    // This is especially useful when using multiple GET forms (like search and filter).
+    $objForm->preserveGetParameters();
+    $objForm->preserveGetParameters(array('page_n')); // Exclude 'page_n' parameter
+
     // A form needs an action. By default it's the current request URI you
     // place your Haste form on, but you can either set your own URI:
     $objForm->setFormActionFromUri('https://foo.bar/somewhere.html');
