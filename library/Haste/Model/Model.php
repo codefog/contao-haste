@@ -34,7 +34,7 @@ abstract class Model extends \Model
                     return null;
                 }
 
-                $objModel = $strClass::findBy(array($arrRelation['field'] . " IN('" . implode("','", $arrIds) . "')"), null, $arrOptions);
+                $objModel = $strClass::findBy(array($arrRelation['related_table'] . "." . $arrRelation['field'] . " IN('" . implode("','", $arrIds) . "')"), null, $arrOptions);
                 $this->arrRelated[$strKey] = $objModel;
             }
         }
