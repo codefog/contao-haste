@@ -85,4 +85,32 @@ class ModelData
 
         return new \ArrayObject($arrData, \ArrayObject::ARRAY_AS_PROPS);
     }
+
+    /**
+     * Generate tokens for model data
+     * @param   \Model
+     * @param   callable
+     * @return  array
+     */
+    public static function generateTokens(\Model $objModel=null, $varCallable=null)
+    {
+        $objData = static::generate($objModel, $varCallable);
+
+        $fnGenerate = function($objData, $strPrefix='') use (&$fnGenerate) {
+
+            $arrTokens = array();
+
+            foreach ($objData as $key => $value) {
+                $arrTokens[$strPrefix.$key] = (string) $value;
+
+                if (is_array($value) || $value instanceof \ArrayObject) {
+                    $arrTokens = array_merge($arrTokens, $fnGenerate($value, $key.'_'));
+                }
+            }
+
+            return $arrTokens;
+        };
+
+        return $fnGenerate($objData);
+    }
 }
