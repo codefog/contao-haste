@@ -274,30 +274,34 @@ class Form extends \Controller
 
         if (is_array($arrDca['save_callback'])) {
             $arrCallbacks = $arrDca['save_callback'];
-            $this->addValidator($strName, function($objWidget) use ($arrCallbacks) {
+            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrCallbacks) {
                 foreach ($arrCallbacks as $callback) {
                     try {
                         if (is_array($callback)) {
                             $objCallback = System::importStatic($callback[0]);
-                            $objWidget->value = $objCallback->$callback[1]($objWidget->value, $this);
+                            $varValue = $objCallback->$callback[1]($varValue, $this);
                         } elseif (is_callable($callback)) {
-                            $objWidget->value = $callback($objWidget->value, $this);
+                            $varValue = $callback($varValue, $this);
                         }
                     } catch (\Exception $e) {
                         $objWidget->class = 'error';
                         $objWidget->addError($e->getMessage());
                     }
                 }
+
+                return $varValue;
             });
         }
 
         // Convert date formats into timestamps
         if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
-            $this->addValidator($strName, function($objWidget) use ($arrDca) {
-                if ($objWidget->value != '') {
-                	$objDate = new \Date($objWidget->value, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
-                	$objWidget->value = $objDate->tstamp;
+            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
+                if ($varValue != '') {
+                	$objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                	$varValue = $objDate->tstamp;
                 }
+
+                return $varValue;
             });
         }
 
@@ -574,10 +578,12 @@ class Form extends \Controller
         foreach ($this->arrWidgets as $strName => $objWidget) {
             $objWidget->validate();
 
+            $varValue = $objWidget->value;
+
             // Run custom validators
             if (isset($this->arrValidators[$strName])) {
                 foreach ($this->arrValidators[$strName] as $varCallback) {
-                    call_user_func($varCallback, $objWidget);
+                    $varValue = call_user_func($varCallback, $varValue, $objWidget, $this);
                 }
             }
 
@@ -587,7 +593,7 @@ class Form extends \Controller
             elseif ($objWidget->submitInput()) {
                 // Bind to Model instance
                 if ($this->objModel !== null) {
-                    $this->objModel->$strName =  $objWidget->value;
+                    $this->objModel->$strName =  $varValue;
                 }
             }
         }
