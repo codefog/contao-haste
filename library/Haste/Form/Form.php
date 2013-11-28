@@ -272,6 +272,18 @@ class Form extends \Controller
             throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrDca['inputType']));
         }
 
+        // Convert date formats into timestamps
+        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
+            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
+                if ($varValue != '') {
+                	$objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                	$varValue = $objDate->tstamp;
+                }
+
+                return $varValue;
+            });
+        }
+
         if (is_array($arrDca['save_callback'])) {
             $arrCallbacks = $arrDca['save_callback'];
             $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrCallbacks) {
@@ -287,18 +299,6 @@ class Form extends \Controller
                         $objWidget->class = 'error';
                         $objWidget->addError($e->getMessage());
                     }
-                }
-
-                return $varValue;
-            });
-        }
-
-        // Convert date formats into timestamps
-        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
-            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
-                if ($varValue != '') {
-                	$objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
-                	$varValue = $objDate->tstamp;
                 }
 
                 return $varValue;
