@@ -276,8 +276,8 @@ class Form extends \Controller
         if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
             $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
                 if ($varValue != '') {
-                	$objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
-                	$varValue = $objDate->tstamp;
+                    $objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                    $varValue = $objDate->tstamp;
                 }
 
                 return $varValue;
