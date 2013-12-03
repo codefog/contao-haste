@@ -12,6 +12,8 @@
 
 namespace Haste\Form;
 
+use Haste\Form\Validator\ValidatorInterface;
+
 class Form extends \Controller
 {
     /**
@@ -499,13 +501,16 @@ class Form extends \Controller
     /**
      * Add a validator to the form field
      * @param   string   The form field name
-     * @param   callable A callable that will be called on widget validation
+     * @param   ValidatorInterface|callable An instance of ValidatorInterface or a callable that will be called on widget validation
      * @return  Form
+     * @throws  \InvalidArgumentException
      */
-    public function addValidator($strName, $varCallback)
+    public function addValidator($strName, $varValidator)
     {
-        if (is_callable($varCallback)) {
-            $this->arrValidators[$strName][] = $varCallback;
+        if ($varValidator instanceof ValidatorInterface || is_callable($varValidator)) {
+            $this->arrValidators[$strName][] = $varValidator;
+        } else {
+            throw new \InvalidArgumentException('Your validator is invalid!');
         }
 
         return $this;
@@ -582,8 +587,13 @@ class Form extends \Controller
 
             // Run custom validators
             if (isset($this->arrValidators[$strName])) {
-                foreach ($this->arrValidators[$strName] as $varCallback) {
-                    $varValue = call_user_func($varCallback, $varValue, $objWidget, $this);
+                foreach ($this->arrValidators[$strName] as $varValidator) {
+
+                    if ($varValidator instanceof ValidatorInterface) {
+                        $varValue = $varValidator->validate($varValue, $objWidget, $this);
+                    } else {
+                        $varValue = call_user_func($varValidator, $varValue, $objWidget, $this);
+                    }
                 }
             }
 
