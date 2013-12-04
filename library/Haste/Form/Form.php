@@ -227,6 +227,11 @@ class Form extends \Controller
             $arrDca['name'] = $strName;
         }
 
+        // Some widgets render the mandatory asterisk only based on "require" attribute
+        if (!isset($arrDca['required'])) {
+            $arrDca['eval']['required'] = (bool) $arrDca['eval']['mandatory'];
+        }
+
         // Support default values
         if (!$this->isSubmitted()) {
             if (isset($arrDca['default']) && !isset($arrDca['value'])) {
@@ -268,7 +273,7 @@ class Form extends \Controller
         if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
             $this->addValidator($strName, function($objWidget) use ($arrDca) {
                 if ($objWidget->value != '') {
-                	$objDate = new Date($objWidget->value, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                	$objDate = new \Date($objWidget->value, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
                 	$objWidget->value = $objDate->tstamp;
                 }
             });
