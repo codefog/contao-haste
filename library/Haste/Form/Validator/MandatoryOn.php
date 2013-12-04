@@ -37,7 +37,8 @@ class MandatoryOn implements ValidatorInterface
             // can we do anything about it?
             $varTargetValue = $objTarget->value;
 
-            if ($this->arrMatches[$objTarget->name]
+            if (trim($varValue) == ''
+                && $this->arrMatches[$objTarget->name]
                 && in_array($varTargetValue, $this->arrMatches[$objTarget->name])
             ) {
                 $objWidget->class = 'error';
