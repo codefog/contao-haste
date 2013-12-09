@@ -312,16 +312,11 @@ class Form extends \Controller
             $arrCallbacks = $arrDca['save_callback'];
             $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrCallbacks) {
                 foreach ($arrCallbacks as $callback) {
-                    try {
-                        if (is_array($callback)) {
-                            $objCallback = System::importStatic($callback[0]);
-                            $varValue = $objCallback->$callback[1]($varValue, $this);
-                        } elseif (is_callable($callback)) {
-                            $varValue = $callback($varValue, $this);
-                        }
-                    } catch (\Exception $e) {
-                        $objWidget->class = 'error';
-                        $objWidget->addError($e->getMessage());
+                    if (is_array($callback)) {
+                        $objCallback = System::importStatic($callback[0]);
+                        $varValue = $objCallback->$callback[1]($varValue, $this);
+                    } elseif (is_callable($callback)) {
+                        $varValue = $callback($varValue, $this);
                     }
                 }
 
@@ -615,26 +610,33 @@ class Form extends \Controller
         foreach ($this->arrWidgets as $strName => $objWidget) {
             $objWidget->validate();
 
-            $varValue = $objWidget->value;
-
-            // Run custom validators
-            if (isset($this->arrValidators[$strName])) {
-                foreach ($this->arrValidators[$strName] as $varValidator) {
-
-                    if ($varValidator instanceof ValidatorInterface) {
-                        $varValue = $varValidator->validate($varValue, $objWidget, $this);
-                    } else {
-                        $varValue = call_user_func($varValidator, $varValue, $objWidget, $this);
-                    }
-                }
-            }
-
             if ($objWidget->hasErrors()) {
                 $this->blnValid = false;
-            }
-            elseif ($objWidget->submitInput()) {
+
+            } elseif ($objWidget->submitInput()) {
+
+                $varValue = $objWidget->value;
+
+                // Run custom validators
+                if (isset($this->arrValidators[$strName])) {
+
+                    try {
+                        foreach ($this->arrValidators[$strName] as $varValidator) {
+
+                            if ($varValidator instanceof ValidatorInterface) {
+                                $varValue = $varValidator->validate($varValue, $objWidget, $this);
+                            } else {
+                                $varValue = call_user_func($varValidator, $varValue, $objWidget, $this);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        $objWidget->class = 'error';
+                        $objWidget->addError($e->getMessage());
+                    }
+                }
+
                 // Bind to Model instance
-                if ($this->objModel !== null) {
+                if (!$objWidget->hasErrors() && $this->objModel !== null) {
                     $this->objModel->$strName =  $varValue;
                 }
             }
