@@ -553,6 +553,10 @@ class Form extends \Controller
         $intTotal = count($this->arrFormFields);
         $i = 0;
 
+        // Reset to initial values
+        $this->arrWidgets = array();
+        $this->blnHasUploads = false;
+
         // Initialize widgets
         foreach ($this->arrFormFields as $strName => $arrField) {
 
@@ -606,6 +610,7 @@ class Form extends \Controller
         }
 
         $this->createWidgets();
+        $this->blnValid = true;
 
         foreach ($this->arrWidgets as $strName => $objWidget) {
             $objWidget->validate();
