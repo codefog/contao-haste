@@ -551,7 +551,7 @@ class Form extends \Controller
     public function createWidgets()
     {
         // Do nothing if already generated
-        if ($this->intState === self::STATE_CLEAN) {
+        if (!$this->isDirty()) {
             return;
         }
 
@@ -582,11 +582,11 @@ class Form extends \Controller
 
         $this->intState = self::STATE_CLEAN;
 
-        if ($this->strMethod == 'GET' && $this->blnHasUploads) {
-            throw new \RuntimeException('How do you want me to upload your file using GET?');
-        }
+        if ($this->hasUploads()) {
+            if ($this->getMethod() == 'GET') {
+                throw new \RuntimeException('How do you want me to upload your file using GET?');
+            }
 
-        if ($this->blnHasUploads) {
             $this->strEnctype = 'multipart/form-data';
         } else {
             $this->strEnctype = 'application/x-www-form-urlencoded';
@@ -603,7 +603,7 @@ class Form extends \Controller
     {
         $this->createWidgets();
 
-        if (!$this->blnSubmitted) {
+        if (!$this->isSubmitted()) {
             return false;
         }
 
@@ -635,7 +635,7 @@ class Form extends \Controller
             }
         }
 
-        return $this->blnValid;
+        return $this->isValid();
     }
 
     /**
@@ -647,14 +647,14 @@ class Form extends \Controller
     {
         $this->createWidgets();
 
-        $objTemplate->action = $this->strFormAction;
-        $objTemplate->formId = $this->strFormId;
-        $objTemplate->method = $this->strMethod;
-        $objTemplate->enctype = $this->strEnctype;
+        $objTemplate->action = $this->getFormAction();
+        $objTemplate->formId = $this->getFormId();
+        $objTemplate->method = $this->getMethod();
+        $objTemplate->enctype = $this->getEnctype();
         $objTemplate->widgets = $this->arrWidgets;
-        $objTemplate->valid = $this->blnValid;
-        $objTemplate->submitted = $this->blnSubmitted;
-        $objTemplate->hasUploads = $this->blnHasUploads;
+        $objTemplate->valid = $this->isValid();
+        $objTemplate->submitted = $this->isSubmitted();
+        $objTemplate->hasUploads = $this->hasUploads();
         $objTemplate->tableless = $this->blnTableless;
 
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
@@ -686,13 +686,13 @@ class Form extends \Controller
         $this->createWidgets();
 
         $objTemplate = new \FrontendTemplate('form');
-        $objTemplate->class = 'hasteform_' . $this->strFormId;
+        $objTemplate->class = 'hasteform_' . $this->getFormId();
         $objTemplate->tableless = $this->blnTableless;
-        $objTemplate->action = $this->strFormAction;
-        $objTemplate->formId = $this->strFormId;
-        $objTemplate->method = strtolower($this->strMethod);
-        $objTemplate->enctype = $this->strEnctype;
-        $objTemplate->formSubmit = $this->strFormId;
+        $objTemplate->action = $this->getFormAction();
+        $objTemplate->formId = $this->getFormId();
+        $objTemplate->method = strtolower($this->getMethod());
+        $objTemplate->enctype = $this->getEnctype();
+        $objTemplate->formSubmit = $this->getFormId();
 
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
@@ -718,11 +718,11 @@ class Form extends \Controller
      */
     public function fetch($strName)
     {
-        if (!$this->blnSubmitted) {
+        if (!$this->isSubmitted()) {
             throw new \BadMethodCallException('How do you want me to fetch data from an unsubmitted form?');
         }
 
-        if ($this->strMethod !== 'POST') {
+        if ($this->getMethod() !== 'POST') {
             throw new \BadMethodCallException('Widgets only support fetching POST values. Use the Contao Input class for other purposes.');
         }
 
