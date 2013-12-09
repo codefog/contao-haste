@@ -601,11 +601,11 @@ class Form extends \Controller
      */
     public function validate()
     {
-        $this->createWidgets();
-
         if (!$this->isSubmitted()) {
             return false;
         }
+
+        $this->createWidgets();
 
         foreach ($this->arrWidgets as $strName => $objWidget) {
             $objWidget->validate();
