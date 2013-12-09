@@ -275,7 +275,7 @@ class Form extends \Controller
         }
 
         // Convert date formats into timestamps
-        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'date') {
+        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'datim') {
             $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
                 if ($varValue != '') {
                     $objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
