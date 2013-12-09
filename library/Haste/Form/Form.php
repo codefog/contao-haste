@@ -188,8 +188,17 @@ class Form extends \Controller
     }
 
     /**
+     * Get form method
+     * @return  string
+     */
+    public function getMethod()
+    {
+        return $this->strMethod;
+    }
+
+    /**
      * Get the form action
-     * @param   string  The URI
+     * @return  string
      */
     public function getFormAction()
     {
@@ -220,7 +229,25 @@ class Form extends \Controller
      */
     public function isSubmitted()
     {
-        return $this->blnSubmitted;
+        return (bool) $this->blnSubmitted;
+    }
+
+    /**
+     * Check if the form is valid (no widget has an error)
+     * @return  boolean
+     */
+    public function isValid()
+    {
+        return (bool) $this->blnValid;
+    }
+
+    /**
+     * Check if form is dirty (widgets need to be generated)
+     * return   bool
+     */
+    public function isDirty()
+    {
+        return (bool) ($this->intState === static::STATE_DIRTY);
     }
 
     /**
@@ -232,7 +259,7 @@ class Form extends \Controller
         // We need to create the widgets to know if we have uploads
         $this->createWidgets();
 
-        return $this->blnHasUploads;
+        return (bool) $this->blnHasUploads;
     }
 
     /**
