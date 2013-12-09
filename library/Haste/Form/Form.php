@@ -524,7 +524,7 @@ class Form extends \Controller
     public function createWidgets()
     {
         // Do nothing if already generated
-        if (!empty($this->arrWidgets) && $this->intState === self::STATE_CLEAN) {
+        if ($this->intState === self::STATE_CLEAN) {
             return;
         }
 
