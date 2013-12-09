@@ -278,11 +278,6 @@ class Form extends \Controller
             $arrDca['name'] = $strName;
         }
 
-        // Some widgets render the mandatory asterisk only based on "require" attribute
-        if (!isset($arrDca['required'])) {
-            $arrDca['eval']['required'] = (bool) $arrDca['eval']['mandatory'];
-        }
-
         // Support default values
         if (!$this->isSubmitted()) {
             if (isset($arrDca['default']) && !isset($arrDca['value'])) {
@@ -569,6 +564,11 @@ class Form extends \Controller
 
             $arrField['tableless']  = $this->blnTableless;
             $arrField['rowClass']   = $this->generateRowClass($i, $intTotal);
+
+            // Some widgets render the mandatory asterisk only based on "require" attribute
+            if (!isset($arrField['required'])) {
+                $arrField['required'] = (bool) $arrField['mandatory'];
+            }
 
             $objWidget = new $strClass($arrField);
 
