@@ -553,6 +553,8 @@ class Form extends \Controller
             $i++;
         }
 
+        $this->intState = self::STATE_CLEAN;
+
         if ($this->strMethod == 'GET' && $this->blnHasUploads) {
             throw new \RuntimeException('How do you want me to upload your file using GET?');
         }
@@ -562,8 +564,6 @@ class Form extends \Controller
         } else {
             $this->strEnctype = 'application/x-www-form-urlencoded';
         }
-
-        $this->intState = self::STATE_CLEAN;
 
         return $this;
     }
