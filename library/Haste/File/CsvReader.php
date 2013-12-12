@@ -16,10 +16,16 @@ class CsvReader
 {
 
     /**
-     * CSV data
-     * @var array
+     * File object
+     * @var object
      */
-    protected $arrData = array();
+    protected $objFile;
+
+    /**
+     * Target model
+     * @var string
+     */
+    protected $strModel;
 
     /**
      * Fields mapper
@@ -28,65 +34,36 @@ class CsvReader
     protected $arrMapper = array();
 
     /**
-     * Delimiter
+     * Delimiter character
      * @var string
      */
     protected $strDelimiter = ';';
 
     /**
-     * Enclosure
+     * Enclosure character
      * @var string
      */
     protected $strEnclosure = '"';
 
     /**
-     * Escape
+     * Escape character
      * @var string
      */
     protected $strEscape = '\\';
 
     /**
      * Header fields
-     * @param boolean
+     * @var boolean
      */
     protected $blnHeaderFields = false;
 
     /**
-     * Set an object property
-     * @param string
+     * Initialize the object
      * @param mixed
-     * @throws \Exception
      */
-    public function __set($strKey, $varValue)
+    public function __construct($varFile)
     {
-        switch ($strKey) {
-            case 'data':
-                $this->arrData = (array) $varValue;
-                break;
-
-            case 'mapper':
-                $this->arrMapper = (array) $varValue;
-                break;
-
-            case 'delimiter':
-                $this->strDelimiter = $varValue;
-                break;
-
-            case 'enclosure':
-                $this->strEnclosure = $varValue;
-                break;
-
-            case 'escape':
-                $this->strEscape = $varValue;
-                break;
-
-            case 'headerFields':
-                $this->blnHeaderFields = (boolean) $varValue;
-                break;
-
-            default:
-                throw new \Exception(sprintf('Trying to set invalid "%s" object property', $strKey));
-        }
+        $this->setFile($varFile);
     }
 
     /**
@@ -97,8 +74,15 @@ class CsvReader
     public function __get($strKey)
     {
         switch ($strKey) {
-            case 'data':
-                return $this->arrData;
+            case 'file':
+                return $this->objFile;
+
+            case 'model':
+                return $this->strModel;
+
+            case 'table':
+                $strModel = $this->strModel;
+                return $strModel::getTable();
 
             case 'mapper':
                 return $this->arrMapper;
@@ -121,64 +105,102 @@ class CsvReader
     }
 
     /**
-     * Set the data from file
-     * @param string
-     * @param integer
-     * @throws \Exception
-     */
-    public function setFromFile($strFile, $intLength=0)
-    {
-        if (!is_file(TL_ROOT . '/' . $strFile)) {
-            throw new \Exception(sprintf('File "%s" does not exist!', $strFile));
-        }
-
-        $resFile = @fopen(TL_ROOT . '/' . $strFile, 'r');
-
-        if ($resFile === false) {
-            throw new \Exception(sprintf('Could not open "%s" file!', $strFile));
-        }
-
-        while (($arrData = fgetcsv($resFile, $intLength, $this->strDelimiter, $this->strEnclosure, $this->strEscape)) !== false) {
-            $this->arrData[] = $arrData;
-        }
-    }
-
-    /**
-     * Set the data from string
+     * Set the file from string or object
      * @param mixed
-     * @param string
-     * @throws \Exception
-     * @see http://www.php.net/manual/en/function.str-getcsv.php#101888
+     * @throws \InvalidArgumentException
      */
-    public function setFromString($strData, $strBreak="\n")
+    public function setFile($varFile)
     {
-        $this->arrData = str_getcsv($strData, $strBreak);
-
-        foreach ($this->arrData as $k => $v) {
-            $this->arrData[$k] = str_getcsv($v, $this->strDelimiter, $this->strEnclosure, $this->strEscape);
-        }
     }
 
     /**
-     * Save the data to table
-     * @param string
-     * @param callable
-     * @throws \Exception
+     * Set the mapper array
+     * @param array
+     * @throws \InvalidArgumentException
      */
-    public function saveToTable($strTable, $varCallback=null)
+    public function setMapper($arrMapper)
     {
-        $strClass = \Model::getClassFromTable($strTable);
-
-        if (!class_exists($strClass)) {
-            throw new \Exception(sprintf('Could not find the model class for "%s"', $strTable));
+        if (!is_array($arrMapper)) {
+            throw new \InvalidArgumentException('Provided mapper is not an array');
         }
 
-        $arrFields = \Database::getInstance()->getFieldNames($strTable);
+        $this->arrMapper = $arrMapper;
+    }
+
+    /**
+     * Set the model name
+     * @param string
+     * @throws \InvalidArgumentException
+     */
+    public function setModel($strClass)
+    {
+        if (!class_exists($strClass)) {
+            throw new \InvalidArgumentException(sprintf('Could not find the model class "%s"', $strClass));
+        }
+
+        $this->strModel = $strClass;
+    }
+
+    /**
+     * Set the model from table name
+     * @param string
+     */
+    public function setTable($strTable)
+    {
+        $this->setModel(\Model::getClassFromTable($strTable));
+    }
+
+    /**
+     * Set the delimiter character
+     * @param string
+     */
+    public function setDelimiter($strDelimiter)
+    {
+        $this->strDelimiter = $strDelimiter;
+    }
+
+    /**
+     * Set the enclosure character
+     * @param string
+     */
+    public function setEnclosure($strEnclosure)
+    {
+        $this->strEnclosure = $strEnclosure;
+    }
+
+    /**
+     * Set the escape character
+     * @param string
+     */
+    public function setEscape($strEscape)
+    {
+        $this->strEscape = $strEscape;
+    }
+
+    /**
+     * Set the header fields
+     * @param boolean
+     */
+    public function setHeaderFields($blnHeaderFields)
+    {
+        $this->blnHeaderFields = (boolean) $blnHeaderFields;
+    }
+
+    /**
+     * Save the data and return number of saved records
+     * @param callable
+     * @return integer
+     */
+    public function save($varCallback=null)
+    {
+        $intIndex = 0;
+        $intSaved = 0;
+        $arrFields = \Database::getInstance()->getFieldNames($objModel::getTable());
         $arrFields = array_flip($arrFields);
 
-        foreach ($this->arrData as $intIndex => $arrData) {
+        while (($arrData = fgetcsv($this->objFile->handle, 0, $this->strDelimiter, $this->strEnclosure, $this->strEscape)) !== false) {
             // Skip first row with header fields
-            if (!$intIndex && $this->blnHeaderFields) {
+            if (!$intIndex++ && $this->blnHeaderFields) {
                 continue;
             }
 
@@ -209,6 +231,11 @@ class CsvReader
             $objModel = new $strClass();
             $objModel->setRow($arrData);
             $objModel->save();
+
+            // Increase the counter
+            $intSaved++;
         }
+
+        return $intSaved;
     }
 }
