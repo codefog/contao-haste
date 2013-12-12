@@ -111,6 +111,15 @@ class CsvReader
      */
     public function setFile($varFile)
     {
+        if (is_string($varFile)) {
+            $varFile = new \File($varFile, true);
+        }
+
+        if (!is_object($varFile) || !$varFile->exists()) {
+            throw new \InvalidArgumentException('Provided file does not exist!');
+        }
+
+        $this->objFile = $varFile;
     }
 
     /**
