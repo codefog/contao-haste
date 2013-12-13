@@ -53,7 +53,11 @@ class Weight implements Weighable
     {
         $arrData = deserialize($arrData);
 
-        if (empty($arrData) || !is_array($arrData) || $arrData['unit'] === '' || !in_array($arrData['unit'], Unit::getAll())) {
+        if (empty($arrData)
+            || !is_array($arrData)
+            || !$arrData['value'] === ''
+            || $arrData['unit'] === ''
+            || !in_array($arrData['unit'], Unit::getAll())) {
             return null;
         }
 
