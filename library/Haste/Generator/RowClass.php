@@ -150,6 +150,11 @@ class RowClass
                 $col = 0;
             }
 
+            // Increase total before generating class to prevent "last" on the first input field
+            if (!$hasColumns && $varValue instanceof \FormPassword) {
+                ++$total;
+            }
+
             $class = $this->generateClass($current, $total, $k, $hasColumns, $row, $col, $rows, $cols);
 
             if (is_array($varValue))
@@ -158,6 +163,12 @@ class RowClass
             }
             elseif (is_object($varValue))
             {
+                // Generate class on confirmation field
+                if (!$hasColumns && $varValue instanceof \FormPassword) {
+                    ++$current;
+                    $varValue->rowClassConfirm = $this->generateClass($current, $total, $k);
+                }
+
                 $varValue->{$this->strKey} = trim($varValue->{$this->strKey} . $class);
                 $arrData[$k] = $varValue;
             }
