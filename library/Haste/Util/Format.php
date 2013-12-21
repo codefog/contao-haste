@@ -123,6 +123,9 @@ class Format
 
         } elseif (is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'])) {
             return isset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue]) ? ((is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue])) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue]) : $varValue;
+
+        } elseif (array_is_assoc($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'])) {
+            return isset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue]) ? ((is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue])) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue]) : $varValue;
         }
 
         return $varValue;
