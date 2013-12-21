@@ -359,14 +359,9 @@ class Form extends \Controller
     /**
      * Gets the bound model
      * @return   \Model
-     * @throws   \BadMethodCallException
      */
     public function getBoundModel()
     {
-        if ($this->objModel === null) {
-            throw new \BadMethodCallException('There was no bound instance of "Model" found!');
-        }
-
         return $this->objModel;
     }
 
