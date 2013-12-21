@@ -331,7 +331,7 @@ class Form extends \Controller
 
                 foreach ($arrDca['save_callback'] as $callback) {
                     if (is_array($callback)) {
-                        $objCallback = System::importStatic($callback[0]);
+                        $objCallback = \System::importStatic($callback[0]);
                         $varValue = $objCallback->$callback[1]($varValue, $dc);
                     } elseif (is_callable($callback)) {
                         $varValue = $callback($varValue, $dc);
