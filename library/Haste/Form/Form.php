@@ -13,6 +13,7 @@
 namespace Haste\Form;
 
 use Haste\Form\Validator\ValidatorInterface;
+use Haste\Generator\RowClass;
 
 class Form extends \Controller
 {
@@ -574,7 +575,6 @@ class Form extends \Controller
             }
 
             $arrField['tableless']  = $this->blnTableless;
-            $arrField['rowClass']   = $this->generateRowClass($i, $intTotal);
 
             // Some widgets render the mandatory asterisk only based on "require" attribute
             if (!isset($arrField['required'])) {
@@ -590,6 +590,8 @@ class Form extends \Controller
             $this->arrWidgets[$strName] = $objWidget;
             $i++;
         }
+
+        RowClass::withKey('rowClass')->addCount('row_')->addFirstLast('row_')->addEvenOdd()->applyTo($this->arrWidgets);
 
         $this->intState = self::STATE_CLEAN;
 
@@ -795,16 +797,6 @@ class Form extends \Controller
         if (in_array($strName, $this->arrFormFields)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
         }
-    }
-
-    /**
-     * Generates a the row CSS class for the widget
-     * @param   int Current index
-     * @param   int Total number of widgets
-     */
-    protected function generateRowClass($intIndex, $intTotal)
-    {
-        return 'row_' . $intIndex . (($intIndex == 0) ? ' row_first' : (($intIndex == ($intTotal - 1)) ? ' row_last' : '')) . ((($intIndex % 2) == 0) ? ' even' : ' odd');
     }
 
     /**
