@@ -413,14 +413,14 @@ class Form extends \Controller
     /**
      * Add form fields from a back end DCA
      * @param   string   The DCA table name
-     * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @param   callable Called for each field, return true if you want to include the field in the form
      * @return  Form
      */
     public function addFieldsFromDca($strTable, $varCallback = null)
     {
         \System::loadLanguageFile($strTable);
         $this->loadDataContainer($strTable);
-        $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
+        $arrFields = &$GLOBALS['TL_DCA'][$strTable]['fields'];
 
         foreach ($arrFields as $k => $v) {
             if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
@@ -436,7 +436,7 @@ class Form extends \Controller
     /**
      * Add form fields from a back end form generator form ID
      * @param   int      The form generator form ID
-     * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @param   callable Called for each field, return true if you want to include the field in the form
      * @return  Form
      * @throws  \InvalidArgumentException
      */
