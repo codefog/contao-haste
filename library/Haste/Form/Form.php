@@ -531,6 +531,17 @@ class Form extends \Controller
     }
 
     /**
+     * Return all widgets
+     * @return  array
+     */
+    public function getWidgets()
+    {
+        $this->createWidgets();
+
+        return $this->arrWidgets;
+    }
+
+    /**
      * Add a validator to the form field
      * @param   string   The form field name
      * @param   ValidatorInterface|callable An instance of ValidatorInterface or a callable that will be called on widget validation
