@@ -309,14 +309,31 @@ class Form extends \Controller
         }
 
         if (is_array($arrDca['save_callback'])) {
-            $arrCallbacks = $arrDca['save_callback'];
-            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrCallbacks) {
-                foreach ($arrCallbacks as $callback) {
+            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca, $strName) {
+
+                $intId = 0;
+                $strTable = '';
+
+                if (($objModel = $objForm->getBoundModel()) !== null) {
+                    $intId = $objModel->id;
+                    $strTable = $objModel->getTable();
+                }
+
+                $dc = (object) array(
+                    'id'            => $intId,
+                    'table'         => $strTable,
+                    'value'         => $varValue,
+                    'field'         => $strName,
+                    'inputName'     => $objWidget->name,
+                    'activeRecord'  => $objModel
+                );
+
+                foreach ($arrDca['save_callback'] as $callback) {
                     if (is_array($callback)) {
                         $objCallback = System::importStatic($callback[0]);
-                        $varValue = $objCallback->$callback[1]($varValue, $this);
+                        $varValue = $objCallback->$callback[1]($varValue, $dc);
                     } elseif (is_callable($callback)) {
-                        $varValue = $callback($varValue, $this);
+                        $varValue = $callback($varValue, $dc);
                     }
                 }
 
