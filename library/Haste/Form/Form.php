@@ -369,7 +369,7 @@ class Form extends \Controller
      * the present values as default values.
      * @param   \Model
      */
-    public function bindModel(\Model $objModel)
+    public function bindModel(\Model $objModel=null)
     {
         $this->objModel = $objModel;
     }
