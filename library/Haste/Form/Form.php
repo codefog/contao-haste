@@ -525,6 +525,8 @@ class Form extends \Controller
      */
     public function getWidget($strName)
     {
+        $this->createWidgets();
+
         return $this->arrWidgets[$strName];
     }
 
