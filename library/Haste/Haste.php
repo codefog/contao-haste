@@ -17,7 +17,7 @@ class Haste extends \Controller
     /**
      * Haste version
      */
-    const VERSION = '3.0.1';
+    const VERSION = '3.0.3';
 
     /**
      * Current object instance (Singleton)
