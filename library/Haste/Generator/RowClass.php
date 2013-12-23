@@ -150,42 +150,12 @@ class RowClass
                 $col = 0;
             }
 
-            $class = '';
-
-            if ($this->intOptions & static::NAME)
-            {
-                $class .= ' ' . $this->strName;
+            // Increase total before generating class to prevent "last" on the first input field
+            if (!$hasColumns && $varValue instanceof \FormPassword) {
+                ++$total;
             }
 
-            if ($this->intOptions & static::KEY)
-            {
-                $class .= ' ' . $this->strKeyPrefix . $k;
-            }
-
-            if ($this->intOptions & static::COUNT)
-            {
-                $class .= ' ' . $this->strCountPrefix . $current;
-            }
-
-            if ($this->intOptions & static::EVENODD)
-            {
-                $class .= ' ' . $this->strEvenOddPrefix . ($current%2 ? 'odd' : 'even');
-            }
-
-            if ($this->intOptions & static::FIRSTLAST)
-            {
-                $class .= ($current == 0 ? ' ' . $this->strFirstLastPrefix . 'first' : '') . ($current == $total ? ' ' . $this->strFirstLastPrefix . 'last' : '');
-            }
-
-            if ($hasColumns && $this->intOptions & static::ROW)
-            {
-                $class .= ' row_'.$row . ($row%2 ? ' row_odd' : ' row_even') . ($row == 0 ? ' row_first' : '') . ($row == $rows ? ' row_last' : '');
-            }
-
-            if ($hasColumns && $this->intOptions & static::COL)
-            {
-                $class .= ' col_'.$col . ($col%2 ? ' col_odd' : ' col_even') . ($col == 0 ? ' col_first' : '') . ($col == $cols ? ' col_last' : '');
-            }
+            $class = $this->generateClass($current, $total, $k, $hasColumns, $row, $col, $rows, $cols);
 
             if (is_array($varValue))
             {
@@ -193,6 +163,12 @@ class RowClass
             }
             elseif (is_object($varValue))
             {
+                // Generate class on confirmation field
+                if (!$hasColumns && $varValue instanceof \FormPassword) {
+                    ++$current;
+                    $varValue->rowClassConfirm = $this->generateClass($current, $total, $k);
+                }
+
                 $varValue->{$this->strKey} = trim($varValue->{$this->strKey} . $class);
                 $arrData[$k] = $varValue;
             }
@@ -207,6 +183,61 @@ class RowClass
 
         return $this;
     }
+
+    /**
+     * Generate CSS class
+     * @param   int
+     * @param   int
+     * @param   string
+     * @param   bool
+     * @param   int
+     * @param   int
+     * @param   int
+     * @param   int
+     * @return  string
+     */
+    protected function generateClass($current, $total, $k, $hasColumns=false, $row=0, $col=0, $rows=0, $cols=0)
+    {
+        $class = '';
+
+        if ($this->intOptions & static::NAME)
+        {
+            $class .= ' ' . $this->strName;
+        }
+
+        if ($this->intOptions & static::KEY)
+        {
+            $class .= ' ' . $this->strKeyPrefix . $k;
+        }
+
+        if ($this->intOptions & static::COUNT)
+        {
+            $class .= ' ' . $this->strCountPrefix . $current;
+        }
+
+        if ($this->intOptions & static::EVENODD)
+        {
+            $class .= ' ' . $this->strEvenOddPrefix . ($current%2 ? 'odd' : 'even');
+        }
+
+        if ($this->intOptions & static::FIRSTLAST)
+        {
+            $class .= ($current == 0 ? ' ' . $this->strFirstLastPrefix . 'first' : '') . ($current == $total ? ' ' . $this->strFirstLastPrefix . 'last' : '');
+        }
+
+        if ($hasColumns && $this->intOptions & static::ROW)
+        {
+            $class .= ' row_'.$row . ($row%2 ? ' row_odd' : ' row_even') . ($row == 0 ? ' row_first' : '') . ($row == $rows ? ' row_last' : '');
+        }
+
+        if ($hasColumns && $this->intOptions & static::COL)
+        {
+            $class .= ' col_'.$col . ($col%2 ? ' col_odd' : ' col_even') . ($col == 0 ? ' col_first' : '') . ($col == $cols ? ' col_last' : '');
+        }
+
+        return $class;
+    }
+
 
     public static function withKey($strKey)
     {

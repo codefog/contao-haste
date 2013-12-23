@@ -12,6 +12,9 @@
 
 namespace Haste\Form;
 
+use Haste\Form\Validator\ValidatorInterface;
+use Haste\Generator\RowClass;
+
 class Form extends \Controller
 {
     /**
@@ -164,8 +167,39 @@ class Form extends \Controller
     }
 
     /**
+     * Preserve the current GET parameters by adding them as hidden fields
+     * @param array
+     */
+    public function preserveGetParameters($arrExclude=array())
+    {
+        foreach ($_GET as $k => $v) {
+            if (in_array($k, $arrExclude)) {
+                continue;
+            }
+
+            if (array_key_exists($k, $this->arrFormFields)) {
+                continue;
+            }
+
+            $this->addFormField($k, array(
+                'inputType' => 'hidden',
+                'value' => \Input::get($k)
+            ));
+        }
+    }
+
+    /**
+     * Get form method
+     * @return  string
+     */
+    public function getMethod()
+    {
+        return $this->strMethod;
+    }
+
+    /**
      * Get the form action
-     * @param   string  The URI
+     * @return  string
      */
     public function getFormAction()
     {
@@ -196,7 +230,25 @@ class Form extends \Controller
      */
     public function isSubmitted()
     {
-        return $this->blnSubmitted;
+        return (bool) $this->blnSubmitted;
+    }
+
+    /**
+     * Check if the form is valid (no widget has an error)
+     * @return  boolean
+     */
+    public function isValid()
+    {
+        return (bool) $this->blnValid;
+    }
+
+    /**
+     * Check if form is dirty (widgets need to be generated)
+     * return   bool
+     */
+    public function isDirty()
+    {
+        return (bool) ($this->intState === static::STATE_DIRTY);
     }
 
     /**
@@ -208,7 +260,7 @@ class Form extends \Controller
         // We need to create the widgets to know if we have uploads
         $this->createWidgets();
 
-        return $this->blnHasUploads;
+        return (bool) $this->blnHasUploads;
     }
 
     /**
@@ -225,11 +277,6 @@ class Form extends \Controller
         // Make sure it has a "name" attribute because it is mandatory
         if (!isset($arrDca['name'])) {
             $arrDca['name'] = $strName;
-        }
-
-        // Some widgets render the mandatory asterisk only based on "require" attribute
-        if (!isset($arrDca['required'])) {
-            $arrDca['eval']['required'] = (bool) $arrDca['eval']['mandatory'];
         }
 
         // Support default values
@@ -250,32 +297,48 @@ class Form extends \Controller
             throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrDca['inputType']));
         }
 
-        if (is_array($arrDca['save_callback'])) {
-            $arrCallbacks = $arrDca['save_callback'];
-            $this->addValidator($strName, function($objWidget) use ($arrCallbacks) {
-                foreach ($arrCallbacks as $callback) {
-                    try {
-                        if (is_array($callback)) {
-                            $objCallback = System::importStatic($callback[0]);
-                            $objWidget->value = $objCallback->$callback[1]($objWidget->value, $this);
-                        } elseif (is_callable($callback)) {
-                            $objWidget->value = $callback($objWidget->value, $this);
-                        }
-                    } catch (\Exception $e) {
-                        $objWidget->class = 'error';
-                        $objWidget->addError($e->getMessage());
-                    }
+        // Convert date formats into timestamps
+        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'datim') {
+            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
+                if ($varValue != '') {
+                    $objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                    $varValue = $objDate->tstamp;
                 }
+
+                return $varValue;
             });
         }
 
-        // Convert date formats into timestamps
-        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'datim') {
-            $this->addValidator($strName, function($objWidget) use ($arrDca) {
-                if ($objWidget->value != '') {
-                	$objDate = new \Date($objWidget->value, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
-                	$objWidget->value = $objDate->tstamp;
+        if (is_array($arrDca['save_callback'])) {
+            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca, $strName) {
+
+                $intId = 0;
+                $strTable = '';
+
+                if (($objModel = $objForm->getBoundModel()) !== null) {
+                    $intId = $objModel->id;
+                    $strTable = $objModel->getTable();
                 }
+
+                $dc = (object) array(
+                    'id'            => $intId,
+                    'table'         => $strTable,
+                    'value'         => $varValue,
+                    'field'         => $strName,
+                    'inputName'     => $objWidget->name,
+                    'activeRecord'  => $objModel
+                );
+
+                foreach ($arrDca['save_callback'] as $callback) {
+                    if (is_array($callback)) {
+                        $objCallback = \System::importStatic($callback[0]);
+                        $varValue = $objCallback->$callback[1]($varValue, $dc);
+                    } elseif (is_callable($callback)) {
+                        $varValue = $callback($varValue, $dc);
+                    }
+                }
+
+                return $varValue;
             });
         }
 
@@ -306,7 +369,7 @@ class Form extends \Controller
      * the present values as default values.
      * @param   \Model
      */
-    public function bindModel(\Model $objModel)
+    public function bindModel(\Model $objModel=null)
     {
         $this->objModel = $objModel;
     }
@@ -314,14 +377,9 @@ class Form extends \Controller
     /**
      * Gets the bound model
      * @return   \Model
-     * @throws   \BadMethodCallException
      */
     public function getBoundModel()
     {
-        if ($this->objModel === null) {
-            throw new \BadMethodCallException('There was no bound instance of "Model" found!');
-        }
-
         return $this->objModel;
     }
 
@@ -356,14 +414,14 @@ class Form extends \Controller
     /**
      * Add form fields from a back end DCA
      * @param   string   The DCA table name
-     * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @param   callable Called for each field, return true if you want to include the field in the form
      * @return  Form
      */
     public function addFieldsFromDca($strTable, $varCallback = null)
     {
         \System::loadLanguageFile($strTable);
         $this->loadDataContainer($strTable);
-        $arrFields = $GLOBALS['TL_DCA'][$strTable]['fields'];
+        $arrFields = &$GLOBALS['TL_DCA'][$strTable]['fields'];
 
         foreach ($arrFields as $k => $v) {
             if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
@@ -379,7 +437,7 @@ class Form extends \Controller
     /**
      * Add form fields from a back end form generator form ID
      * @param   int      The form generator form ID
-     * @param   callable A callable that will be called on the array before adding (remove fields if you like)
+     * @param   callable Called for each field, return true if you want to include the field in the form
      * @return  Form
      * @throws  \InvalidArgumentException
      */
@@ -467,19 +525,35 @@ class Form extends \Controller
      */
     public function getWidget($strName)
     {
+        $this->createWidgets();
+
         return $this->arrWidgets[$strName];
+    }
+
+    /**
+     * Return all widgets
+     * @return  array
+     */
+    public function getWidgets()
+    {
+        $this->createWidgets();
+
+        return $this->arrWidgets;
     }
 
     /**
      * Add a validator to the form field
      * @param   string   The form field name
-     * @param   callable A callable that will be called on widget validation
+     * @param   ValidatorInterface|callable An instance of ValidatorInterface or a callable that will be called on widget validation
      * @return  Form
+     * @throws  \InvalidArgumentException
      */
-    public function addValidator($strName, $varCallback)
+    public function addValidator($strName, $varValidator)
     {
-        if (is_callable($varCallback)) {
-            $this->arrValidators[$strName][] = $varCallback;
+        if ($varValidator instanceof ValidatorInterface || is_callable($varValidator)) {
+            $this->arrValidators[$strName][] = $varValidator;
+        } else {
+            throw new \InvalidArgumentException('Your validator is invalid!');
         }
 
         return $this;
@@ -493,12 +567,16 @@ class Form extends \Controller
     public function createWidgets()
     {
         // Do nothing if already generated
-        if (!empty($this->arrWidgets) && $this->intState === self::STATE_CLEAN) {
+        if (!$this->isDirty()) {
             return;
         }
 
         $intTotal = count($this->arrFormFields);
         $i = 0;
+
+        // Reset to initial values
+        $this->arrWidgets = array();
+        $this->blnHasUploads = false;
 
         // Initialize widgets
         foreach ($this->arrFormFields as $strName => $arrField) {
@@ -510,7 +588,11 @@ class Form extends \Controller
             }
 
             $arrField['tableless']  = $this->blnTableless;
-            $arrField['rowClass']   = $this->generateRowClass($i, $intTotal);
+
+            // Some widgets render the mandatory asterisk only based on "require" attribute
+            if (!isset($arrField['required'])) {
+                $arrField['required'] = (bool) $arrField['mandatory'];
+            }
 
             $objWidget = new $strClass($arrField);
 
@@ -522,17 +604,19 @@ class Form extends \Controller
             $i++;
         }
 
-        if ($this->strMethod == 'GET' && $this->blnHasUploads) {
-            throw new \RuntimeException('How do you want me to upload your file using GET?');
-        }
+        RowClass::withKey('rowClass')->addCount('row_')->addFirstLast('row_')->addEvenOdd()->applyTo($this->arrWidgets);
 
-        if ($this->blnHasUploads) {
+        $this->intState = self::STATE_CLEAN;
+
+        if ($this->hasUploads()) {
+            if ($this->getMethod() == 'GET') {
+                throw new \RuntimeException('How do you want me to upload your file using GET?');
+            }
+
             $this->strEnctype = 'multipart/form-data';
         } else {
             $this->strEnctype = 'application/x-www-form-urlencoded';
         }
-
-        $this->intState = self::STATE_CLEAN;
 
         return $this;
     }
@@ -543,34 +627,49 @@ class Form extends \Controller
      */
     public function validate()
     {
-        $this->createWidgets();
-
-        if (!$this->blnSubmitted) {
+        if (!$this->isSubmitted()) {
             return false;
         }
+
+        $this->createWidgets();
+        $this->blnValid = true;
 
         foreach ($this->arrWidgets as $strName => $objWidget) {
             $objWidget->validate();
 
-            // Run custom validators
-            if (isset($this->arrValidators[$strName])) {
-                foreach ($this->arrValidators[$strName] as $varCallback) {
-                    call_user_func($varCallback, $objWidget);
-                }
-            }
-
             if ($objWidget->hasErrors()) {
                 $this->blnValid = false;
-            }
-            elseif ($objWidget->submitInput()) {
+
+            } elseif ($objWidget->submitInput()) {
+
+                $varValue = $objWidget->value;
+
+                // Run custom validators
+                if (isset($this->arrValidators[$strName])) {
+
+                    try {
+                        foreach ($this->arrValidators[$strName] as $varValidator) {
+
+                            if ($varValidator instanceof ValidatorInterface) {
+                                $varValue = $varValidator->validate($varValue, $objWidget, $this);
+                            } else {
+                                $varValue = call_user_func($varValidator, $varValue, $objWidget, $this);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        $objWidget->class = 'error';
+                        $objWidget->addError($e->getMessage());
+                    }
+                }
+
                 // Bind to Model instance
-                if ($this->objModel !== null) {
-                    $this->objModel->$strName =  $objWidget->value;
+                if (!$objWidget->hasErrors() && $this->objModel !== null) {
+                    $this->objModel->$strName =  $varValue;
                 }
             }
         }
 
-        return $this->blnValid;
+        return $this->isValid();
     }
 
     /**
@@ -582,14 +681,14 @@ class Form extends \Controller
     {
         $this->createWidgets();
 
-        $objTemplate->action = $this->strFormAction;
-        $objTemplate->formId = $this->strFormId;
-        $objTemplate->method = $this->strMethod;
-        $objTemplate->enctype = $this->strEnctype;
+        $objTemplate->action = $this->getFormAction();
+        $objTemplate->formId = $this->getFormId();
+        $objTemplate->method = $this->getMethod();
+        $objTemplate->enctype = $this->getEnctype();
         $objTemplate->widgets = $this->arrWidgets;
-        $objTemplate->valid = $this->blnValid;
-        $objTemplate->submitted = $this->blnSubmitted;
-        $objTemplate->hasUploads = $this->blnHasUploads;
+        $objTemplate->valid = $this->isValid();
+        $objTemplate->submitted = $this->isSubmitted();
+        $objTemplate->hasUploads = $this->hasUploads();
         $objTemplate->tableless = $this->blnTableless;
 
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
@@ -621,13 +720,13 @@ class Form extends \Controller
         $this->createWidgets();
 
         $objTemplate = new \FrontendTemplate('form');
-        $objTemplate->class = 'hasteform_' . $this->strFormId;
+        $objTemplate->class = 'hasteform_' . $this->getFormId();
         $objTemplate->tableless = $this->blnTableless;
-        $objTemplate->action = $this->strFormAction;
-        $objTemplate->formId = $this->strFormId;
-        $objTemplate->method = strtolower($this->strMethod);
-        $objTemplate->enctype = $this->strEnctype;
-        $objTemplate->formSubmit = $this->strFormId;
+        $objTemplate->action = $this->getFormAction();
+        $objTemplate->formId = $this->getFormId();
+        $objTemplate->method = strtolower($this->getMethod());
+        $objTemplate->enctype = $this->getEnctype();
+        $objTemplate->formSubmit = $this->getFormId();
 
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
@@ -653,11 +752,11 @@ class Form extends \Controller
      */
     public function fetch($strName)
     {
-        if (!$this->blnSubmitted) {
+        if (!$this->isSubmitted()) {
             throw new \BadMethodCallException('How do you want me to fetch data from an unsubmitted form?');
         }
 
-        if ($this->strMethod !== 'POST') {
+        if ($this->getMethod() !== 'POST') {
             throw new \BadMethodCallException('Widgets only support fetching POST values. Use the Contao Input class for other purposes.');
         }
 
@@ -711,16 +810,6 @@ class Form extends \Controller
         if (in_array($strName, $this->arrFormFields)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
         }
-    }
-
-    /**
-     * Generates a the row CSS class for the widget
-     * @param   int Current index
-     * @param   int Total number of widgets
-     */
-    protected function generateRowClass($intIndex, $intTotal)
-    {
-        return 'row_' . $intIndex . (($intIndex == 0) ? ' row_first' : (($intIndex == ($intTotal - 1)) ? ' row_last' : '')) . ((($intIndex % 2) == 0) ? ' even' : ' odd');
     }
 
     /**

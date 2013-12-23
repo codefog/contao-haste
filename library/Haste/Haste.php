@@ -17,7 +17,7 @@ class Haste extends \Controller
     /**
      * Haste version
      */
-    const VERSION = '3.0.3';
+    const VERSION = '4.0.0';
 
     /**
      * Current object instance (Singleton)
@@ -48,5 +48,33 @@ class Haste extends \Controller
         }
 
         return static::$objInstance;
+    }
+
+    /**
+     * Recursively create a directory
+     * Until Contao Core supports it (see https://github.com/contao/core/issues/6553)
+     * @param   string
+     * @param   bool
+     * @return  bool
+     */
+    public static function mkdirr($strDirectory)
+    {
+        $components = explode('/', $strDirectory);
+        $strDirectory = '';
+
+        foreach ($components as $folder) {
+
+            $strDirectory .= '/' . (string) $folder;
+            $strDirectory = ltrim($strDirectory, '/');
+
+            // Does not matter if file or directory
+            if (!file_exists(TL_ROOT . '/' . $strDirectory)) {
+                if (!\Files::getInstance()->mkdir($strDirectory)) {
+                    return false;
+                }
+            }
+        }
+
+        return is_dir(TL_ROOT . '/' . $strDirectory);
     }
 }
