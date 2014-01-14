@@ -137,6 +137,31 @@ class CsvReader
     }
 
     /**
+     * Set the mapper array from DCA
+     * @param string
+     * @throws \Exception
+     */
+    public function setMapperFromDca($strTable)
+    {
+        if (!is_array($GLOBALS['TL_DCA'][$strTable]['fields'])) {
+            throw new \Exception('There is no DCA loaded!');
+        }
+
+        $arrMapper = array();
+
+        // Build the mapper
+        foreach ($GLOBALS['TL_DCA']['tl_pensimo']['fields'] as $k => $v) {
+            if (!is_array($v['eval']) || !array_key_exists('haste_csv_position', $v['eval'])) {
+                continue;
+            }
+
+            $arrMapper[$k] = $v['eval']['haste_csv_position'];
+        }
+
+        $this->setMapper($arrMapper);
+    }
+
+    /**
      * Set the model name
      * @param string
      * @throws \InvalidArgumentException
@@ -202,9 +227,11 @@ class CsvReader
      */
     public function save($varCallback=null)
     {
+        $time = time();
         $intIndex = 0;
         $intSaved = 0;
-        $arrFields = \Database::getInstance()->getFieldNames($objModel::getTable());
+        $strModel = $this->strModel;
+        $arrFields = \Database::getInstance()->getFieldNames($strModel::getTable());
         $arrFields = array_flip($arrFields);
 
         while (($arrData = fgetcsv($this->objFile->handle, 0, $this->strDelimiter, $this->strEnclosure, $this->strEscape)) !== false) {
@@ -216,12 +243,12 @@ class CsvReader
             // Use mapper
             if (!empty($this->arrMapper)) {
                 foreach ($this->arrMapper as $k => $v) {
-                    if (!array_key_exists($k, $arrData)) {
+                    if (!array_key_exists($v, $arrData)) {
                         continue;
                     }
 
-                    $arrData[$v] = $arrData[$k];
-                    unset($arrData[$k]);
+                    $arrData[$k] = $arrData[$v];
+                    unset($arrData[$v]);
                 }
             }
 
@@ -234,10 +261,19 @@ class CsvReader
                 }
             }
 
+            // Add the timestamp
+            if (!isset($arrData['tstamp'])) {
+                $arrData['tstamp'] = $time;
+            }
+
             // Sort out the fields that are not present in database
             $arrData = array_intersect_key($arrData, $arrFields);
 
-            $objModel = new $strClass();
+            if (empty($arrData)) {
+                continue;
+            }
+
+            $objModel = new $strModel();
             $objModel->setRow($arrData);
             $objModel->save();
 
