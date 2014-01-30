@@ -373,6 +373,7 @@ class Relations extends \Backend
             $arrIds = Model::getRelatedValues($arrRelation['reference_table'], $field);
 
             if (empty($arrIds)) {
+                $return .= '</select> ';
                 continue;
             }
 
