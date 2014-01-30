@@ -84,11 +84,16 @@ class Relations extends \Backend
      */
     public function updateRelatedRecords($varValue, \DataContainer $dc)
     {
+        static $blnPurged;
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
             $arrValues = deserialize($varValue, true);
-            $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
+
+            if (!$blnPurged) {
+                $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
+                $blnPurged = true;
+            }
 
             foreach ($arrValues as $value) {
                 $arrSet = array(
