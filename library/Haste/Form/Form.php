@@ -345,7 +345,7 @@ class Form extends \Controller
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
 
         // Convert optgroups so they work with FormSelectMenu
-        if (is_array($arrDca['options']) && !array_is_assoc($arrDca['options'])) {
+        if (is_array($arrDca['options']) && array_is_assoc($arrDca['options'])) {
             $arrOptions = $arrDca['options'];
             $arrDca['options'] = array();
 
