@@ -22,6 +22,7 @@ Haste is a collection of tools and classes to ease working with Contao.
 
 - [Date](docs/Date/index.md)
 - [File/CsvReader](docs/File/CsvReader.md)
+- [File/CsvWriter](docs/File/CsvWriter.md)
 - [Form](docs/Form/Form.md)
 - [Http](docs/Http/index.md)
 - [Input](docs/Input/index.md)
