@@ -33,10 +33,12 @@ class JsonResponse extends Response
     /**
      * Prepares the content
      * @param   array
+     * @param   integer
+     * @param   integer
      */
-    public function setContent($arrContent)
+    public function setContent($arrContent, $intOptions = 0, $intDepth = 512)
     {
-        $strContent = json_encode($arrContent);
+        $strContent = json_encode($arrContent, $intOptions, $intDepth);
 
         parent::setContent($strContent);
     }
