@@ -122,7 +122,7 @@ class CsvWriter
         $arrMapper = array();
 
         // Build the mapper
-        foreach ($GLOBALS['TL_DCA']['tl_pensimo']['fields'] as $k => $v) {
+        foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $k => $v) {
             if (!is_array($v['eval']) || !array_key_exists('haste_csv_position', $v['eval'])) {
                 continue;
             }
