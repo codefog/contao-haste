@@ -190,10 +190,11 @@ class CsvWriter
     /**
      * Download the CSV file
      * @param callable
+     * @param string
      */
-    public function download($varCallback=null)
+    public function download($varCallback=null, $strFile='')
     {
-		$objFile = $this->createFile($varCallback);
+		$objFile = $this->createFile($varCallback, $strFile);
 		$objFile->sendToBrowser();
     }
 
