@@ -37,7 +37,7 @@ class CsvWriter
      * Delimiter character
      * @var string
      */
-    protected $strDelimiter = ';';
+    protected $strDelimiter = ',';
 
     /**
      * Enclosure character
@@ -211,20 +211,21 @@ class CsvWriter
         }
 
         $objFile = new \File($strFile);
+        $objFile->truncate();
 
         // Add the header fields
         if (!empty($this->arrHeaderFields)) {
             fputcsv($objFile->handle, $this->arrHeaderFields, $this->strDelimiter, $this->strEnclosure);
         }
 
-        if ($objModel !== null) {
-            while ($objModel->next()) {
-                $arrData = $objModel->row();
+        if ($this->objModel !== null) {
+            while ($this->objModel->next()) {
+                $arrData = $this->objModel->row();
 
                 // Use mapper
                 if (!empty($this->arrMapper)) {
                     foreach ($this->arrMapper as $k => $v) {
-                        if (array_key_exists($k, $arrData)) {
+                        if (!array_key_exists($k, $arrData)) {
                             continue;
                         }
 
