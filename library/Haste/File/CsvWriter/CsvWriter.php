@@ -12,7 +12,7 @@
 
 namespace Haste\File\CsvWriter;
 
-use Haste\File\CsvWriter\DataProvider;
+use Haste\File\CsvWriter\DataProvider\ProviderInterface;
 
 class CsvWriter
 {
