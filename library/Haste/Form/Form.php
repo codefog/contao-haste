@@ -681,6 +681,7 @@ class Form extends \Controller
                     } catch (\Exception $e) {
                         $objWidget->class = 'error';
                         $objWidget->addError($e->getMessage());
+                        $this->blnValid = false;
                     }
                 }
 
