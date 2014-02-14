@@ -355,7 +355,7 @@ class Form extends \Controller
                 } else {
                     $arrDca['options'][] = array(
                         'label'     => $k,
-                        'value'     => '',
+                        'value'     => $k,
                         'group'     => '1',
                     );
 
