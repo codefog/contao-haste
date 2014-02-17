@@ -104,7 +104,7 @@ class ModelData
                 $arrTokens[$strPrefix.$key] = (string) $value;
 
                 if (is_array($value) || $value instanceof \ArrayObject) {
-                    $arrTokens = array_merge($arrTokens, $fnGenerate($value, $key.'_'));
+                    $arrTokens = array_merge($arrTokens, $fnGenerate($value, $strPrefix.$key.'_'));
                 }
             }
 
