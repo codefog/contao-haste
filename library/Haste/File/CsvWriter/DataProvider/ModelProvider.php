@@ -80,7 +80,7 @@ class ModelProvider implements ProviderInterface
         }
 
         if (is_callable($varCallback)) {
-            $varData = call_user_func_array($varCallback, array($varData, $this->objModel));
+            $varData = call_user_func($varCallback, $varData, $this->objModel);
         }
 
         // Skip records if the returned data is null
