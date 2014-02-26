@@ -116,9 +116,11 @@ class CsvWriter
 
         $objFile = new \File($strFile);
         $objFile->truncate();
+        $this->objProvider->rewind();
 
-        while (($arrData = $this->objProvider->getNext($varCallback)) !== false) {
-            fputcsv($objFile->handle, $arrData, $this->strDelimiter, $this->strEnclosure);
+        while ($this->objProvider->valid()) {
+            fputcsv($objFile->handle, $this->objProvider->current($varCallback), $this->strDelimiter, $this->strEnclosure);
+            $this->objProvider->next();
         }
 
         return $objFile;

@@ -12,14 +12,8 @@
 
 namespace Haste\File\CsvWriter\DataProvider;
 
-class DcaProvider implements ProviderInterface
+class CollectionProvider implements \Iterator
 {
-
-    /**
-     * Table name
-     * @var string
-     */
-    protected $strTable;
 
     /**
      * Model
@@ -41,25 +35,11 @@ class DcaProvider implements ProviderInterface
 
     /**
      * Initialize the object
-     * @param string
-     * @throws \InvalidArgumentException
+     * @param object
      */
-    public function __construct($strTable)
+    public function __construct(\Collection $objModel)
     {
-        \Haste::getInstance()->call('loadDataContainer', $strTable);
-
-        if (!isset($GLOBALS['TL_DCA'][$strTable])) {
-            throw new \InvalidArgumentException('Could not find DCA for ' . $strTable);
-        }
-
-        $strClass = \Model::getClassFromTable($strTable);
-
-        if (!class_exists($strClass)) {
-            throw new \InvalidArgumentException('Could not find model class for ' . $strTable);
-        }
-
-        $this->objModel = $strClass::findAll();
-        $this->strTable = $strTable;
+        $this->objModel = $objModel;
     }
 
     /**
@@ -81,33 +61,68 @@ class DcaProvider implements ProviderInterface
     }
 
     /**
-     * Get the next array of data
+     * Return the current row of data
      * @param callable
-     * @return array|boolean
+     * @return array|null
      */
-    public function getNext($varCallback=null)
+    public function current($varCallback=null)
     {
         if (!empty($this->arrHeaderFields) && !$this->blnHeaderFieldsUsed) {
             $this->blnHeaderFieldsUsed = true;
             return $this->arrHeaderFields;
         }
 
-        $varData = $this->objModel->next();
+        $varData = null;
 
         // Get the data as array
-        if ($varData !== false) {
+        if ($this->objModel !== null) {
             $varData = $this->objModel->row();
         }
 
         if (is_callable($varCallback)) {
-            $varData = call_user_func_array($varCallback, array($varData, $this->objModel));
+            $varData = call_user_func($varCallback, $varData, $this->objModel);
         }
 
         // Skip records if the returned data is null
-        if ($varData === null) {
-            $varData = $this->getNext($varCallback);
+        if ($varData === false) {
+            $this->next();
+            $varData = $this->current($varCallback);
         }
 
         return $varData;
+    }
+
+    /**
+     * Return the current key
+     * @return boolean
+     */
+    public function key()
+    {
+        return false;
+    }
+
+    /**
+     * Get the next position
+     */
+    public function next()
+    {
+        $this->objModel->next();
+    }
+
+    /**
+     * Reset the records
+     */
+    public function rewind()
+    {
+        $this->objModel->reset();
+    }
+
+    /**
+     * Is row valid?
+     * @return boolean
+     */
+    public function valid()
+    {
+        return $this->current() !== null;
     }
 }
