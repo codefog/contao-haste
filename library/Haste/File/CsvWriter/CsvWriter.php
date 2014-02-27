@@ -91,8 +91,7 @@ class CsvWriter
      */
     public function enableHeaderFields()
     {
-        if ($this->objProvider instanceof DataProvider\HeaderFieldsInterface)
-        {
+        if ($this->objProvider instanceof DataProvider\HeaderFieldsInterface) {
             $this->blnHeaderFields = $this->objProvider->hasHeaderFields();
         }
     }
