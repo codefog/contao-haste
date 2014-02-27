@@ -12,13 +12,18 @@
 
 namespace Haste\File\CsvWriter\DataProvider;
 
-interface ProviderInterface
+interface HeaderFieldsInterface
 {
 
     /**
-     * Get the next line of data
-     * @param callable
-     * @return array|boolean
+     * Has header fields
+     * @return boolean
      */
-    public function getNext($varCallback=null);
+    public function hasHeaderFields();
+
+    /**
+     * Get header fields
+     * @return array
+     */
+    public function getHeaderFields();
 }

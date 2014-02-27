@@ -12,14 +12,20 @@
 
 namespace Haste\File\CsvWriter\DataProvider;
 
-class CollectionProvider implements \Iterator
+class DatabaseResultProvider implements HeaderFieldsInterface, \Iterator
 {
 
     /**
-     * Model
+     * Database result
      * @var object
      */
-    protected $objModel;
+    protected $objResult;
+
+    /**
+     * Iteration is valid
+     * @var boolean
+     */
+    protected $blnValid = true;
 
     /**
      * Header fields
@@ -28,18 +34,21 @@ class CollectionProvider implements \Iterator
     protected $arrHeaderFields = array();
 
     /**
-     * Were the header fields already used?
-     * @var boolean
-     */
-    protected $blnHeaderFieldsUsed = false;
-
-    /**
      * Initialize the object
      * @param object
      */
-    public function __construct(\Collection $objModel)
+    public function __construct(\Database\Result $objResult)
     {
-        $this->objModel = $objModel;
+        $this->objResult = $objResult;
+    }
+
+    /**
+     * Has header fields
+     * @return boolean
+     */
+    public function hasHeaderFields()
+    {
+        return !empty($this->arrHeaderFields);
     }
 
     /**
@@ -62,43 +71,20 @@ class CollectionProvider implements \Iterator
 
     /**
      * Return the current row of data
-     * @param callable
      * @return array|null
      */
-    public function current($varCallback=null)
+    public function current()
     {
-        if (!empty($this->arrHeaderFields) && !$this->blnHeaderFieldsUsed) {
-            $this->blnHeaderFieldsUsed = true;
-            return $this->arrHeaderFields;
-        }
-
-        $varData = null;
-
-        // Get the data as array
-        if ($this->objModel !== null) {
-            $varData = $this->objModel->row();
-        }
-
-        if (is_callable($varCallback)) {
-            $varData = call_user_func($varCallback, $varData, $this->objModel);
-        }
-
-        // Skip records if the returned data is null
-        if ($varData === false) {
-            $this->next();
-            $varData = $this->current($varCallback);
-        }
-
-        return $varData;
+        return $this->objResult->row();
     }
 
     /**
      * Return the current key
-     * @return boolean
+     * @return null
      */
     public function key()
     {
-        return false;
+        return null;
     }
 
     /**
@@ -106,7 +92,9 @@ class CollectionProvider implements \Iterator
      */
     public function next()
     {
-        $this->objModel->next();
+        if (!$this->objResult->next()) {
+            $this->blnValid = false;
+        }
     }
 
     /**
@@ -114,7 +102,7 @@ class CollectionProvider implements \Iterator
      */
     public function rewind()
     {
-        $this->objModel->reset();
+        $this->objResult->reset();
     }
 
     /**
@@ -123,6 +111,6 @@ class CollectionProvider implements \Iterator
      */
     public function valid()
     {
-        return $this->current() !== null;
+        return $this->blnValid;
     }
 }

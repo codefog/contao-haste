@@ -12,7 +12,7 @@
 
 namespace Haste\File\CsvWriter;
 
-use Haste\File\CsvWriter\DataProvider\ProviderInterface;
+use Haste\File\CsvWriter\DataProvider;
 
 class CsvWriter
 {
@@ -22,6 +22,12 @@ class CsvWriter
      * @var ProviderInterface
      */
     protected $objProvider;
+
+    /**
+     * Use header fields
+     * @var boolean
+     */
+    protected $blnHeaderFields = false;
 
     /**
      * Delimiter character
@@ -39,7 +45,7 @@ class CsvWriter
      * Initialize object
      * @param ProviderInterface
      */
-    public function __construct(ProviderInterface $objProvider)
+    public function __construct(\Traversable $objProvider)
     {
         $this->objProvider = $objProvider;
     }
@@ -81,6 +87,25 @@ class CsvWriter
     }
 
     /**
+     * Enable the header fields
+     */
+    public function enableHeaderFields()
+    {
+        if ($this->objProvider instanceof DataProvider\HeaderFieldsInterface)
+        {
+            $this->blnHeaderFields = $this->objProvider->hasHeaderFields();
+        }
+    }
+
+    /**
+     * Disable the header fields
+     */
+    public function disableHeaderFields()
+    {
+        $this->blnHeaderFields = false;
+    }
+
+    /**
      * Save the data to CSV file
      * @param string
      * @param callable
@@ -116,11 +141,26 @@ class CsvWriter
 
         $objFile = new \File($strFile);
         $objFile->truncate();
-        $this->objProvider->rewind();
 
-        while ($this->objProvider->valid()) {
-            fputcsv($objFile->handle, $this->objProvider->current($varCallback), $this->strDelimiter, $this->strEnclosure);
-            $this->objProvider->next();
+        // Add header fields
+        if ($this->blnHeaderFields) {
+            $arrHeaderFields = $this->objProvider->getHeaderFields();
+
+            if (is_array($arrHeaderFields)) {
+                fputcsv($objFile->handle, $arrHeaderFields, $this->strDelimiter, $this->strEnclosure);
+            }
+        }
+
+        foreach ($this->objProvider as $arrData) {
+            if (is_callable($varCallback)) {
+                $arrData = call_user_func($varCallback, $arrData);
+            }
+
+            if (!is_array($arrData)) {
+                continue;
+            }
+
+            fputcsv($objFile->handle, $arrData, $this->strDelimiter, $this->strEnclosure);
         }
 
         return $objFile;
