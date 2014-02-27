@@ -122,8 +122,8 @@ class CsvWriter
      */
     public function download($strFile='', $varCallback=null)
     {
-		$objFile = $this->createFile($varCallback, $strFile);
-		$objFile->sendToBrowser();
+        $objFile = $this->createFile($varCallback, $strFile);
+        $objFile->sendToBrowser();
     }
 
     /**
