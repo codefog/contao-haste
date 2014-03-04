@@ -36,7 +36,7 @@ class Url
         $queries = preg_split('/&(amp;)?/i', $strQueryString, PREG_SPLIT_NO_EMPTY);
 
         // Overwrite existing parameters and ignore "language", see #64
-        foreach ($queries as $k=>$v) {
+        foreach ($queries as $k => $v) {
             $explode = explode('=', $v, 2);
 
             if ($v === '' || $k === 'language' || preg_match('/(^|&(amp;)?)' . preg_quote($explode[0], '/') . '=/i', $strRequest)) {
@@ -51,6 +51,43 @@ class Url
         }
 
         return $strScript . $href . str_replace(' ', '%20', $strRequest);
+    }
+
+    /**
+     * Remove query parameters from the current URL
+     * @param   array
+     * @param   mixed
+     * @return  string
+     */
+    public static function removeQueryString(array $arrParams, $varUrl=null)
+    {
+        $strUrl = static::prepareUrl($varUrl);
+
+        if (empty($arrParams)) {
+            return $strUrl;
+        }
+
+        list($strScript, $strQueryString) = explode('?', $strUrl, 2);
+
+        $strRequest = preg_replace('/^&(amp;)?/i', '', $strRequest);
+        $queries = preg_split('/&(amp;)?/i', $strQueryString, PREG_SPLIT_NO_EMPTY);
+
+        // Remove given parameters
+        foreach ($queries as $k => $v) {
+            $explode = explode('=', $v, 2);
+
+            if (in_array($explode[0], $arrParams)) {
+                unset($queries[$k]);
+            }
+        }
+
+        $href = '';
+
+        if (!empty($queries)) {
+            $href .= '?' . implode('&amp;', $queries) . '&amp;';
+        }
+
+        return $strScript . $href;
     }
 
     /**
