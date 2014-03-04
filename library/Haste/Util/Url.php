@@ -24,22 +24,13 @@ class Url
      */
     public static function addQueryString($strRequest, $varUrl=null)
     {
-        if ($varUrl === null) {
-            $varUrl = \Environment::getInstance()->request;
-
-        } elseif (is_numeric($varUrl)) {
-            if (($objJump = \PageModel::findByPk($varUrl)) === null) {
-                throw new \InvalidArgumentException('Given page id does not exist.');
-            }
-
-            $varUrl = \Controller::generateFrontendUrl($objJump->row());
-        }
+        $strUrl = static::prepareUrl($varUrl);
 
         if ($strRequest === '') {
-            return $varUrl;
+            return $strUrl;
         }
 
-        list($strScript, $strQueryString) = explode('?', $varUrl, 2);
+        list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
         $strRequest = preg_replace('/^&(amp;)?/i', '', $strRequest);
         $queries = preg_split('/&(amp;)?/i', $strQueryString, PREG_SPLIT_NO_EMPTY);
@@ -60,5 +51,32 @@ class Url
         }
 
         return $strScript . $href . str_replace(' ', '%20', $strRequest);
+    }
+
+    /**
+     * Prepare URL from ID and keep query string from current string
+     * @param   mixed
+     * @return  string
+     */
+    protected static function prepareUrl($varUrl)
+    {
+        if ($varUrl === null) {
+            $varUrl = \Environment::getInstance()->request;
+
+        } elseif (is_numeric($varUrl)) {
+            if (($objJump = \PageModel::findByPk($varUrl)) === null) {
+                throw new \InvalidArgumentException('Given page id does not exist.');
+            }
+
+            $varUrl = \Controller::generateFrontendUrl($objJump->row());
+
+            list(, $strQueryString) = explode('?', \Environment::getInstance()->request, 2);
+
+            if ($strQueryString != '') {
+                $varUrl .= '?' . $strQueryString;
+            }
+        }
+
+        return $varUrl;
     }
 }
