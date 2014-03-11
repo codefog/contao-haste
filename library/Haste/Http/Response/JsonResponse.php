@@ -12,8 +12,6 @@
 
 namespace Haste\Http\Response;
 
-use Haste\Util\InsertTag;
-
 class JsonResponse extends Response
 {
     /**
@@ -36,7 +34,7 @@ class JsonResponse extends Response
      * @param   integer
      * @param   integer
      */
-    public function setContent($arrContent, $intOptions = 0, $intDepth = 512)
+    public function setContent(array $arrContent = array(), $intOptions = 0, $intDepth = 512)
     {
         $strContent = json_encode($arrContent, $intOptions, $intDepth);
 
