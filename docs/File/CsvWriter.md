@@ -2,7 +2,7 @@
 
 Provides helper classes to write CSV files. Default configuration:
 
-- delimiter is ; (semicolon)
+- delimiter is , (comma)
 - enclosure is " (quote)
 
 
