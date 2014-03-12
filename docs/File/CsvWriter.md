@@ -8,57 +8,39 @@ Provides helper classes to write CSV files. Default configuration:
 
 ## Examples ##
 
-### A simple save from table ###
+### Export data from model ###
 
 ```php
 <?php
 
-$objExport = new Haste\File\CsvWriter();
-$objExport->setTable('tl_news');
-$objExport->setMapperFromDca('tl_news');
-$objExport->save('files/csv/my_file.csv'); // Returns a file object
+// Initialize data provider object
+$objDataProvider = new \Haste\File\CsvWriter\DataProvider\ModelCollection($objModel);
+
+// Set header fields
+$objDataProvider->setHeaderFields($arrHeaderFields);
+
+// Initialize the writer object
+$objCsvWriter = new Haste\File\CsvWriter($objDataProvider);
+
+// Enable header fields
+$objCsvWriter->enableHeaderFields();
+
+// Save the file (returns a \File object)
+$objCsvWriter->save('files/csv/my_file.csv');
+
+// Download the file
+$objCsvWriter->download();
 ```
 
-If you set the mapper from DCA, the fields must have "haste\_csv\_position" property set with column index value, e.g.
-
-```php
-$GLOBALS['TL_DCA']['tl_news']['fields']['alias']['eval']['haste_csv_position'] = 2;
-```
-
-### Download a file ###
-
-```php
-<?php
-
-$objExport = new Haste\File\CsvWriter();
-$objExport->setTable('tl_news');
-$objExport->setMapperFromDca('tl_news');
-$objExport->download();
-```
-
-### Advanced usage ###
+### Map the data ###
 
 ```php
 <?php
 
-$objExport = new Haste\File\CsvWriter();
+$objDataProvider = new \Haste\File\CsvWriter\DataProvider\DatabaseResult($objResult);
+$objCsvWriter = new Haste\File\CsvWriter($objDataProvider);
 
-// Use custom data
-$objExport->setModel($objModel);
-
-// Add header fields
-$objExport->setHeaderFields(array('ID', 'Headline', 'Alias'));
-
-// Set custom mapper
-$objExport->setMapper(array
-(
-    'id' => 0,
-    'headline' => 1,
-    'alias' => 2
-));
-
-// Add custom parsing
-$objExport->save('files/csv/my_file.csv', function($arrData) {
-    return array_filter($arrData);
+$objCsvWriter->download('', function($arrRow) {
+	return array($arrRow['id'], $arrRow['title']);
 });
 ```
