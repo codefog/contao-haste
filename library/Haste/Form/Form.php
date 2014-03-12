@@ -355,7 +355,7 @@ class Form extends \Controller
                 } else {
                     $arrDca['options'][] = array(
                         'label'     => $k,
-                        'value'     => '',
+                        'value'     => $k,
                         'group'     => '1',
                     );
 
@@ -681,6 +681,7 @@ class Form extends \Controller
                     } catch (\Exception $e) {
                         $objWidget->class = 'error';
                         $objWidget->addError($e->getMessage());
+                        $this->blnValid = false;
                     }
                 }
 
