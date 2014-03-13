@@ -367,6 +367,7 @@ class Relations extends \Backend
             $this->Session->setData($session);
         }
 
+        $count = 0;
         $return .= '<div class="tl_filter tl_subpanel">
 <strong>' . $GLOBALS['TL_LANG']['HST']['advanced_filter'] . '</strong> ';
 
@@ -379,6 +380,12 @@ class Relations extends \Backend
 
             if (empty($arrIds)) {
                 $return .= '</select> ';
+
+                // Add the line-break after 5 elements
+                if ((++$count % 5) == 0) {
+                    $return .= '<br>';
+                }
+
                 continue;
             }
 
@@ -443,6 +450,11 @@ class Relations extends \Backend
 
             $return .= "\n" . implode("\n", array_keys($options_sorter));
             $return .= '</select> ';
+
+            // Add the line-break after 5 elements
+            if ((++$count % 5) == 0) {
+                $return .= '<br>';
+            }
         }
 
         return $return . '</div>';
