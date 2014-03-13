@@ -12,31 +12,36 @@
 
 namespace Haste\Http\Response;
 
-use Haste\Util\InsertTag;
-
 class JsonResponse extends Response
 {
     /**
      * Creates a new JSON encoded HTTP response
-     * @param   array The response content
+     * @param   mixed The response content as string or array
      * @param   integer The response HTTP status code
      * @throws  \InvalidArgumentException When the HTTP status code is not valid
      */
-    public function __construct(array $arrContent = array(), $intStatus = 200)
+    public function __construct($varContent = '', $intStatus = 200)
     {
         parent::__construct('', $intStatus);
 
-        $this->setContent($arrContent);
+        $this->setContent($varContent);
         $this->setHeader('Content-Type', 'application/json');
     }
 
     /**
      * Prepares the content
-     * @param   array
+     * @param   mixed
+     * @param   integer
+     * @param   integer
      */
-    public function setContent($arrContent)
+    public function setContent($varContent, $intOptions = 0, $intDepth = 512)
     {
-        $strContent = json_encode($arrContent);
+        // Depth parameter is only supported from PHP 5.5
+        if (version_compare(PHP_VERSION, '5.5', '>=')) {
+            $strContent = json_encode($varContent, $intOptions, $intDepth);
+        } else {
+            $strContent = json_encode($varContent, $intOptions);
+        }
 
         parent::setContent($strContent);
     }
