@@ -12,7 +12,7 @@
 
 namespace Haste\IO\Writer;
 
-class ExcelFileWriter extends AbstractWriter
+class ExcelFileWriter extends AbstractFileWriter
 {
 
     /**
@@ -90,7 +90,7 @@ class ExcelFileWriter extends AbstractWriter
         }
 
         $this->currentRow = -1;
-        $this->objPHPExcel = new PHPExcel();
+        $this->objPHPExcel = new \PHPExcel();
 
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
         $this->objPHPExcel->setActiveSheetIndex(0);
@@ -127,7 +127,7 @@ class ExcelFileWriter extends AbstractWriter
      */
     protected function finish()
     {
-        $objWriter = PHPExcel_IOFactory::createWriter($this->objPHPExcel, $this->strFormat);
+        $objWriter = \PHPExcel_IOFactory::createWriter($this->objPHPExcel, $this->strFormat);
         $objWriter->save(TL_ROOT . '/' . $this->strFile);
     }
 
@@ -143,7 +143,7 @@ class ExcelFileWriter extends AbstractWriter
         $num2 = intval($num / 26);
 
         if ($num2 > 0) {
-            return getNameFromNumber($num2 - 1) . $letter;
+            return $this->getCharForColumn($num2 - 1) . $letter;
         } else {
             return $letter;
         }
