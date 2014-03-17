@@ -10,22 +10,22 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
-namespace Haste\File\CsvWriter\DataProvider;
+namespace Haste\IO\Reader;
 
-class DatabaseResultProvider implements HeaderFieldsInterface, \Iterator
+class ModelCollectionReader implements HeaderFieldsInterface, \Iterator
 {
 
     /**
-     * Database result
+     * Model Collection
      * @var object
      */
-    protected $objResult;
+    protected $objCollection;
 
     /**
      * Iteration is valid
      * @var boolean
      */
-    protected $blnValid = true;
+    protected $blnValid;
 
     /**
      * Header fields
@@ -37,9 +37,10 @@ class DatabaseResultProvider implements HeaderFieldsInterface, \Iterator
      * Initialize the object
      * @param object
      */
-    public function __construct(\Database\Result $objResult)
+    public function __construct(\Model\Collection $objCollection)
     {
-        $this->objResult = $objResult;
+        $this->objCollection = $objCollection;
+        $this->blnValid = ($this->objCollection->numRows > 0);
     }
 
     /**
@@ -71,11 +72,11 @@ class DatabaseResultProvider implements HeaderFieldsInterface, \Iterator
 
     /**
      * Return the current row of data
-     * @return array|null
+     * @return array
      */
     public function current()
     {
-        return $this->objResult->row();
+        return $this->objCollection->row();
     }
 
     /**
@@ -92,7 +93,7 @@ class DatabaseResultProvider implements HeaderFieldsInterface, \Iterator
      */
     public function next()
     {
-        if (!$this->objResult->next()) {
+        if (!$this->objCollection->next()) {
             $this->blnValid = false;
         }
     }
@@ -102,7 +103,9 @@ class DatabaseResultProvider implements HeaderFieldsInterface, \Iterator
      */
     public function rewind()
     {
-        $this->objResult->reset();
+        $this->objCollection->reset();
+        $this->blnValid = ($this->objCollection->count() > 0);
+
     }
 
     /**

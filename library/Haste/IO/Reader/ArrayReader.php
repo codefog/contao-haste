@@ -10,9 +10,9 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
-namespace Haste\File\CsvWriter\DataProvider;
+namespace Haste\IO\Reader;
 
-class ArrayProvider implements HeaderFieldsInterface, \IteratorAggregate
+class ArrayReader implements HeaderFieldsInterface, \IteratorAggregate
 {
 
     /**
