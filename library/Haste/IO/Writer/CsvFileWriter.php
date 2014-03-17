@@ -119,4 +119,12 @@ class CsvFileWriter extends AbstractWriter
 
         return (bool) fputcsv($this->resFile, $arrData, $this->strDelimiter, $this->strEnclosure);
     }
+
+    /**
+     * Close file handle
+     */
+    protected function finish()
+    {
+        fclose($this->resFile);
+    }
 }

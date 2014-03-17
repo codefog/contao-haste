@@ -111,6 +111,8 @@ abstract class AbstractWriter implements WriterInterface
             }
         }
 
+        $this->finish();
+
         return $intWritten;
     }
 
@@ -127,4 +129,9 @@ abstract class AbstractWriter implements WriterInterface
      * @return  bool
      */
     abstract protected function writeRow(array $arrRow);
+
+    /**
+     * Finish writing
+     */
+    abstract protected function finish();
 }

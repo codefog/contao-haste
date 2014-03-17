@@ -62,4 +62,9 @@ class ModelWriter extends AbstractWriter
 
         return true;
     }
+
+    /**
+     * Nothing to finish here
+     */
+    protected function finish() {}
 }
