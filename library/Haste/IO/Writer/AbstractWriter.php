@@ -14,7 +14,6 @@ namespace Haste\IO\Writer;
 
 use Haste\IO\Mapper\MapperInterface;
 
-
 abstract class AbstractWriter implements WriterInterface
 {
 
@@ -55,7 +54,7 @@ abstract class AbstractWriter implements WriterInterface
 
     /**
      * Set mapper handler
-     * @param   MapperInterface
+     * @param   MapperInterface|null
      * @return  $this
      */
     public function setMapper(MapperInterface $objMapper = null)
@@ -84,7 +83,7 @@ abstract class AbstractWriter implements WriterInterface
      */
     public function writeFrom(\Traversable $objReader)
     {
-        if (!$this->prepare()) {
+        if (!$this->prepare($objReader)) {
             return false;
         }
 

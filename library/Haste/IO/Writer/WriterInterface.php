@@ -12,15 +12,17 @@
 
 namespace Haste\IO\Writer;
 
+use Haste\IO\Mapper\MapperInterface;
+
 interface WriterInterface
 {
 
     /**
      * Set mapper handler
-     * @param   MapperInterface
+     * @param   MapperInterface|null
      * @return  $this
      */
-    public function setMapper(MapperInterface $objMapper);
+    public function setMapper(MapperInterface $objMapper = null);
 
     /**
      * Set row callback
