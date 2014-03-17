@@ -103,15 +103,6 @@ class CsvFileWriter extends AbstractWriter
             return false;
         }
 
-        // Add header fields
-        if ($this->blnHeaderFields && $objReader instanceof HeaderFieldsInterface && $objReader->hasHeaderFields()) {
-            $arrHeaderFields = $objReader->getHeaderFields();
-
-            if (is_array($arrHeaderFields)) {
-                fputcsv($this->resFile, $arrHeaderFields, $this->strDelimiter, $this->strEnclosure);
-            }
-        }
-
         return true;
     }
 
