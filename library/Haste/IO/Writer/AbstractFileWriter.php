@@ -40,11 +40,13 @@ abstract class AbstractFileWriter extends AbstractWriter
      */
     public function __construct($strFile = '', $strExtension = '')
     {
+        $strFile = (string) $strFile;
+
         if ($strFile == '') {
             $this->blnRandomName = true;
             $this->strExtension = $strExtension;
         } else {
-            $this->strFile = TL_ROOT . '/' . (string) $strFile;
+            $this->strFile = $strFile;
         }
     }
 
@@ -65,7 +67,7 @@ abstract class AbstractFileWriter extends AbstractWriter
     protected function prepare(\Traversable $objReader)
     {
         if ($this->blnRandomName) {
-            $this->strFile = TL_ROOT . '/system/tmp/export_' . specialchars(uniqid()) . $this->strExtension;
+            $this->strFile = 'system/tmp/export_' . specialchars(uniqid()) . $this->strExtension;
         }
 
         return true;

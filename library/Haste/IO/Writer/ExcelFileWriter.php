@@ -124,7 +124,7 @@ class ExcelFileWriter extends AbstractWriter
     protected function finish()
     {
         $objWriter = PHPExcel_IOFactory::createWriter($this->objPHPExcel, $this->strFormat);
-        $objWriter->save($this->strFile);
+        $objWriter->save(TL_ROOT . '/' . $this->strFile);
     }
 
     /**

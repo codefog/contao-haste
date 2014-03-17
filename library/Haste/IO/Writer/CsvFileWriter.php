@@ -88,7 +88,7 @@ class CsvFileWriter extends AbstractFileWriter
     {
         parent::prepare($objReader);
 
-        $this->resFile = @fopen($this->strFile, 'w');
+        $this->resFile = @fopen(TL_ROOT . '/' . $this->strFile, 'w');
 
         if (false === $this->resFile) {
             return false;
