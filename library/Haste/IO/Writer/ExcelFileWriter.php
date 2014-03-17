@@ -85,6 +85,10 @@ class ExcelFileWriter extends AbstractWriter
      */
     protected function prepare(\Traversable $objReader)
     {
+        if (!parent::prepare($objReader)) {
+            return false;
+        }
+
         $this->currentRow = -1;
         $this->objPHPExcel = new PHPExcel();
 

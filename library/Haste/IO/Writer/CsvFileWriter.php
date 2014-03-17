@@ -86,7 +86,9 @@ class CsvFileWriter extends AbstractFileWriter
      */
     protected function prepare(\Traversable $objReader)
     {
-        parent::prepare($objReader);
+        if (!parent::prepare($objReader)) {
+            return false;
+        }
 
         $this->resFile = @fopen(TL_ROOT . '/' . $this->strFile, 'w');
 
