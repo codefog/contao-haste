@@ -12,14 +12,8 @@
 
 namespace Haste\IO\Writer;
 
-class CsvFileWriter extends AbstractWriter
+class CsvFileWriter extends AbstractFileWriter
 {
-
-    /**
-     * Target file
-     * @var string
-     */
-    protected $strFile;
 
     /**
      * Target file resource
@@ -40,12 +34,13 @@ class CsvFileWriter extends AbstractWriter
     protected $strEnclosure = '"';
 
     /**
-     * Initialize object
-     * @param Traversable
+     * Construct csv writer
+     * @param   string
+     * @param   string
      */
-    public function __construct($strFile = '')
+    public function __construct($strFile = '', $strExtension = '.csv')
     {
-        $this->strFile = (string) $strFile;
+        parent::__construct($strFile, $strExtension);
     }
 
     /**
@@ -91,11 +86,7 @@ class CsvFileWriter extends AbstractWriter
      */
     protected function prepare(\Traversable $objReader)
     {
-        $strFile = $this->strFile;
-
-        if ($strFile == '') {
-            $strFile = 'system/tmp/export_' . md5(uniqid('', true)) . '.csv';
-        }
+        parent::prepare($objReader);
 
         $this->resFile = @fopen($this->strFile, 'w');
 
