@@ -13,6 +13,7 @@
 namespace Haste\IO\Writer;
 
 use Haste\IO\Mapper\MapperInterface;
+use Haste\IO\Reader\HeaderFieldsInterface;
 
 abstract class AbstractWriter implements WriterInterface
 {
