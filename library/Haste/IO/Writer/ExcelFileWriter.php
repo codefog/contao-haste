@@ -89,7 +89,7 @@ class ExcelFileWriter extends AbstractFileWriter
             return false;
         }
 
-        $this->currentRow = -1;
+        $this->currentRow = 0;
         $this->objPHPExcel = new \PHPExcel();
 
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
