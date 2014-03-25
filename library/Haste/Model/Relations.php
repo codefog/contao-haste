@@ -27,6 +27,11 @@ class Relations extends \Backend
      */
     private static $arrFilterableFields = array();
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * Add the relation callbacks to DCA
      * @param string
