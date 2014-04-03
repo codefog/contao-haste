@@ -16,30 +16,29 @@ class Url
 {
 
     /**
-     * Add a request string to the given URI string or page ID
-     * @param   string
+     * Add a query string to the given URI string or page ID
+     * @param   string Query
      * @param   mixed
      * @return  string
      * @throws  \InvalidArgumentException
      */
-    public static function addQueryString($strRequest, $varUrl=null)
+    public static function addQueryString($strQuery, $varUrl=null)
     {
         $strUrl = static::prepareUrl($varUrl);
+        $strQuery = ampersand($strQuery, false);
 
-        if ($strRequest === '') {
+        if ($strQuery === '') {
             return $strUrl;
         }
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
-
-        $strRequest = preg_replace('/^&(amp;)?/i', '', $strRequest);
-        $queries = preg_split('/&(amp;)?/i', $strQueryString, PREG_SPLIT_NO_EMPTY);
+        $queries = explode('&', $strQueryString);
 
         // Overwrite existing parameters and ignore "language", see #64
         foreach ($queries as $k => $v) {
             $explode = explode('=', $v, 2);
 
-            if ($v === '' || $k === 'language' || preg_match('/(^|&(amp;)?)' . preg_quote($explode[0], '/') . '=/i', $strRequest)) {
+            if ($v === '' || $k === 'language' || preg_match('/(^|&(amp;)?)' . preg_quote($explode[0], '/') . '=/i', $strQuery)) {
                 unset($queries[$k]);
             }
         }
@@ -47,10 +46,10 @@ class Url
         $href = '?';
 
         if (!empty($queries)) {
-            $href .= implode('&amp;', $queries) . '&amp;';
+            $href .= implode('&', $queries) . '&';
         }
 
-        return $strScript . $href . str_replace(' ', '%20', $strRequest);
+        return $strScript . $href . $strQuery;
     }
 
     /**
@@ -69,8 +68,7 @@ class Url
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
-        $strRequest = preg_replace('/^&(amp;)?/i', '', $strRequest);
-        $queries = preg_split('/&(amp;)?/i', $strQueryString, PREG_SPLIT_NO_EMPTY);
+        $queries = explode('&', $strQueryString);
 
         // Remove given parameters
         foreach ($queries as $k => $v) {
@@ -84,8 +82,10 @@ class Url
         $href = '';
 
         if (!empty($queries)) {
-            $href .= '?' . implode('&amp;', $queries) . '&amp;';
+            $href .= '?' . implode('&', $queries) . '&';
         }
+
+        $href = rtrim($href, '&');
 
         return $strScript . $href;
     }
@@ -113,6 +113,8 @@ class Url
                 $varUrl .= '?' . $strQueryString;
             }
         }
+
+        $varUrl = ampersand($varUrl, false);
 
         return $varUrl;
     }
