@@ -132,8 +132,14 @@ and validate the user inputs etc.
 <?php
     // you can exclude or modify certain fields by passing a callable as second
     // parameter
-    $objForm->addFieldsFromFormGenerator(42, function(&$arrFields) {
-        unset($arrFields['idontwantyou']);
+    $objForm->addFieldsFromFormGenerator(42, function(&$strField, &$arrDca) {
+        // add anything you like
+        if ($strField == 'myField') {
+            $arrDca['eval']['mandatory'] = true;
+        }
+
+        // you must return true otherwise the field will be skipped
+        return true;
     });
 ```
 
