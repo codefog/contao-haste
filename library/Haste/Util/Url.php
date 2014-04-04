@@ -27,10 +27,6 @@ class Url
         $strUrl = static::prepareUrl($varUrl);
         $strQuery = trim(ampersand($strQuery, false), '&');
 
-        if ($strQuery === '') {
-            return $strUrl;
-        }
-
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
         $queries = explode('&', $strQueryString);
@@ -44,10 +40,12 @@ class Url
             }
         }
 
-        $href = '?';
+        $href = '';
 
         if (!empty($queries)) {
-            $href .= implode('&', $queries) . '&';
+            $href = '?' . implode('&', $queries) . '&';
+        } elseif (!empty($strQuery)) {
+            $href = '?';
         }
 
         return $strScript . $href . $strQuery;
