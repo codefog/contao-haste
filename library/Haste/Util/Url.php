@@ -25,13 +25,14 @@ class Url
     public static function addQueryString($strQuery, $varUrl=null)
     {
         $strUrl = static::prepareUrl($varUrl);
-        $strQuery = ampersand($strQuery, false);
+        $strQuery = trim(ampersand($strQuery, false), '&');
 
         if ($strQuery === '') {
             return $strUrl;
         }
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
+
         $queries = explode('&', $strQueryString);
 
         // Overwrite existing parameters and ignore "language", see #64
