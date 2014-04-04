@@ -82,10 +82,8 @@ class Url
         $href = '';
 
         if (!empty($queries)) {
-            $href .= '?' . implode('&', $queries) . '&';
+            $href .= '?' . implode('&', $queries);
         }
-
-        $href = rtrim($href, '&');
 
         return $strScript . $href;
     }
