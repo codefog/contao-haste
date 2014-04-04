@@ -75,7 +75,7 @@ class Url
         foreach ($queries as $k => $v) {
             $explode = explode('=', $v, 2);
 
-            if (in_array($explode[0], $arrParams)) {
+            if ($v === '' || in_array($explode[0], $arrParams)) {
                 unset($queries[$k]);
             }
         }
