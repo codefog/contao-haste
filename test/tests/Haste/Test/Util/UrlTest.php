@@ -76,6 +76,11 @@ class UrlTest extends \PHPUnit_Framework_TestCase
                 'http://domain.com/path.html?param1=value1'
             ),
             array(
+                'http://domain.com/path.html?',
+                '',
+                'http://domain.com/path.html'
+            ),
+            array(
                 'http://domain.com/path.html?param1=value1',
                 'param1=value2',
                 'http://domain.com/path.html?param1=value2'
@@ -136,6 +141,16 @@ class UrlTest extends \PHPUnit_Framework_TestCase
             array(
                 'http://domain.com/path.html',
                 array('param1'),
+                'http://domain.com/path.html'
+            ),
+            array(
+                'http://domain.com/path.html',
+                array(),
+                'http://domain.com/path.html'
+            ),
+            array(
+                'http://domain.com/path.html',
+                array(''),
                 'http://domain.com/path.html'
             ),
             array(
