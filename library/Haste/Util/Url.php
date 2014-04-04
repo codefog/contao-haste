@@ -98,7 +98,7 @@ class Url
     protected static function prepareUrl($varUrl)
     {
         if ($varUrl === null) {
-            $varUrl = \Environment::getInstance()->request;
+            $varUrl = \Environment::get('request');
 
         } elseif (is_numeric($varUrl)) {
             if (($objJump = \PageModel::findByPk($varUrl)) === null) {
@@ -107,7 +107,7 @@ class Url
 
             $varUrl = \Controller::generateFrontendUrl($objJump->row());
 
-            list(, $strQueryString) = explode('?', \Environment::getInstance()->request, 2);
+            list(, $strQueryString) = explode('?', \Environment::get('request'), 2);
 
             if ($strQueryString != '') {
                 $varUrl .= '?' . $strQueryString;
