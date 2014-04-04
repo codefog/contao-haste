@@ -157,11 +157,11 @@ class Form extends \Controller
      */
     public function setFormActionFromPageId($intId)
     {
-        if (($objPage = \PageModel::findByPk($intId)) === null) {
+        if (($objPage = \PageModel::findWithDetails($intId)) === null) {
             throw new \InvalidArgumentException(sprintf('The page id "%s" does apparently not exist!', $intId));
         }
 
-        $this->strFormAction = \Controller::generateFrontendUrl($objPage->row());
+        $this->strFormAction = \Controller::generateFrontendUrl($objPage->row(), null, $objPage->language);
 
         return $this;
     }

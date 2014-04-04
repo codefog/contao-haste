@@ -28,6 +28,12 @@ class Relations
     private static $arrFilterableFields = array();
 
     /**
+     * Purge cache
+     * @var array
+     */
+    private static $arrPurgeCache = array();
+
+    /**
      * Add the relation callbacks to DCA
      * @param string
      */
@@ -84,15 +90,14 @@ class Relations
      */
     public function updateRelatedRecords($varValue, \DataContainer $dc)
     {
-        static $blnPurged;
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
             $arrValues = deserialize($varValue, true);
 
-            if (!$blnPurged) {
+            if (!in_array($arrRelation['table'], static::$arrPurgeCache)) {
                 $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
-                $blnPurged = true;
+                static::$arrPurgeCache[] = $arrRelation['table'];
             }
 
             foreach ($arrValues as $value) {
