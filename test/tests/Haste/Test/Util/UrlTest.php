@@ -18,20 +18,23 @@ use Haste\Util\Url;
 
 class UrlTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
      * @dataProvider addQueryStringProvider
      */
     public function testAddQueryString($request, $queryToAdd, $expectedResult)
     {
-        $this->assertSame(Url::addQueryString($queryToAdd, $request), $expectedResult);
+        $this->assertSame($expectedResult, Url::addQueryString($queryToAdd, $request));
     }
+
     /**
      * @dataProvider removeQueryStringProvider
      */
     public function testRemoveQueryString($request, $paramsToRemove, $expectedResult)
     {
-        $this->assertSame(Url::removeQueryString($paramsToRemove, $request), $expectedResult);
+        $this->assertSame($expectedResult, Url::removeQueryString($paramsToRemove, $request));
     }
+
 
     public function addQueryStringProvider()
     {
@@ -44,15 +47,71 @@ class UrlTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 'http://domain.com/path.html',
-                'param3=value3',
-                'http://domain.com/path.html?param3=value3'
+                'param1=value1',
+                'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html',
+                '&param1=value1',
+                'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html',
+                '&amp;param1=value1',
+                'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html',
+                'param1=value1&',
+                'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html',
+                'param1=value1&amp;',
+                'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html?',
+                'param1=value1',
+                'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1',
+                'param1=value2',
+                'http://domain.com/path.html?param1=value2'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1&amp;',
+                'param1=value2',
+                'http://domain.com/path.html?param1=value2'
+            ),
+            array(
+                'http://domain.com/path.html?&amp;param1=value1',
+                'param1=value2',
+                'http://domain.com/path.html?param1=value2'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1&param2=value2',
+                'param3=value3&param4=value4',
+                'http://domain.com/path.html?param1=value1&param2=value2&param3=value3&param4=value4'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1&param2=value2',
+                'param3=value3&amp;param4=value4',
+                'http://domain.com/path.html?param1=value1&param2=value2&param3=value3&param4=value4'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1&amp;param2=value2',
+                'param3=value3&amp;param4=value4',
+                'http://domain.com/path.html?param1=value1&param2=value2&param3=value3&param4=value4'
             ),
         );
     }
 
+
     public function removeQueryStringProvider()
     {
-        // current request -> query to add -> expected result
+        // current request -> query to remove -> expected result
         return array(
             array(
                 'http://domain.com/path.html?param1=value1&param2=value2',
@@ -73,6 +132,31 @@ class UrlTest extends \PHPUnit_Framework_TestCase
                 'http://domain.com/path.html?param1=value1',
                 array('param2'),
                 'http://domain.com/path.html?param1=value1'
+            ),
+            array(
+                'http://domain.com/path.html',
+                array('param1'),
+                'http://domain.com/path.html'
+            ),
+            array(
+                'http://domain.com/path.html?',
+                array('param1'),
+                'http://domain.com/path.html'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1&amp;',
+                array('param1'),
+                'http://domain.com/path.html'
+            ),
+            array(
+                'http://domain.com/path.html?&amp;param1=value1',
+                array('param1'),
+                'http://domain.com/path.html'
+            ),
+            array(
+                'http://domain.com/path.html?param1=value1&param2=value2',
+                array('param3', 'param4'),
+                'http://domain.com/path.html?param1=value1&param2=value2'
             ),
         );
     }
