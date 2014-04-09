@@ -12,7 +12,7 @@
 
 namespace Haste\IO\Reader;
 
-class CsvReader
+class CsvReader implements \Iterator
 {
 
     /**
