@@ -115,7 +115,7 @@ class CsvReader implements \Iterator
      */
     public function next()
     {
-        $this->arrCurrent = fgetcsv($this->objFile->handle, 0, $this->strDelimiter, $this->strEnclosure, $this->strEscape);
+        $this->arrCurrent = fgetcsv($this->resFile, 0, $this->strDelimiter, $this->strEnclosure, $this->strEscape);
 
         if (!is_array($this->arrCurrent)) {
             $this->arrCurrent = null;
