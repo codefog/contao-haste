@@ -104,6 +104,10 @@ abstract class AbstractWriter implements WriterInterface
 
             if (null !== $this->varRowCallback) {
                 $arrRow = call_user_func($this->varRowCallback, $arrRow);
+
+                if ($arrRow === false) {
+                    continue;
+                }
             }
 
             if ($this->writeRow($arrRow)) {
