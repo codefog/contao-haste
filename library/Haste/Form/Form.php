@@ -157,11 +157,11 @@ class Form extends \Controller
      */
     public function setFormActionFromPageId($intId)
     {
-        if (($objPage = \PageModel::findByPk($intId)) === null) {
+        if (($objPage = \PageModel::findWithDetails($intId)) === null) {
             throw new \InvalidArgumentException(sprintf('The page id "%s" does apparently not exist!', $intId));
         }
 
-        $this->strFormAction = \Controller::generateFrontendUrl($objPage->row());
+        $this->strFormAction = \Controller::generateFrontendUrl($objPage->row(), null, $objPage->language);
 
         return $this;
     }
@@ -702,34 +702,44 @@ class Form extends \Controller
      */
     public function addToTemplate(\FrontendTemplate $objTemplate)
     {
+        $this->addToObject($objTemplate);
+    }
+
+    /**
+     * Add form to a object
+     * @param   FrontendTemplate
+     * @return  Form
+     */
+    public function addToObject($objObject)
+    {
         $this->createWidgets();
 
-        $objTemplate->action = $this->getFormAction();
-        $objTemplate->formId = $this->getFormId();
-        $objTemplate->method = $this->getMethod();
-        $objTemplate->enctype = $this->getEnctype();
-        $objTemplate->widgets = $this->arrWidgets;
-        $objTemplate->valid = $this->isValid();
-        $objTemplate->submitted = $this->isSubmitted();
-        $objTemplate->hasUploads = $this->hasUploads();
-        $objTemplate->tableless = $this->blnTableless;
+        $objObject->action = $this->getFormAction();
+        $objObject->formId = $this->getFormId();
+        $objObject->method = $this->getMethod();
+        $objObject->enctype = $this->getEnctype();
+        $objObject->widgets = $this->arrWidgets;
+        $objObject->valid = $this->isValid();
+        $objObject->submitted = $this->isSubmitted();
+        $objObject->hasUploads = $this->hasUploads();
+        $objObject->tableless = $this->blnTableless;
 
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
         // Generate hidden form fields
         foreach ((array) $arrWidgets['hidden'] as $objWidget) {
-            $objTemplate->hidden .= $objWidget->parse();
+            $objObject->hidden .= $objWidget->parse();
         }
 
         // Generate visible form fields
         foreach ((array) $arrWidgets['visible'] as $objWidget) {
-            $objTemplate->fields .= $objWidget->parse();
+            $objObject->fields .= $objWidget->parse();
         }
 
-        $objTemplate->hiddenWidgets  = $arrWidgets['hidden'];
-        $objTemplate->visibleWidgets = $arrWidgets['visible'];
+        $objObject->hiddenWidgets  = $arrWidgets['hidden'];
+        $objObject->visibleWidgets = $arrWidgets['visible'];
 
-        $objTemplate->hasteFormInstance = $this;
+        $objObject->hasteFormInstance = $this;
 
         return $this;
     }

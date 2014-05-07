@@ -153,3 +153,7 @@ $GLOBALS['objPage'] = new Database_Result();
 function standardize($varValue) {
     return $varValue;
 }
+function ampersand($strString, $blnEncode=true)
+{
+    return preg_replace('/&(amp;)?/i', ($blnEncode ? '&amp;' : '&'), $strString);
+}

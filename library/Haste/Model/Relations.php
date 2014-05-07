@@ -12,7 +12,7 @@
 
 namespace Haste\Model;
 
-class Relations extends \Backend
+class Relations
 {
 
     /**
@@ -26,6 +26,12 @@ class Relations extends \Backend
      * @var array
      */
     private static $arrFilterableFields = array();
+
+    /**
+     * Purge cache
+     * @var array
+     */
+    private static $arrPurgeCache = array();
 
     /**
      * Add the relation callbacks to DCA
@@ -84,15 +90,14 @@ class Relations extends \Backend
      */
     public function updateRelatedRecords($varValue, \DataContainer $dc)
     {
-        static $blnPurged;
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
             $arrValues = deserialize($varValue, true);
 
-            if (!$blnPurged) {
+            if (!in_array($arrRelation['table'], static::$arrPurgeCache)) {
                 $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
-                $blnPurged = true;
+                static::$arrPurgeCache[] = $arrRelation['table'];
             }
 
             foreach ($arrValues as $value) {
@@ -101,9 +106,9 @@ class Relations extends \Backend
                     $arrRelation['related_field'] => $value,
                 );
 
-                $this->Database->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
-                               ->set($arrSet)
-                               ->execute();
+                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                                        ->set($arrSet)
+                                        ->execute();
             }
         }
 
@@ -153,21 +158,21 @@ class Relations extends \Backend
 
             // Get the reference value (if not an ID)
             if ($arrRelation['reference'] != 'id') {
-                $objReference = $this->Database->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
-                                               ->limit(1)
-                                               ->execute($intId);
+                $objReference = \Database::getInstance()->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
+                                                        ->limit(1)
+                                                        ->execute($intId);
 
                 if ($objReference->numRows) {
                     $varReference = $objReference->$arrRelation['reference'];
                 }
             }
 
-            $objValues = $this->Database->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                        ->execute($dc->$arrRelation['reference']);
+            $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                                                 ->execute($dc->$arrRelation['reference']);
 
             while ($objValues->next()) {
-                $this->Database->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
-                               ->execute($varReference, $objValues->$arrRelation['related_field']);
+                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
+                                        ->execute($varReference, $objValues->$arrRelation['related_field']);
             }
         }
     }
@@ -205,7 +210,7 @@ class Relations extends \Backend
                     continue;
                 }
 
-                $this->loadDataContainer(substr($strFile, 0, -4));
+                \Haste\Haste::getInstance()->call('loadDataContainer', substr($strFile, 0, -4));
             }
         }
 
@@ -221,8 +226,8 @@ class Relations extends \Backend
                     continue;
                 }
 
-                $this->Database->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
-                               ->execute($dc->$arrRelation['field']);
+                \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
+                                        ->execute($dc->$arrRelation['field']);
             }
         }
     }
@@ -246,7 +251,7 @@ class Relations extends \Backend
                 continue;
             }
 
-            $objDelete = $this->Database->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
+            $objDelete = \Database::getInstance()->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
 
             while ($objDelete->next()) {
                 $this->purgeRelatedRecords($arrRelation, $objDelete->$arrRelation['reference']);
@@ -280,8 +285,8 @@ class Relations extends \Backend
      */
     protected function purgeRelatedRecords($arrRelation, $varId)
     {
-        $this->Database->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                       ->execute($varId);
+        \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                                ->execute($varId);
     }
 
     /**
@@ -325,7 +330,7 @@ class Relations extends \Backend
 
         $arrIds = array();
         $blnFilter = false;
-        $session = $this->Session->getData();
+        $session = \Session::getInstance()->getData();
 
         foreach (array_keys(static::$arrFilterableFields) as $field) {
             if (isset($session['filter'][$dc->table][$field])) {
@@ -352,7 +357,7 @@ class Relations extends \Backend
         }
 
         $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
-        $session = $this->Session->getData();
+        $session = \Session::getInstance()->getData();
 
         // Set filter from user input
         if (\Input::post('FORM_SUBMIT') == 'tl_filters') {
@@ -364,7 +369,7 @@ class Relations extends \Backend
                 }
             }
 
-            $this->Session->setData($session);
+            \Session::getInstance()->setData($session);
         }
 
         $count = 0;
@@ -398,8 +403,8 @@ class Relations extends \Backend
                     $strClass = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][0];
                     $strMethod = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][1];
 
-                    $this->import($strClass);
-                    $options_callback = $this->$strClass->$strMethod($this);
+                    $objClass = \System::importStatic($strClass);
+                    $options_callback = $objClass->$strMethod($this);
                 } elseif (is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) {
                     $options_callback = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']($this);
                 }
@@ -421,9 +426,9 @@ class Relations extends \Backend
                     // Replace the ID with the foreign key
                     $key = explode('.', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'], 2);
 
-                    $objParent = $this->Database->prepare("SELECT " . $key[1] . " AS value FROM " . $key[0] . " WHERE id=?")
-                                                ->limit(1)
-                                                ->execute($vv);
+                    $objParent = \Database::getInstance()->prepare("SELECT " . $key[1] . " AS value FROM " . $key[0] . " WHERE id=?")
+                                                         ->limit(1)
+                                                         ->execute($vv);
 
                     if ($objParent->numRows) {
                         $vv = $objParent->value;

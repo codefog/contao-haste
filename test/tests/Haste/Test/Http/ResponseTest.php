@@ -33,27 +33,27 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
     public function testRegularOutput()
     {
         $objResponse = new Response('Foobar');
-        $this->assertSame((string) $objResponse, "HTTP/1.1 200 OK\nContent-Length: 6\nContent-Type: text/plain; charset=utf-8\n\nFoobar");
+        $this->assertSame("HTTP/1.1 200 OK\nContent-Length: 6\nContent-Type: text/plain; charset=utf-8\n\nFoobar", (string) $objResponse);
     }
 
     public function testJsonOutput()
     {
         $objResponse = new JsonResponse(array('foo' => 'bar'), 201);
         $this->assertSame(201, $objResponse->getStatusCode());
-        $this->assertSame((string) $objResponse, "HTTP/1.1 201 Created\nContent-Length: 13\nContent-Type: application/json; charset=utf-8\n\n{\"foo\":\"bar\"}");
+        $this->assertSame("HTTP/1.1 201 Created\nContent-Length: 13\nContent-Type: application/json; charset=utf-8\n\n{\"foo\":\"bar\"}", (string) $objResponse);
     }
 
     public function testEmptyJsonOutput()
     {
         $objResponse = new JsonResponse(array());
-        $this->assertSame((string) $objResponse, "HTTP/1.1 200 OK\nContent-Length: 2\nContent-Type: application/json; charset=utf-8\n\n[]");
+        $this->assertSame("HTTP/1.1 200 OK\nContent-Length: 2\nContent-Type: application/json; charset=utf-8\n\n[]", (string) $objResponse);
     }
 
     public function testXmlOutput()
     {
         $objResponse = new XmlResponse('<foo><bar>indeed</bar></foo>', 304);
         $this->assertSame(304, $objResponse->getStatusCode());
-        $this->assertSame((string) $objResponse, "HTTP/1.1 304 Not Modified\nContent-Length: 28\nContent-Type: application/xml; charset=utf-8\n\n<foo><bar>indeed</bar></foo>");
+        $this->assertSame("HTTP/1.1 304 Not Modified\nContent-Length: 28\nContent-Type: application/xml; charset=utf-8\n\n<foo><bar>indeed</bar></foo>", (string) $objResponse);
     }
 
     public function testHtmlOutput()

@@ -20,8 +20,8 @@ For more internal details please read the source ;-)
     // Second is either GET or POST
     // Third is a callable that decides when your form is submitted
     // You can pass an optional fourth parameter (true by default) to turn the form into a table based one
-    $objForm = new \Haste\Form\Form('someid', 'POST', function($haste) {
-        return \Input::post('FORM_SUBMIT') === $haste->getFormId();
+    $objForm = new \Haste\Form\Form('someid', 'POST', function($objHaste) {
+        return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
     });
 
     // Haste will never decide for you when the form has been submitted.
@@ -106,6 +106,11 @@ and validate the user inputs etc.
     $objMyTemplate = new \FrontendTemplate('mytemplate');
     $objForm->addToTemplate($objMyTemplate);
     echo $objMyTemplate->parse();
+
+    // Alternatively, you can pass it to any other object
+    $objFilter = new \stdClass();
+    $objForm->addToObject($objFilter);
+    $this->Template->filter = $objFilter;
 ```
 
 ### Add the form fields from a back end DCA
@@ -113,10 +118,16 @@ and validate the user inputs etc.
 ```php
 <?php
     // you can exclude or modify certain fields by passing a callable as second
-    // parameter and return your modified fields array
-    $objForm->addFieldsFromDca('tl_content', function($arrFields) {
-        unset($arrFields['idontwantyou']);
-        return $arrFields;
+    // parameter
+    $objForm->addFieldsFromDca('tl_content', function(&$strField, &$arrDca) {
+
+        // add anything you like
+        if ($strField == 'myField') {
+            $arrDca['eval']['mandatory'] = true;
+        }
+
+        // you must return true otherwise the field will be skipped
+        return true;
     });
 ```
 
@@ -126,8 +137,14 @@ and validate the user inputs etc.
 <?php
     // you can exclude or modify certain fields by passing a callable as second
     // parameter
-    $objForm->addFieldsFromFormGenerator(42, function(&$arrFields) {
-        unset($arrFields['idontwantyou']);
+    $objForm->addFieldsFromFormGenerator(42, function(&$strField, &$arrDca) {
+        // add anything you like
+        if ($strField == 'myField') {
+            $arrDca['eval']['mandatory'] = true;
+        }
+
+        // you must return true otherwise the field will be skipped
+        return true;
     });
 ```
 
