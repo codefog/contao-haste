@@ -72,8 +72,8 @@ class FormTest extends \PHPUnit_Framework_TestCase
         if ($this->instance->validate()) {
             $objBoundModel = $this->instance->getBoundModel();
             $this->assertTrue(spl_object_hash($objModel) === spl_object_hash($objBoundModel));
-            $this->assertEquals($objBoundModel->pageTitle, 'My page title test');
-            $this->assertEquals($objBoundModel->jumpTo, 42);
+            $this->assertEquals('My page title test', $objBoundModel->pageTitle);
+            $this->assertEquals(42, $objBoundModel->jumpTo);
         }
     }
 
@@ -99,8 +99,8 @@ class FormTest extends \PHPUnit_Framework_TestCase
 
         $objInstance->createWidgets();
 
-        $this->assertEquals($objInstance->getWidget('id')->value, 13);
-        $this->assertEquals($objInstance->getWidget('pageTitle')->value, 'My page');
-        $this->assertEquals($objInstance->getWidget('jumpTo')->value, 11);
+        $this->assertEquals(13, $objInstance->getWidget('id')->value);
+        $this->assertEquals('My page', $objInstance->getWidget('pageTitle')->value);
+        $this->assertEquals(11, $objInstance->getWidget('jumpTo')->value);
     }
 }
