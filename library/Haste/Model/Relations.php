@@ -401,6 +401,9 @@ class Relations
             $options = array_unique($arrIds);
             $options_callback = array();
 
+            // Store the field name to be used e.g. in the options_callback
+            $this->field = $field;
+
             // Call the options_callback
             if ((is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']) || is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) && !$GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference']) {
                 if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) {
