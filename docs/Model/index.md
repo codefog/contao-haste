@@ -27,6 +27,7 @@ $GLOBALS['TL_DCA']['tl_table_one']['fields']['my_field']['relation'] = array
     'field' => 'id', // related table field (optional)
     'fieldSql' => "int(10) unsigned NOT NULL default '0'", // related table field sql definition (optional)
     'relationTable' => '', // custom relation table name (optional)
+    'forceSave' => true // false by default. If set to true it does not only store the values in the relation tables but also the "my_relation" field
 );
 ```
 

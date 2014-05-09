@@ -112,6 +112,10 @@ class Relations
             }
         }
 
+        if ($arrRelation['forceSave']) {
+            return $varValue;
+        }
+
         return null;
     }
 
