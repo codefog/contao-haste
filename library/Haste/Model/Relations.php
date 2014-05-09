@@ -85,10 +85,10 @@ class Relations
     /**
      * Update the records in related table
      * @param mixed
-     * @param \DataContainer
+     * @param object \DataContainer in BE
      * @return mixed
      */
-    public function updateRelatedRecords($varValue, \DataContainer $dc)
+    public function updateRelatedRecords($varValue, $dc)
     {
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
@@ -121,9 +121,9 @@ class Relations
 
     /**
      * Delete the records in related table
-     * @param \DataContainer
+     * @param object \DataContainer in BE
      */
-    public function deleteRelatedRecords(\DataContainer $dc)
+    public function deleteRelatedRecords($dc)
     {
         if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'])) {
             return;
@@ -143,9 +143,9 @@ class Relations
     /**
      * Copy the records in related table
      * @param integer
-     * @param \DataContainer
+     * @param object \DataContainer in BE
      */
-    public function copyRelatedRecords($intId, \DataContainer $dc)
+    public function copyRelatedRecords($intId, $dc)
     {
         if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'])) {
             return;
@@ -268,10 +268,10 @@ class Relations
     /**
      * Get related records of particular field
      * @param mixed
-     * @param \DataContainer
+     * @param object \DataContainer in BE
      * @return mixed
      */
-    public function getRelatedRecords($varValue, \DataContainer $dc)
+    public function getRelatedRecords($varValue, $dc)
     {
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
@@ -324,9 +324,9 @@ class Relations
 
     /**
      * Filter records by relations set in custom filter
-     * @param \DataContainer
+     * @param object \DataContainer in BE
      */
-    public function filterByRelations(\DataContainer $dc)
+    public function filterByRelations($dc)
     {
         if (empty(static::$arrFilterableFields)) {
             return;
@@ -351,10 +351,10 @@ class Relations
 
     /**
      * Add the relation filters
-     * @param \DataContainer
+     * @param object \DataContainer in BE
      * @return string
      */
-    public function addRelationFilters(\DataContainer $dc)
+    public function addRelationFilters($dc)
     {
         if (empty(static::$arrFilterableFields)) {
             return '';
