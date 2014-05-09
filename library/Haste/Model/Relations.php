@@ -75,7 +75,7 @@ class Relations
         $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'cleanRelatedRecords');
 
         // Add filter callbacks
-        if (!empty(static::$arrFilterableFields)) {
+        if (!empty(static::$arrFilterableFields) && TL_MODE == 'BE') {
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Haste\Model\Relations', 'filterByRelations');
             $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = str_replace('filter', 'haste_filter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout']);
             $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = array('Haste\Model\Relations', 'addRelationFilters');
