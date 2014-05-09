@@ -106,6 +106,11 @@ and validate the user inputs etc.
     $objMyTemplate = new \FrontendTemplate('mytemplate');
     $objForm->addToTemplate($objMyTemplate);
     echo $objMyTemplate->parse();
+
+    // Alternatively, you can pass it to any other object
+    $objFilter = new \stdClass();
+    $objForm->addToObject($objFilter);
+    $this->Template->filter = $objFilter;
 ```
 
 ### Add the form fields from a back end DCA
