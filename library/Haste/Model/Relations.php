@@ -107,8 +107,8 @@ class Relations
                 );
 
                 \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
-                                        ->set($arrSet)
-                                        ->execute();
+                    ->set($arrSet)
+                    ->execute();
             }
         }
 
@@ -163,8 +163,8 @@ class Relations
             // Get the reference value (if not an ID)
             if ($arrRelation['reference'] != 'id') {
                 $objReference = \Database::getInstance()->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
-                                                        ->limit(1)
-                                                        ->execute($intId);
+                    ->limit(1)
+                    ->execute($intId);
 
                 if ($objReference->numRows) {
                     $varReference = $objReference->$arrRelation['reference'];
@@ -172,11 +172,11 @@ class Relations
             }
 
             $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                                 ->execute($dc->$arrRelation['reference']);
+                ->execute($dc->$arrRelation['reference']);
 
             while ($objValues->next()) {
                 \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
-                                        ->execute($varReference, $objValues->$arrRelation['related_field']);
+                    ->execute($varReference, $objValues->$arrRelation['related_field']);
             }
         }
     }
@@ -231,7 +231,7 @@ class Relations
                 }
 
                 \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
-                                        ->execute($dc->$arrRelation['field']);
+                    ->execute($dc->$arrRelation['field']);
             }
         }
     }
@@ -290,7 +290,7 @@ class Relations
     protected function purgeRelatedRecords($arrRelation, $varId)
     {
         \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                                ->execute($varId);
+            ->execute($varId);
     }
 
     /**
@@ -434,8 +434,8 @@ class Relations
                     $key = explode('.', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'], 2);
 
                     $objParent = \Database::getInstance()->prepare("SELECT " . $key[1] . " AS value FROM " . $key[0] . " WHERE id=?")
-                                                         ->limit(1)
-                                                         ->execute($vv);
+                        ->limit(1)
+                        ->execute($vv);
 
                     if ($objParent->numRows) {
                         $vv = $objParent->value;
@@ -510,6 +510,9 @@ class Relations
                 $varRelation['related_table'] = $arrField['table'];
                 $varRelation['related_field'] = str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field'];
                 $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
+
+                // Force save
+                $varRelation['forceSave'] = $arrField['forceSave'];
             }
 
             static::$arrRelationsCache[$strCacheKey] = $varRelation;
