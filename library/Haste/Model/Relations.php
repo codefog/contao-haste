@@ -122,12 +122,15 @@ class Relations
     /**
      * Delete the records in related table
      * @param object \DataContainer in BE
+     * @param integer
      */
-    public function deleteRelatedRecords($dc)
+    public function deleteRelatedRecords($dc, $intUndoId)
     {
         if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'])) {
             return;
         }
+
+        $arrUndo = array();
 
         foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
             $arrRelation = static::getRelation($dc->table, $strField);
@@ -136,8 +139,141 @@ class Relations
                 continue;
             }
 
+            // Store the related values for further save in tl_undo table
+            $arrUndo[] = array
+            (
+                'table' => $dc->table,
+                'field' => $strField,
+                'reference' => $dc->$arrRelation['reference'],
+                'values' => Model::getRelatedValues($dc->table, $strField, $dc->$arrRelation['reference'])
+            );
+
             $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
         }
+
+        // Store the relations in the tl_undo table
+        if (!empty($arrUndo)) {
+            \Database::getInstance()->prepare("UPDATE tl_undo SET haste_relations=? WHERE id=?")
+                                    ->execute(serialize($arrUndo), $intUndoId);
+        }
+    }
+
+    /**
+     * Return the "undo" button
+     * @param array
+     * @param string
+     * @param string
+     * @param string
+     * @param string
+     * @param string
+     * @return string
+     */
+    public function undoButton($row, $href, $label, $title, $icon, $attributes)
+    {
+        $objRecord = \Database::getInstance()->prepare("SELECT haste_relations FROM tl_undo WHERE id=?")
+                                             ->limit(1)
+                                             ->execute($row['id']);
+
+        $arrRelations = deserialize($objRecord->haste_relations, true);
+
+        // Replace the default action if there are relations to restore
+        if (!empty($arrRelations)) {
+            $href = '&amp;key=haste_undo';
+        }
+
+        return '<a href="'.\Backend::addToUrl($href.'&amp;id='.$row['id']).'" title="'.specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
+    }
+
+    /**
+     * Undo the relations
+     * @param \DataContainer
+     */
+    public function undoRelations(\DataContainer $dc)
+    {
+        $objRecords = \Database::getInstance()->prepare("SELECT * FROM " . $dc->table . " WHERE id=?")
+                                              ->limit(1)
+                                              ->execute($dc->id);
+
+        // Check whether there is a record
+        if ($objRecords->numRows < 1) {
+            \System::redirect(\System::getReferer());
+        }
+
+        $error = false;
+        $query = $objRecords->query;
+        $data = deserialize($objRecords->data);
+
+        if (!is_array($data)) {
+            \System::redirect(\System::getReferer());
+        }
+
+        $arrFields = array();
+        $arrRelations = deserialize($objRecords->haste_relations, true);
+
+        // Restore the data
+        foreach ($data as $table => $fields) {
+
+            // Get the currently available fields
+            if (!isset($arrFields[$table])) {
+                $arrFields[$table] = array_flip(\Database::getInstance()->getFieldnames($table));
+            }
+
+            foreach ($fields as $row) {
+
+                // Unset fields that no longer exist in the database
+                $row = array_intersect_key($row, $arrFields[$table]);
+
+                // Re-insert the data
+                $objInsertStmt = \Database::getInstance()->prepare("INSERT INTO " . $table . " %s")
+                                                         ->set($row)
+                                                         ->execute();
+
+                // Do not delete record from tl_undo if there is an error
+                if ($objInsertStmt->affectedRows < 1) {
+                    $error = true;
+                }
+
+                // Restore the relations
+                if (!$error) {
+                    foreach ($arrRelations as $relation) {
+                        if ($relation['table'] != $table) {
+                            continue;
+                        }
+
+                        $arrRelation = static::getRelation($relation['table'], $relation['field']);
+
+                        // Continue if there is no relation or reference value does not match
+                        if ($arrRelation === false || $relation['reference'] != $row[$arrRelation['reference']]) {
+                            continue;
+                        }
+
+                        $intId = $objInsertStmt->insertId;
+
+                        foreach ($relation['values'] as $value) {
+                            $arrSet = array(
+                                $arrRelation['reference_field'] => $intId,
+                                $arrRelation['related_field'] => $value,
+                            );
+
+                            \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                                                    ->set($arrSet)
+                                                    ->execute();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add log entry and delete record from tl_undo if there was no error
+        if (!$error) {
+            \System::log('Undone '. $query, __METHOD__, TL_GENERAL);
+
+            \Database::getInstance()->prepare("DELETE FROM " . $dc->table . " WHERE id=?")
+                                    ->limit(1)
+                                    ->execute($dc->id);
+        }
+
+        \System::redirect(\System::getReferer());
     }
 
     /**

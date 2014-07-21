@@ -12,6 +12,12 @@
 
 
 /**
+ * Add the "haste_undo" opreation to "undo" module
+ */
+$GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Haste\Model\Relations', 'undoRelations');
+
+
+/**
  * Backend widgets
  */
 $GLOBALS['BE_FFL']['numberField'] = 'Haste\Number\BackendWidget';
