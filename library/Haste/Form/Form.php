@@ -702,7 +702,7 @@ class Form extends \Controller
      */
     public function addToTemplate(\FrontendTemplate $objTemplate)
     {
-        $this->addToObject($objTemplate);
+        return $this->addToObject($objTemplate);
     }
 
     /**
