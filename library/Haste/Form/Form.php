@@ -406,6 +406,24 @@ class Form extends \Controller
     }
 
     /**
+     * Add the Contao hidden fields FORM_SUBMIT and REQUEST_TOKEN
+     */
+    public function addContaoHiddenFields()
+    {
+        $this->addFormField('FORM_SUBMIT', array(
+            'name' => 'FORM_SUBMIT',
+            'inputType' => 'hidden',
+            'value' => $this->getFormId()
+        ));
+
+        $this->addFormField('REQUEST_TOKEN', array(
+            'name' => 'REQUEST_TOKEN',
+            'inputType' => 'hidden',
+            'value' => REQUEST_TOKEN
+        ));
+    }
+
+    /**
      * Helper method to easily add a captcha field
      * @param   string  The form field name
      */
