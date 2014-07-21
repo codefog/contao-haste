@@ -16,17 +16,21 @@ class Input extends \Input
 {
 
     /**
-     * Check if auto_item is enabled and return appropriate value
-     * @param   string
-     * @return  string
+     * Check if auto_item is enabled and return $_GET variable
+     *
+     * @param string  $strKey            The variable name
+     * @param boolean $blnDecodeEntities If true, all entities will be decoded
+     * @param boolean $blnKeepUnused     If true, the parameter will not be marked as used (see #4277)
+     *
+     * @return mixed The cleaned variable value
      */
-    public static function getAutoItem($strKey)
+    public static function getAutoItem($strKey, $blnDecodeEntities=false, $blnKeepUnused=false)
     {
         if ($GLOBALS['TL_CONFIG']['useAutoItem'] && in_array($strKey, $GLOBALS['TL_AUTO_ITEM'])) {
 
-            return static::get('auto_item');
+            return static::get('auto_item', $blnDecodeEntities, $blnKeepUnused);
         }
 
-        return static::get($strKey);
+        return static::get($strKey, $blnDecodeEntities, $blnKeepUnused);
     }
 }
