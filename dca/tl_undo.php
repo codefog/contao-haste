@@ -13,12 +13,12 @@
 /**
  * Replace the "undo" button href
  */
-$GLOBALS['TL_DCA']['tl_undo']['list']['operations']['undo']['button_callback'] = array('Haste\Model\Relations', 'undoButton');
+$GLOBALS['TL_DCA']['tl_undo']['list']['operations']['undo']['button_callback'] = array('Haste\Util\Undo', 'button');
 
 /**
  * Add fields to tl_undo
  */
-$GLOBALS['TL_DCA']['tl_undo']['fields']['haste_relations'] = array
+$GLOBALS['TL_DCA']['tl_undo']['fields']['haste_data'] = array
 (
     'sql' => "blob NULL"
 );

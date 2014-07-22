@@ -14,7 +14,7 @@
 /**
  * Add the "haste_undo" opreation to "undo" module
  */
-$GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Haste\Model\Relations', 'undoRelations');
+$GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Haste\Util\Undo', 'callback');
 
 
 /**
@@ -29,3 +29,12 @@ $GLOBALS['BE_FFL']['numberField'] = 'Haste\Number\BackendWidget';
 $GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('Haste\Model\Relations', 'addRelationCallbacks');
 $GLOBALS['TL_HOOKS']['reviseTable'][]       = array('Haste\Model\Relations', 'reviseRelatedRecords');
 $GLOBALS['TL_HOOKS']['sqlGetFromFile'][]    = array('Haste\Model\Relations', 'addRelationTables');
+
+
+/**
+ * Haste hooks
+ */
+$GLOBALS['HASTE_HOOKS']['undoData'] = array
+(
+    array('Haste\Model\Relations', 'undoRelations')
+);
