@@ -45,6 +45,6 @@ class Plain extends \ArrayObject
             return implode(', ', $varValue);
         }
 
-        return $varValue;
+        return (string) $varValue;
     }
 }
