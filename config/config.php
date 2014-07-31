@@ -12,7 +12,7 @@
 
 
 /**
- * Add the "haste_undo" opreation to "undo" module
+ * Add the "haste_undo" operation to "undo" module
  */
 $GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Haste\Util\Undo', 'callback');
 
