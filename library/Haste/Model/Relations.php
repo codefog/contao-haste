@@ -126,29 +126,42 @@ class Relations
      */
     public function deleteRelatedRecords($dc, $intUndoId)
     {
-        if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'])) {
-            return;
-        }
-
+        $this->loadDataContainers();
         $arrUndo = array();
 
-        foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
-            $arrRelation = static::getRelation($dc->table, $strField);
+        foreach ($GLOBALS['TL_DCA'] as $strTable => $arrTable) {
+            foreach ($arrTable['fields'] as $strField => $arrField) {
+                $arrRelation = static::getRelation($strTable, $strField);
 
-            if ($arrRelation === false) {
-                continue;
+                if ($arrRelation === false || ($arrRelation['reference_table'] != $dc->table && $arrRelation['related_table'] != $dc->table)) {
+                    continue;
+                }
+
+                // Store the related values for further save in tl_undo table
+                if ($arrRelation['reference_table'] == $dc->table) {
+                    $arrUndo[] = array
+                    (
+                        'table' => $dc->table,
+                        'relationTable' => $strTable,
+                        'relationField' => $strField,
+                        'reference' => $dc->$arrRelation['reference'],
+                        'values' => Model::getRelatedValues($strTable, $strField, $dc->$arrRelation['reference'])
+                    );
+
+                    $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
+                } else {
+                    $arrUndo[] = array
+                    (
+                        'table' => $dc->table,
+                        'relationTable' => $strTable,
+                        'relationField' => $strField,
+                        'reference' => $dc->$arrRelation['field'],
+                        'values' => Model::getReferenceValues($strTable, $strField, $dc->$arrRelation['field'])
+                    );
+
+                    $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['field']);
+                }
             }
-
-            // Store the related values for further save in tl_undo table
-            $arrUndo[] = array
-            (
-                'table' => $dc->table,
-                'field' => $strField,
-                'reference' => $dc->$arrRelation['reference'],
-                'values' => Model::getRelatedValues($dc->table, $strField, $dc->$arrRelation['reference'])
-            );
-
-            $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
         }
 
         // Store the relations in the tl_undo table
@@ -175,22 +188,46 @@ class Relations
                 continue;
             }
 
-            $arrRelation = static::getRelation($relation['table'], $relation['field']);
+            $arrRelation = static::getRelation($relation['relationTable'], $relation['relationField']);
+            $blnTableReference = ($arrRelation['reference_table'] == $strTable);
+            $strField = $blnTableReference ? $arrRelation['reference'] : $arrRelation['field'];
 
             // Continue if there is no relation or reference value does not match
-            if ($arrRelation === false || $relation['reference'] != $arrRow[$arrRelation['reference']]) {
+            if ($arrRelation === false || empty($relation['values']) || $relation['reference'] != $arrRow[$strField]) {
                 continue;
             }
 
             foreach ($relation['values'] as $value) {
                 $arrSet = array(
-                    $arrRelation['reference_field'] => $intId,
-                    $arrRelation['related_field'] => $value,
+                    $arrRelation['reference_field'] => $blnTableReference ? $intId : $value,
+                    $arrRelation['related_field'] => $blnTableReference ? $value : $intId,
                 );
 
                 \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                                         ->set($arrSet)
                                         ->execute();
+            }
+        }
+    }
+
+    /**
+     * Load all data containers
+     */
+    protected function loadDataContainers()
+    {
+        foreach (\ModuleLoader::getActive() as $strModule) {
+            $strDir = 'system/modules/' . $strModule . '/dca';
+
+            if (!is_dir(TL_ROOT . '/' . $strDir)) {
+                continue;
+            }
+
+            foreach (scan(TL_ROOT . '/' . $strDir) as $strFile) {
+                if (substr($strFile, -4) != '.php') {
+                    continue;
+                }
+
+                \Haste\Haste::getInstance()->call('loadDataContainer', substr($strFile, 0, -4));
             }
         }
     }
@@ -256,22 +293,7 @@ class Relations
             throw new \RuntimeException('Sorry but there seems to be no valid DataContainer instance!');
         }
 
-        // Only check the active modules
-        foreach (\ModuleLoader::getActive() as $strModule) {
-            $strDir = 'system/modules/' . $strModule . '/dca';
-
-            if (!is_dir(TL_ROOT . '/' . $strDir)) {
-                continue;
-            }
-
-            foreach (scan(TL_ROOT . '/' . $strDir) as $strFile) {
-                if (substr($strFile, -4) != '.php') {
-                    continue;
-                }
-
-                \Haste\Haste::getInstance()->call('loadDataContainer', substr($strFile, 0, -4));
-            }
-        }
+        $this->loadDataContainers();
 
         foreach ($GLOBALS['TL_DCA'] as $strTable => $arrTable) {
             if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
