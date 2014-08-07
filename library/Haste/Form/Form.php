@@ -287,6 +287,15 @@ class Form extends \Controller
     }
 
     /**
+     * Check if form has fields
+     * @return bool
+     */
+    public function hasFields()
+    {
+        return !empty($this->arrFormFields);
+    }
+
+    /**
      * Adds a form field
      * @param   string  The form field name
      * @param   array   The DCA representation of the field
