@@ -14,6 +14,7 @@ namespace Haste\Form;
 
 use Haste\Form\Validator\ValidatorInterface;
 use Haste\Generator\RowClass;
+use Haste\Util\ArrayPosition;
 
 class Form extends \Controller
 {
@@ -318,12 +319,17 @@ class Form extends \Controller
      *
      * @param string        $strName the form field name
      * @param array         $arrDca The DCA representation of the field
+     * @param ArrayPosition $position
      *
      * @return $this
      */
-    public function addFormField($strName, array $arrDca)
+    public function addFormField($strName, array $arrDca, ArrayPosition $position = null)
     {
         $this->checkFormFieldNameIsValid($strName);
+
+        if (null === $position) {
+            $position = ArrayPosition::last();
+        }
 
         // Make sure it has a "name" attribute because it is mandatory
         if (!isset($arrDca['name'])) {
@@ -417,7 +423,7 @@ class Form extends \Controller
             }
         }
 
-        $this->arrFormFields[$strName] = $arrDca;
+        $this->arrFormFields = $position->addToArray($this->arrFormFields, array($strName=>$arrDca));
         $this->intState = self::STATE_DIRTY;
 
         return $this;
@@ -427,13 +433,18 @@ class Form extends \Controller
      * Add multiple form fields
      *
      * @param array         $arrFormFields
+     * @param ArrayPosition $position
      *
      * @return $this
      */
-    public function addFormFields($arrFormFields)
+    public function addFormFields(array $arrFormFields, ArrayPosition $position = null)
     {
+        if ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE) {
+            $arrFormFields = array_reverse($arrFormFields, true);
+        }
+
         foreach ($arrFormFields as $strName => $arrDca) {
-            $this->addFormField($strName, $arrDca);
+            $this->addFormField($strName, $arrDca, $position);
         }
 
         return $this;
@@ -486,15 +497,16 @@ class Form extends \Controller
      * Helper method to easily add a captcha field
      *
      * @param string        $strName The form field name
+     * @param ArrayPosition $position
      */
-    public function addCaptchaFormField($strName)
+    public function addCaptchaFormField($strName, ArrayPosition $position = null)
     {
         $this->addFormField($strName, array(
             'name'      => $strName . '_' . $this->strFormId, // make sure they're unique on a page
             'label'     => $GLOBALS['TL_LANG']['MSC']['securityQuestion'],
             'inputType' => 'captcha',
             'eval'      => array('mandatory'=>true)
-        ));
+        ), $position);
     }
 
     /**
@@ -502,14 +514,15 @@ class Form extends \Controller
      *
      * @param string        $strName  The form field name
      * @param string        $strLabel The label for the submit button
+     * @param ArrayPosition $position
      */
-    public function addSubmitFormField($strName, $strLabel)
+    public function addSubmitFormField($strName, $strLabel, ArrayPosition $position = null)
     {
         $this->addFormField($strName, array(
             'name'      => $strName,
             'label'     => $strLabel,
             'inputType' => 'submit'
-        ));
+        ), $position);
     }
 
     /**
