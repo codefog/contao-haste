@@ -225,6 +225,29 @@ class Form extends \Controller
     }
 
     /**
+     * Get tableless flag
+     * @return bool
+     */
+    public function isTableless()
+    {
+        return $this->blnTableless;
+    }
+
+    /**
+     * Set tabeless flag
+     * @param bool $blnTableless
+     * @return $this
+     */
+    public function setTableless($blnTableless)
+    {
+        $this->blnTableless = (bool) $blnTableless;
+        $this->intState = self::STATE_DIRTY;
+
+        return $this;
+    }
+
+
+    /**
      * Check if the form has been submitted
      * @return  boolean
      */
