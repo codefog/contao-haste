@@ -110,7 +110,7 @@ class Form extends \Controller
      * @param   boolean Whether to render the form tableless or not
      * @throws  \InvalidArgumentException
      */
-    public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless=true)
+    public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless = true)
     {
         parent::__construct();
 
@@ -170,7 +170,7 @@ class Form extends \Controller
      * Preserve the current GET parameters by adding them as hidden fields
      * @param array
      */
-    public function preserveGetParameters($arrExclude=array())
+    public function preserveGetParameters($arrExclude = array())
     {
         foreach ($_GET as $k => $v) {
             if (in_array($k, $arrExclude)) {
@@ -414,7 +414,7 @@ class Form extends \Controller
      * the present values as default values.
      * @param   \Model
      */
-    public function bindModel(\Model $objModel=null)
+    public function bindModel(\Model $objModel = null)
     {
         $this->objModel = $objModel;
     }
@@ -846,7 +846,7 @@ class Form extends \Controller
      * @param   callable    A callable that should be used to fetch the data instead of the built in functionality
      * @return  array
      */
-    public function fetchAll($varCallback=null)
+    public function fetchAll($varCallback = null)
     {
         $arrData = array();
 
