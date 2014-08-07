@@ -244,7 +244,7 @@ class Form extends \Controller
 
     /**
      * Check if form is dirty (widgets need to be generated)
-     * return   bool
+     * @return   bool
      */
     public function isDirty()
     {
