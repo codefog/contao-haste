@@ -14,6 +14,7 @@ namespace Haste\Form;
 
 use Haste\Form\Validator\ValidatorInterface;
 use Haste\Generator\RowClass;
+use Haste\Util\ArrayPosition;
 
 class Form extends \Controller
 {
@@ -104,13 +105,15 @@ class Form extends \Controller
 
     /**
      * Initialize the form
-     * @param   string   The ID of the form
-     * @param   string   The HTTP Method GET or POST
-     * @param   callable A callable that checks if the form has been submitted
-     * @param   boolean Whether to render the form tableless or not
-     * @throws  \InvalidArgumentException
+     *
+     * @param string   $strId          The ID of the form
+     * @param string   $strMethod      The HTTP Method GET or POST
+     * @param callable $varSubmitCheck A callable that checks if the form has been submitted
+     * @param boolean  $blnTableless   Whether to render the form tableless or not
+     *
+     * @throws \InvalidArgumentException
      */
-    public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless=true)
+    public function __construct($strId, $strMethod, $varSubmitCheck, $blnTableless = true)
     {
         parent::__construct();
 
@@ -139,8 +142,10 @@ class Form extends \Controller
 
     /**
      * Set the form action directly
-     * @param   string  The URI
-     * @return   Form
+     *
+     * @param string $strUri The URI
+     *
+     * @return $this
      */
     public function setFormActionFromUri($strUri)
     {
@@ -151,8 +156,10 @@ class Form extends \Controller
 
     /**
      * Set the form action from a Contao page ID
-     * @param   int  The page ID
-     * @return   Form
+     *
+     * @param   int $intId The page ID
+     *
+     * @return   $this
      * @throws  \InvalidArgumentException
      */
     public function setFormActionFromPageId($intId)
@@ -168,9 +175,10 @@ class Form extends \Controller
 
     /**
      * Preserve the current GET parameters by adding them as hidden fields
-     * @param array
+     *
+     * @param array $arrExclude
      */
-    public function preserveGetParameters($arrExclude=array())
+    public function preserveGetParameters($arrExclude = array())
     {
         foreach ($_GET as $k => $v) {
             if (in_array($k, $arrExclude)) {
@@ -190,7 +198,8 @@ class Form extends \Controller
 
     /**
      * Get form method
-     * @return  string
+     *
+     * @return string
      */
     public function getMethod()
     {
@@ -199,7 +208,8 @@ class Form extends \Controller
 
     /**
      * Get the form action
-     * @return  string
+     *
+     * @return string
      */
     public function getFormAction()
     {
@@ -208,7 +218,8 @@ class Form extends \Controller
 
     /**
      * Gets the form ID
-     * @return  string The form ID
+     *
+     * @return string The form ID
      */
     public function getFormId()
     {
@@ -225,8 +236,35 @@ class Form extends \Controller
     }
 
     /**
+     * Get tableless flag
+     *
+     * @return bool
+     */
+    public function isTableless()
+    {
+        return $this->blnTableless;
+    }
+
+    /**
+     * Set tabeless flag
+     *
+     * @param bool $blnTableless
+     *
+     * @return $this
+     */
+    public function setTableless($blnTableless)
+    {
+        $this->blnTableless = (bool) $blnTableless;
+        $this->intState = self::STATE_DIRTY;
+
+        return $this;
+    }
+
+
+    /**
      * Check if the form has been submitted
-     * @return  boolean
+     *
+     * @return bool
      */
     public function isSubmitted()
     {
@@ -235,7 +273,8 @@ class Form extends \Controller
 
     /**
      * Check if the form is valid (no widget has an error)
-     * @return  boolean
+     *
+     * @return  bool
      */
     public function isValid()
     {
@@ -244,7 +283,8 @@ class Form extends \Controller
 
     /**
      * Check if form is dirty (widgets need to be generated)
-     * return   bool
+     *
+     * @return bool
      */
     public function isDirty()
     {
@@ -253,7 +293,8 @@ class Form extends \Controller
 
     /**
      * Check if there are uploads
-     * @return  boolean
+     *
+     * @return  bool
      */
     public function hasUploads()
     {
@@ -264,15 +305,31 @@ class Form extends \Controller
     }
 
     /**
-     * Adds a form field
-     * @param   string  The form field name
-     * @param   array   The DCA representation of the field
-     * @return  Form
-     * @throws  \RuntimeException
+     * Check if form has fields
+     *
+     * @return bool
      */
-    public function addFormField($strName, array $arrDca)
+    public function hasFields()
+    {
+        return !empty($this->arrFormFields);
+    }
+
+    /**
+     * Adds a form field
+     *
+     * @param string        $strName the form field name
+     * @param array         $arrDca The DCA representation of the field
+     * @param ArrayPosition $position
+     *
+     * @return $this
+     */
+    public function addFormField($strName, array $arrDca, ArrayPosition $position = null)
     {
         $this->checkFormFieldNameIsValid($strName);
+
+        if (null === $position) {
+            $position = ArrayPosition::last();
+        }
 
         // Make sure it has a "name" attribute because it is mandatory
         if (!isset($arrDca['name'])) {
@@ -366,7 +423,7 @@ class Form extends \Controller
             }
         }
 
-        $this->arrFormFields[$strName] = $arrDca;
+        $this->arrFormFields = $position->addToArray($this->arrFormFields, array($strName=>$arrDca));
         $this->intState = self::STATE_DIRTY;
 
         return $this;
@@ -374,13 +431,20 @@ class Form extends \Controller
 
     /**
      * Add multiple form fields
-     * @param   array
-     * @return  Form
+     *
+     * @param array         $arrFormFields
+     * @param ArrayPosition $position
+     *
+     * @return $this
      */
-    public function addFormFields($arrFormFields)
+    public function addFormFields(array $arrFormFields, ArrayPosition $position = null)
     {
+        if ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE) {
+            $arrFormFields = array_reverse($arrFormFields, true);
+        }
+
         foreach ($arrFormFields as $strName => $arrDca) {
-            $this->addFormField($strName, $arrDca);
+            $this->addFormField($strName, $arrDca, $position);
         }
 
         return $this;
@@ -389,16 +453,22 @@ class Form extends \Controller
     /**
      * Binds a model instance to the form. If there is data, haste form will add
      * the present values as default values.
-     * @param   \Model
+     *
+     * @param \Model
+     *
+     * @return $this
      */
-    public function bindModel(\Model $objModel=null)
+    public function bindModel(\Model $objModel = null)
     {
         $this->objModel = $objModel;
+
+        return $this;
     }
 
     /**
      * Gets the bound model
-     * @return   \Model
+     *
+     * @return \Model
      */
     public function getBoundModel()
     {
@@ -406,38 +476,62 @@ class Form extends \Controller
     }
 
     /**
-     * Helper method to easily add a captcha field
-     * @param   string  The form field name
+     * Add the Contao hidden fields FORM_SUBMIT and REQUEST_TOKEN
      */
-    public function addCaptchaFormField($strName)
+    public function addContaoHiddenFields()
+    {
+        $this->addFormField('FORM_SUBMIT', array(
+            'name' => 'FORM_SUBMIT',
+            'inputType' => 'hidden',
+            'value' => $this->getFormId()
+        ));
+
+        $this->addFormField('REQUEST_TOKEN', array(
+            'name' => 'REQUEST_TOKEN',
+            'inputType' => 'hidden',
+            'value' => REQUEST_TOKEN
+        ));
+    }
+
+    /**
+     * Helper method to easily add a captcha field
+     *
+     * @param string        $strName The form field name
+     * @param ArrayPosition $position
+     */
+    public function addCaptchaFormField($strName, ArrayPosition $position = null)
     {
         $this->addFormField($strName, array(
             'name'      => $strName . '_' . $this->strFormId, // make sure they're unique on a page
             'label'     => $GLOBALS['TL_LANG']['MSC']['securityQuestion'],
             'inputType' => 'captcha',
             'eval'      => array('mandatory'=>true)
-        ));
+        ), $position);
     }
 
     /**
      * Helper method to easily add a submit field
-     * @param   string  The form field name
-     * @param   string  The label for the submit button
+     *
+     * @param string        $strName  The form field name
+     * @param string        $strLabel The label for the submit button
+     * @param ArrayPosition $position
      */
-    public function addSubmitFormField($strName, $strLabel)
+    public function addSubmitFormField($strName, $strLabel, ArrayPosition $position = null)
     {
         $this->addFormField($strName, array(
             'name'      => $strName,
             'label'     => $strLabel,
             'inputType' => 'submit'
-        ));
+        ), $position);
     }
 
     /**
      * Add form fields from a back end DCA
-     * @param   string   The DCA table name
-     * @param   callable Called for each field, return true if you want to include the field in the form
-     * @return  Form
+     *
+     * @param string   $strTable    The DCA table name
+     * @param callable $varCallback Called for each field, return true if you want to include the field in the form
+     *
+     * @return $this
      */
     public function addFieldsFromDca($strTable, $varCallback = null)
     {
@@ -458,10 +552,12 @@ class Form extends \Controller
 
     /**
      * Add form fields from a back end form generator form ID
-     * @param   int      The form generator form ID
-     * @param   callable Called for each field, return true if you want to include the field in the form
-     * @return  Form
-     * @throws  \InvalidArgumentException
+     *
+     * @param int      $intId       The form generator form ID
+     * @param callable $varCallback Called for each field, return true if you want to include the field in the form
+     *
+     * @return $this
+     * @throws \InvalidArgumentException
      */
     public function addFieldsFromFormGenerator($intId, $varCallback = null)
     {
@@ -501,8 +597,10 @@ class Form extends \Controller
 
     /**
      * Get a form field by a given name
-     * @param   string  The form field name
-     * @return  array
+     *
+     * @param string $strName The form field name
+     *
+     * @return array
      */
     public function getFormField($strName)
     {
@@ -511,7 +609,8 @@ class Form extends \Controller
 
     /**
      * Get all form fields
-     * @return  array
+     *
+     * @return array
      */
     public function getFormFields()
     {
@@ -520,8 +619,10 @@ class Form extends \Controller
 
     /**
      * Removes a form field
-     * @param   string  The form field name
-     * @return  Form
+     *
+     * @param string $strName The form field name
+     *
+     * @return $this
      */
     public function removeFormField($strName)
     {
@@ -533,7 +634,10 @@ class Form extends \Controller
 
     /**
      * Checks if there is a form field with a given name
-     * @param   string  The form field name
+     *
+     * @param string $strName The form field name
+     *
+     * @return bool
      */
     public function hasFormField($strName)
     {
@@ -542,8 +646,10 @@ class Form extends \Controller
 
     /**
      * Returns a widget instance if existing
-     * @param   string  The form field name
-     * @return  \Widget
+     *
+     * @param string $strName The form field name
+     *
+     * @return \Widget
      */
     public function getWidget($strName)
     {
@@ -554,7 +660,8 @@ class Form extends \Controller
 
     /**
      * Return all widgets
-     * @return  array
+     *
+     * @return array
      */
     public function getWidgets()
     {
@@ -565,10 +672,12 @@ class Form extends \Controller
 
     /**
      * Add a validator to the form field
-     * @param   string   The form field name
-     * @param   ValidatorInterface|callable An instance of ValidatorInterface or a callable that will be called on widget validation
-     * @return  Form
-     * @throws  \InvalidArgumentException
+     *
+     * @param string                      $strName      The form field name
+     * @param ValidatorInterface|callable $varValidator An instance of ValidatorInterface or a callable that will be called on widget validation
+     *
+     * @return $this
+     * @throws \InvalidArgumentException
      */
     public function addValidator($strName, $varValidator)
     {
@@ -583,8 +692,9 @@ class Form extends \Controller
 
     /**
      * Create the widget instances
-     * @return  Form
-     * @throws  \RuntimeException
+     *
+     * @return $this
+     * @throws \RuntimeException
      */
     public function createWidgets()
     {
@@ -645,7 +755,8 @@ class Form extends \Controller
 
     /**
      * Validate the form
-     * @return boolean
+     *
+     * @return bool
      */
     public function validate()
     {
@@ -697,8 +808,10 @@ class Form extends \Controller
 
     /**
      * Add form to a template
-     * @param   FrontendTemplate
-     * @return  Form
+     *
+     * @param \FrontendTemplate $objTemplate
+     *
+     * @return $this
      */
     public function addToTemplate(\FrontendTemplate $objTemplate)
     {
@@ -707,8 +820,10 @@ class Form extends \Controller
 
     /**
      * Add form to a object
-     * @param   FrontendTemplate
-     * @return  Form
+     *
+     * @param object $objObject
+     *
+     * @return $this
      */
     public function addToObject($objObject)
     {
@@ -746,6 +861,7 @@ class Form extends \Controller
 
     /**
      * Generate a form and return it as HTML string
+     *
      * @return string
      */
     public function generate()
@@ -778,10 +894,12 @@ class Form extends \Controller
 
     /**
      * Return the submitted data of a specific form field
-     * @param   string   The form field name
-     * @return  mixed    The value of the widget
-     * @throws  \BadMethodCallException
-     * @throws  \InvalidArgumentException
+     *
+     * @param string $strName The form field name
+     *
+     * @return mixed    The value of the widget
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
      */
     public function fetch($strName)
     {
@@ -802,10 +920,12 @@ class Form extends \Controller
 
     /**
      * Return the submitted data as an associative array
-     * @param   callable    A callable that should be used to fetch the data instead of the built in functionality
-     * @return  array
+     *
+     * @param callable $varCallback A callable that should be used to fetch the data instead of the built in functionality
+     *
+     * @return array
      */
-    public function fetchAll($varCallback=null)
+    public function fetchAll($varCallback = null)
     {
         $arrData = array();
 
@@ -822,6 +942,7 @@ class Form extends \Controller
 
     /**
      * Generate a form and return it as HTML string
+     *
      * @return string
      */
     public function __toString()
@@ -831,8 +952,10 @@ class Form extends \Controller
 
     /**
      * Check for a valid form field name
-     * @param   string  The form field name
-     * @throws  \InvalidArgumentException
+     *
+     * @param string $strName The form field name
+     *
+     * @throws \InvalidArgumentException
      */
     protected function checkFormFieldNameIsValid($strName)
     {
@@ -847,6 +970,7 @@ class Form extends \Controller
 
     /**
      * Splits hidden and visible widgets
+     *
      * @return array
      */
     protected function splitHiddenAndVisibleWidgets()

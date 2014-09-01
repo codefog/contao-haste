@@ -52,10 +52,10 @@ class Haste extends \Controller
 
     /**
      * Recursively create a directory
-     * Until Contao Core supports it (see https://github.com/contao/core/issues/6553)
      * @param   string
      * @param   bool
      * @return  bool
+     * @deprecated use `new Folder(...)` (see https://github.com/contao/core/issues/6553)
      */
     public static function mkdirr($strDirectory)
     {

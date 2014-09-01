@@ -66,6 +66,10 @@ For more internal details please read the source ;-)
       'inputType' => 'submit'
     ));
 
+    // Automatically add the FORM_SUBMIT and REQUEST_TOKEN hidden fields.
+    // DO NOT use this method with generate() as the "form" template provides those fields by default.
+    $objForm->addContaoHiddenFields();
+
     // For the ease of use we do provide two helpers for the submit button and captcha field
     $objForm->addSubmitFormField('submit', 'Submit form');
     $objForm->addCaptchaFormField('captcha');

@@ -16,6 +16,11 @@ namespace Haste\Data;
 class Plain extends \ArrayObject
 {
 
+    /**
+     * @param array|null|object $value
+     * @param string            $label
+     * @param array             $additional
+     */
     public function __construct($value, $label='', array $additional=array())
     {
         $values = array_merge(
@@ -29,8 +34,17 @@ class Plain extends \ArrayObject
         parent::__construct($values, \ArrayObject::ARRAY_AS_PROPS);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        return (string) ($this->formatted ?: $this->value);
+        $varValue = ($this->formatted ?: $this->value);
+
+        if (is_array($varValue)) {
+            return implode(', ', $varValue);
+        }
+
+        return (string) $varValue;
     }
 }
