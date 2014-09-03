@@ -439,7 +439,7 @@ class Form extends \Controller
      */
     public function addFormFields(array $arrFormFields, ArrayPosition $position = null)
     {
-        if ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE) {
+        if (null !== $position && ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE)) {
             $arrFormFields = array_reverse($arrFormFields, true);
         }
 
