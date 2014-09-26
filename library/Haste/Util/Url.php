@@ -17,12 +17,14 @@ class Url
 
     /**
      * Add a query string to the given URI string or page ID
-     * @param   string Query
-     * @param   mixed
-     * @return  string
-     * @throws  \InvalidArgumentException
+     *
+     * @param string $strQuery
+     * @param mixed  $varUrl
+     *
+     * @return string
+     * @throws \InvalidArgumentException
      */
-    public static function addQueryString($strQuery, $varUrl=null)
+    public static function addQueryString($strQuery, $varUrl = null)
     {
         $strUrl = static::prepareUrl($varUrl);
         $strQuery = trim(ampersand($strQuery, false), '&');

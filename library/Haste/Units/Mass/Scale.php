@@ -17,7 +17,7 @@ class Scale
 
     /**
      * Scale weight objects
-     * @var array
+     * @var Weight[]
      */
     protected $arrWeights = array();
 

@@ -11,7 +11,7 @@
  */
 
 
-namespace \Haste\Geodesy\Datum;
+namespace Haste\Geodesy\Datum;
 
 
 interface GeodeticDatum

@@ -38,6 +38,8 @@ class UrlId
         $strValid = $intId . '-' . standardize($strName);
 
         if (Input::getAutoItem($strKey) != $strValid) {
+
+            /** @type \PageModel $objPage */
             global $objPage;
 
             $strParams = '/' . $strValid;

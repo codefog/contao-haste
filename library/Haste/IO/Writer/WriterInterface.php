@@ -19,7 +19,7 @@ interface WriterInterface
 
     /**
      * Set mapper handler
-     * @param   MapperInterface|null
+     * @param MapperInterface|null $objMapper
      * @return  $this
      */
     public function setMapper(MapperInterface $objMapper = null);
@@ -33,8 +33,10 @@ interface WriterInterface
 
     /**
      * Write from the given data reader
-     * @param   Traversable     Reader instance
-     * @return  int             the number of written rows
+     *
+     * @param \Traversable $objReader Reader instance
+     *
+     * @return int the number of written rows
      */
     public function writeFrom(\Traversable $objReader);
 }

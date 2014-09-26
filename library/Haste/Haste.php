@@ -27,10 +27,13 @@ class Haste extends \Controller
 
     /**
      * Allow access to all protected Contao Controller methods
-     * @param   string Method name
-     * @param   mixed Arguments
+     *
+     * @param string $name Method name
+     * @param mixed  $arguments
+     *
+     * @return mixed
      */
-    public function call($name, $arguments=null)
+    public function call($name, $arguments = null)
     {
         $arguments = $arguments === null ? array() : (is_array($arguments) ? $arguments : array($arguments));
 

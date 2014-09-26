@@ -121,27 +121,28 @@ class RowClass
 
     /**
      * Generate row class for an array
-     * @param   array   data rows
-     * @param   string  class prefix (e.g. "col")
-     * @param   string  row class name
-     * @param   int     number of columns
-     * @param   int     options configuration
-     * @return  array
+     *
+     * @param array $arrData data rows
+     *
+     * @return array
      */
     public function applyTo(array &$arrData)
     {
         $hasColumns = ($this->intColumns > 1);
         $total = count($arrData) - 1;
         $current = 0;
+        $row = 0;
+        $col = 0;
+        $rows = 0;
+        $cols = 0;
 
         if ($hasColumns)
         {
-            $row = 0;
-            $col = 0;
             $rows = ceil(count($arrData) / $this->intColumns) - 1;
             $cols = $this->intColumns - 1;
         }
 
+        /** @type mixed $varValue */
         foreach ($arrData as $k => $varValue)
         {
             if ($hasColumns && $current > 0 && $current % $this->intColumns == 0)
