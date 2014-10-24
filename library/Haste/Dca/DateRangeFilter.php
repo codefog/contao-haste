@@ -240,6 +240,8 @@ class DateRangeFilter
      */
     private function createDatepickerInputField($name, $value, $rgxp)
     {
+        $datepickerVersion = version_compare(VERSION, '3.3', '<') ? DATEPICKER : $GLOBALS['TL_ASSETS']['DATEPICKER'];
+        $datepickerClass = version_compare(VERSION, '3.3', '<') ? 'datepicker_dashboard' : 'datepicker_bootstrap';
         $format = \Date::formatToJs($GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
         switch ($rgxp) {
             case 'datim':
@@ -264,7 +266,7 @@ class DateRangeFilter
                 toggle: $("toggle_%s"),
                 format: "%s",
                 positionOffset: {x:-211,y:-209}%s,
-                pickerClass: "datepicker_bootstrap",
+                pickerClass: "%s",
                 useFadeInOut: !Browser.ie,
                 startDay: %s,
                 titleFormat: "%s"
@@ -275,13 +277,14 @@ class DateRangeFilter
             $name,
             ($value) ? ' active' : '',
             $value,
-            $GLOBALS['TL_ASSETS']['DATEPICKER'],
+            $datepickerVersion,
             specialchars($GLOBALS['TL_LANG']['MSC']['datepicker']),
             $name,
             $name,
             $name,
             $format,
             $time,
+            $datepickerClass,
             $GLOBALS['TL_LANG']['MSC']['weekOffset'],
             $GLOBALS['TL_LANG']['MSC']['titleFormat']
         );
