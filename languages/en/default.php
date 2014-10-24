@@ -26,7 +26,7 @@ $GLOBALS['TL_LANG']['ERR']['numberInputNotAllowed'] = 'Enter a valid number (e.g
 /**
  * Miscellaneous
  */
-$GLOBALS['TL_LANG']['HST']['advanced_filter'] = 'Advanced filter:';
+$GLOBALS['TL_LANG']['HST']['advanced_filter']   = 'Advanced filter:';
 
 /**
  * Weight Units
