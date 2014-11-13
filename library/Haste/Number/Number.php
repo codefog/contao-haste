@@ -25,7 +25,9 @@ class Number
 
     /**
      * Create a Number instance
-     * @param   integer The amount in representation to support 4 floating points
+     *
+     * @param int $intAmount The amount in representation to support 4 floating points
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct($intAmount)
@@ -113,7 +115,7 @@ class Number
      * @param   Number
      * @return  boolean
      */
-    public function lessThan(Numberv $objToCompare)
+    public function lessThan(Number $objToCompare)
     {
         return $this->getAmount() < $objToCompare->getAmount();
     }
@@ -192,7 +194,7 @@ class Number
     /**
      * Create Number instance from PHP value
      * @param   mixed
-     * @return  Number
+     * @return  static
      * @throws  \InvalidArgumentException
      */
     public static function create($varInput)

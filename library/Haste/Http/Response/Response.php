@@ -109,8 +109,9 @@ class Response
 
     /**
      * Creates a new HTTP response
-     * @param   string The response content
-     * @param   integer The response HTTP status code
+     *
+     * @param string $strContent The response content
+     * @param int    $intStatus  The response HTTP status code
      */
     public function __construct($strContent = '', $intStatus = 200)
     {
@@ -123,9 +124,11 @@ class Response
 
     /**
      * Sets a header
-     * @param   string The header name
-     * @param   string The header content
-     * @return  Response
+     *
+     * @param string $strName    The header name
+     * @param string $strContent The header content
+     *
+     * @return Response
      */
     public function setHeader($strName, $strContent)
     {
@@ -136,8 +139,10 @@ class Response
 
     /**
      * Remove a header
-     * @param   string The header name
-     * @return  Response
+     *
+     * @param string $strName The header name
+     *
+     * @return Response
      */
     public function removeHeader($strName)
     {
@@ -148,8 +153,10 @@ class Response
 
     /**
      * Get a header
-     * @param   string The header name
-     * @return  string The header content
+     *
+     * @param string $strName The header name
+     *
+     * @return string The header content
      */
     public function getHeader($strName)
     {
@@ -158,7 +165,8 @@ class Response
 
     /**
      * Gets the status code
-     * @return  int Status code
+     *
+     * @return int Status code
      */
     public function getStatusCode()
     {
@@ -167,7 +175,9 @@ class Response
 
     /**
      * Set the status code
-     * @param   int
+     *
+     * @param int $intCode
+     *
      * @throws  \InvalidArgumentException When the HTTP status code is not valid
      */
     public function setStatusCode($intCode)
@@ -228,8 +238,10 @@ class Response
 
     /**
      * Send the response
-     * @param   boolean Exit script
-     * @return  Response|null
+     *
+     * @param bool $blnExit Exit script
+     *
+     * @return Response|null
      */
     public function send($blnExit = true)
     {

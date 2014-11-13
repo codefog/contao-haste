@@ -17,7 +17,8 @@ interface WeightAggregate
 
     /**
      * Returns an object that implements the weightable interface
-     * @return  Weightable
+     *
+     * @return Weighable
      */
     public function getWeight();
 }

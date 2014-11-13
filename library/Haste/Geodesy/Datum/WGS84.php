@@ -11,7 +11,7 @@
  */
 
 
-namespace \Haste\Geodesy\Datum;
+namespace Haste\Geodesy\Datum;
 
 
 class WGS84 implements GeodeticDatum
@@ -65,11 +65,13 @@ class WGS84 implements GeodeticDatum
 
     /**
      * Find coordinates using the google maps geocode service
-     * @param   string  street
-     * @param   string  postal code
-     * @param   string  city
-     * @param   string  country
-     * @return  WGS84|null
+     *
+     * @param string $strStreet
+     * @param string $strPostal
+     * @param string $strCity
+     * @param string $strCountry
+     *
+     * @return WGS84|null
      */
     public static function findAddressOnGoogleMaps($strStreet, $strPostal, $strCity, $strCountry)
     {

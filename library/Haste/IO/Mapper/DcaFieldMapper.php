@@ -12,17 +12,22 @@
 
 namespace Haste\IO\Mapper;
 
+use Haste\Haste;
+
 class DcaFieldMapper extends ArrayMapper
 {
 
     /**
      * Construct mapper from DCA fields
-     * @param   string
+     *
+     * @param string $strTable
+     *
+     * @throws \Exception
      */
     public function __construct($strTable)
     {
         if (!is_array($GLOBALS['TL_DCA'][$strTable])) {
-            \Haste\Haste::getInstance()->call('loadDataContainer', $strTable);
+            Haste::getInstance()->call('loadDataContainer', $strTable);
         }
 
         if (!is_array($GLOBALS['TL_DCA'][$strTable]['fields'])) {

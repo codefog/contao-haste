@@ -12,6 +12,9 @@
 
 namespace Haste\Model;
 
+use Haste\Haste;
+use Haste\Util\Undo;
+
 class Relations
 {
 
@@ -84,8 +87,10 @@ class Relations
 
     /**
      * Update the records in related table
-     * @param mixed
-     * @param object \DataContainer in BE
+     *
+     * @param mixed          $varValue
+     * @param \DataContainer $dc in BE
+     *
      * @return mixed
      */
     public function updateRelatedRecords($varValue, $dc)
@@ -121,8 +126,9 @@ class Relations
 
     /**
      * Delete the records in related table
-     * @param object \DataContainer in BE
-     * @param integer
+     *
+     * @param \DataContainer $dc in BE
+     * @param int            $intUndoId
      */
     public function deleteRelatedRecords($dc, $intUndoId)
     {
@@ -166,7 +172,7 @@ class Relations
 
         // Store the relations in the tl_undo table
         if (!empty($arrUndo)) {
-            \Haste\Util\Undo::add($intUndoId, 'haste_relations', $arrUndo);
+            Undo::add($intUndoId, 'haste_relations', $arrUndo);
         }
     }
 
@@ -227,15 +233,16 @@ class Relations
                     continue;
                 }
 
-                \Haste\Haste::getInstance()->call('loadDataContainer', substr($strFile, 0, -4));
+                Haste::getInstance()->call('loadDataContainer', substr($strFile, 0, -4));
             }
         }
     }
 
     /**
      * Copy the records in related table
-     * @param integer
-     * @param object \DataContainer in BE
+     *
+     * @param int            $intId
+     * @param \DataContainer $dc in BE
      */
     public function copyRelatedRecords($intId, $dc)
     {
@@ -344,8 +351,10 @@ class Relations
 
     /**
      * Get related records of particular field
-     * @param mixed
-     * @param object \DataContainer in BE
+     *
+     * @param mixed          $varValue
+     * @param \DataContainer $dc in BE
+     *
      * @return mixed
      */
     public function getRelatedRecords($varValue, $dc)
@@ -401,7 +410,7 @@ class Relations
 
     /**
      * Filter records by relations set in custom filter
-     * @param object \DataContainer in BE
+     * @param \DataContainer $dc in BE
      */
     public function filterByRelations($dc)
     {
@@ -428,7 +437,7 @@ class Relations
 
     /**
      * Add the relation filters
-     * @param object \DataContainer in BE
+     * @param \DataContainer $dc in BE
      * @return string
      */
     public function addRelationFilters($dc)
@@ -454,7 +463,7 @@ class Relations
         }
 
         $count = 0;
-        $return .= '<div class="tl_filter tl_subpanel">
+        $return = '<div class="tl_filter tl_subpanel">
 <strong>' . $GLOBALS['TL_LANG']['HST']['advanced_filter'] . '</strong> ';
 
         foreach (static::$arrFilterableFields as $field => $arrRelation) {
@@ -559,7 +568,7 @@ class Relations
     public static function getRelation($strTable, $strField)
     {
         if (!isset($GLOBALS['TL_DCA'][$strTable])) {
-            \Haste\Haste::getInstance()->call('loadDataContainer', $strTable);
+            Haste::getInstance()->call('loadDataContainer', $strTable);
         }
 
         $strCacheKey = $strTable . '_' . $strField;

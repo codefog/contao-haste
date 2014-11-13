@@ -51,7 +51,7 @@ class ArrayMapper implements MapperInterface
      */
     public function getPreserveUnmapped()
     {
-        return $blnValue;
+        return $this->blnPreserveUnmapped;
     }
 
     /**

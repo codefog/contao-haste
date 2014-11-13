@@ -69,7 +69,7 @@ class Form extends \Controller
 
     /**
      * Widget instances
-     * @var array
+     * @var \Widget[]
      */
     protected $arrWidgets = array();
 
@@ -348,6 +348,7 @@ class Form extends \Controller
             }
         }
 
+        /** @type \Widget $strClass */
         $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
 
         if (!class_exists($strClass)) {
@@ -356,7 +357,7 @@ class Form extends \Controller
 
         // Convert date formats into timestamps
         if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'datim') {
-            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca) {
+            $this->addValidator($strName, function($varValue) use ($arrDca) {
                 if ($varValue != '') {
                     $objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
                     $varValue = $objDate->tstamp;
@@ -367,36 +368,39 @@ class Form extends \Controller
         }
 
         if (is_array($arrDca['save_callback'])) {
-            $this->addValidator($strName, function($varValue, $objWidget, $objForm) use ($arrDca, $strName) {
 
-                $intId = 0;
-                $strTable = '';
+            $this->addValidator(
+                $strName,
+                function($varValue, \Widget $objWidget, Form $objForm) use ($arrDca, $strName) {
+                    $intId = 0;
+                    $strTable = '';
 
-                if (($objModel = $objForm->getBoundModel()) !== null) {
-                    $intId = $objModel->id;
-                    $strTable = $objModel->getTable();
-                }
-
-                $dc = (object) array(
-                    'id'            => $intId,
-                    'table'         => $strTable,
-                    'value'         => $varValue,
-                    'field'         => $strName,
-                    'inputName'     => $objWidget->name,
-                    'activeRecord'  => $objModel
-                );
-
-                foreach ($arrDca['save_callback'] as $callback) {
-                    if (is_array($callback)) {
-                        $objCallback = \System::importStatic($callback[0]);
-                        $varValue = $objCallback->$callback[1]($varValue, $dc);
-                    } elseif (is_callable($callback)) {
-                        $varValue = $callback($varValue, $dc);
+                    if (($objModel = $objForm->getBoundModel()) !== null) {
+                        $intId = $objModel->id;
+                        $strTable = $objModel->getTable();
                     }
-                }
 
-                return $varValue;
-            });
+                    $dc = (object) array(
+                        'id'            => $intId,
+                        'table'         => $strTable,
+                        'value'         => $varValue,
+                        'field'         => $strName,
+                        'inputName'     => $objWidget->name,
+                        'activeRecord'  => $objModel
+                    );
+
+                    foreach ($arrDca['save_callback'] as $callback) {
+                        if (is_array($callback)) {
+                            $objCallback = \System::importStatic($callback[0]);
+                            $varValue = $objCallback->$callback[1]($varValue, $dc);
+                        } elseif (is_callable($callback)) {
+                            $varValue = $callback($varValue, $dc);
+                        }
+                    }
+
+                    return $varValue;
+                }
+            );
         }
 
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
@@ -439,7 +443,7 @@ class Form extends \Controller
      */
     public function addFormFields(array $arrFormFields, ArrayPosition $position = null)
     {
-        if ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE) {
+        if (null !== $position && ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE)) {
             $arrFormFields = array_reverse($arrFormFields, true);
         }
 
@@ -700,10 +704,9 @@ class Form extends \Controller
     {
         // Do nothing if already generated
         if (!$this->isDirty()) {
-            return;
+            return $this;
         }
 
-        $intTotal = count($this->arrFormFields);
         $i = 0;
 
         // Reset to initial values
@@ -839,6 +842,7 @@ class Form extends \Controller
         $objObject->hasUploads = $this->hasUploads();
         $objObject->tableless = $this->blnTableless;
 
+        /** @type \Widget $objWidget */
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
         // Generate hidden form fields
@@ -877,6 +881,7 @@ class Form extends \Controller
         $objTemplate->enctype = $this->getEnctype();
         $objTemplate->formSubmit = $this->getFormId();
 
+        /** @type \Widget $objWidget */
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
         // Generate hidden form fields
