@@ -12,6 +12,8 @@
 
 namespace Haste\Util;
 
+use Haste\Haste;
+
 class Format
 {
 
@@ -61,7 +63,7 @@ class Format
     public static function dcaLabel($strTable, $strField)
     {
         \System::loadLanguageFile($strTable);
-        \Haste\Haste::getInstance()->call('loadDataContainer', $strTable);
+        Haste::getInstance()->call('loadDataContainer', $strTable);
 
         if (!empty($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'])) {
             $strLabel = is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label']) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'];
@@ -89,7 +91,7 @@ class Format
         $varValue = deserialize($varValue);
 
         \System::loadLanguageFile($strTable);
-        \Haste\Haste::getInstance()->call('loadDataContainer', $strTable);
+        Haste::getInstance()->call('loadDataContainer', $strTable);
 
         // Get field value
         if (strlen($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['foreignKey'])) {
@@ -139,8 +141,10 @@ class Format
      * echo Format::version(10030042);
      * // will output: 1.3.4 alpha3
      * </code>
-     * @param   int     The encoded version
-     * @return  string  The version in human readable format
+     *
+     * @param int $aVersion The encoded version
+     *
+     * @return string The version in human readable format
      */
     public static function repositoryVersion($aVersion)
     {
@@ -169,14 +173,15 @@ class Format
 
     /**
      * Format a version number to human readable with short status text
-     *
      * Example:
      * <code>
      * echo Format::shortVersion(10030042);
      * // will output: 1.3.4 a3
      * </code>
-     * @param   int     The encoded version
-     * @return  string  The version in human readable format
+     *
+     * @param int $aVersion The encoded version
+     *
+     * @return string  The version in human readable format
      */
     public static function repositoryShortVersion($aVersion)
     {

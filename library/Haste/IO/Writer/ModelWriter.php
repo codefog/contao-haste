@@ -56,6 +56,7 @@ class ModelWriter extends AbstractWriter
             return false;
         }
 
+        /** @type \Model $objModel */
         $objModel = new $this->strModel();
         $objModel->setRow($arrData);
         $objModel->save();

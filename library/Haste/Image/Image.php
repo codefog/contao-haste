@@ -51,6 +51,7 @@ class Image
         }
 
         $arrGdinfo = gd_info();
+        $strImage = null;
 
         // Load image
         switch ($objFile->extension) {

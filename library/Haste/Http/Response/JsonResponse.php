@@ -16,9 +16,11 @@ class JsonResponse extends Response
 {
     /**
      * Creates a new JSON encoded HTTP response
-     * @param   mixed The response content as string or array
-     * @param   integer The response HTTP status code
-     * @throws  \InvalidArgumentException When the HTTP status code is not valid
+     *
+     * @param mixed $varContent The response content as string or array
+     * @param int   $intStatus  The response HTTP status code
+     *
+     * @throws \InvalidArgumentException When the HTTP status code is not valid
      */
     public function __construct($varContent = '', $intStatus = 200)
     {

@@ -23,6 +23,8 @@ abstract class Model extends \Model
         $arrRelation = Relations::getRelation(static::$strTable, $strKey);
 
         if ($arrRelation !== false) {
+
+            /** @type \Model $strClass */
             $strClass = static::getClassFromTable($arrRelation['related_table']);
 
             if (class_exists($strClass)) {
