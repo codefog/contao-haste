@@ -15,11 +15,6 @@ namespace Haste;
 class Haste extends \Controller
 {
     /**
-     * Haste version
-     */
-    const VERSION = '4.0.0';
-
-    /**
      * Current object instance (Singleton)
      * @var Haste
      */
