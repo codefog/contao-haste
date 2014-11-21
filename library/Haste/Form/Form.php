@@ -62,6 +62,12 @@ class Form extends \Controller
     protected $blnHasUploads = false;
 
     /**
+     * True if the HTML5 validation should be ignored
+     * @var bool
+     */
+    protected $blnNoValidate = false;
+
+    /**
      * Form fields in the representation AFTER the Widget::getAttributesFromDca() call
      * @var array
      */
@@ -233,6 +239,32 @@ class Form extends \Controller
     public function getEnctype()
     {
         return $this->strEnctype;
+    }
+
+    /**
+     * Get novalidate flag
+     * @return bool
+     */
+    public function getNoValidate()
+    {
+        return $this->blnNoValidate;
+    }
+
+    /**
+     * Generate the novalidate attribute
+     * @return string
+     */
+    public function generateNoValidate()
+    {
+        return $this->blnNoValidate ? 'novalidate':'';
+    }
+
+    /**
+     * Set novalidate flag
+     */
+    public function setNoValidate($blnNoValidate)
+    {
+        $this->blnNoValidate = (bool) $blnNoValidate;
     }
 
     /**
@@ -840,6 +872,7 @@ class Form extends \Controller
         $objObject->valid = $this->isValid();
         $objObject->submitted = $this->isSubmitted();
         $objObject->hasUploads = $this->hasUploads();
+        $objObject->novalidate = $this->generateNoValidate();
         $objObject->tableless = $this->blnTableless;
 
         /** @type \Widget $objWidget */
@@ -879,6 +912,7 @@ class Form extends \Controller
         $objTemplate->formId = $this->getFormId();
         $objTemplate->method = strtolower($this->getMethod());
         $objTemplate->enctype = $this->getEnctype();
+        $objTemplate->novalidate = $this->generateNoValidate();
         $objTemplate->formSubmit = $this->getFormId();
 
         /** @type \Widget $objWidget */
