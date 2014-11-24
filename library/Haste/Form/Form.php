@@ -245,7 +245,7 @@ class Form extends \Controller
      * Get novalidate flag
      * @return bool
      */
-    public function getNoValidate()
+    public function isNoValidate()
     {
         return $this->blnNoValidate;
     }
