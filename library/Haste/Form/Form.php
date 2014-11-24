@@ -234,6 +234,7 @@ class Form extends \Controller
 
     /**
      * Gets the encoding type
+     * 
      * @return  string
      */
     public function getEnctype()
@@ -243,6 +244,7 @@ class Form extends \Controller
 
     /**
      * Get novalidate flag
+     * 
      * @return bool
      */
     public function isNoValidate()
@@ -252,6 +254,7 @@ class Form extends \Controller
 
     /**
      * Generate the novalidate attribute
+     * 
      * @return string
      */
     public function generateNoValidate()
@@ -261,6 +264,7 @@ class Form extends \Controller
 
     /**
      * Set novalidate flag
+     * 
      * @param bool $blnNoValidate
      */
     public function setNoValidate($blnNoValidate)
