@@ -256,7 +256,7 @@ class Form extends \Controller
      */
     public function generateNoValidate()
     {
-        return $this->blnNoValidate ? ' novalidate':'';
+        return $this->blnNoValidate ? ' novalidate' : '';
     }
 
     /**
