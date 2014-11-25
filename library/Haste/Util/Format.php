@@ -57,45 +57,86 @@ class Format
 
     /**
      * Get field label based on DCA config
-     * @param   string
-     * @param   string
+     *
+     * @param string $strTable
+     * @param string $strField
+     *
+     * @return string
      */
     public static function dcaLabel($strTable, $strField)
     {
         \System::loadLanguageFile($strTable);
         Haste::getInstance()->call('loadDataContainer', $strTable);
+        $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
 
-        if (!empty($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'])) {
-            $strLabel = is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label']) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['label'];
+        // Add the "name" key (backwards compatibility)
+        if (!isset($arrField['name'])) {
+            $arrField['name'] = $strField;
+        }
+
+        return static::dcaLabelFromArray($arrField);
+    }
+
+    /**
+     * Get field label based on field config
+     *
+     * @param array $arrField
+     *
+     * @return string
+     */
+    public static function dcaLabelFromArray(array $arrField)
+    {
+        if (!empty($arrField['label'])) {
+            $strLabel = is_array($arrField['label']) ? $arrField['label'][0] : $arrField['label'];
         } else {
-            $strLabel = is_array($GLOBALS['TL_LANG']['MSC'][$strField]) ? $GLOBALS['TL_LANG']['MSC'][$strField][0] : $GLOBALS['TL_LANG']['MSC'][$strField];
+            $strLabel = is_array($GLOBALS['TL_LANG']['MSC'][$arrField['name']]) ? $GLOBALS['TL_LANG']['MSC'][$arrField['name']][0] : $GLOBALS['TL_LANG']['MSC'][$arrField['name']];
         }
 
         if ($strLabel == '') {
-            $strLabel = $strField;
+            $strLabel = $arrField['name'];
         }
 
         return $strLabel;
     }
 
-
     /**
      * Format DCA field value according to Contao Core standard
-     * @param   string
-     * @param   string
-     * @param   mixed
-     * @return  string
+     *
+     * @param string $strTable
+     * @param string $strField
+     * @param mixed $varValue
+     *
+     * @return mixed
      */
     public static function dcaValue($strTable, $strField, $varValue)
     {
-        $varValue = deserialize($varValue);
-
         \System::loadLanguageFile($strTable);
         Haste::getInstance()->call('loadDataContainer', $strTable);
+        $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
+
+        // Add the "name" key (backwards compatibility)
+        if (!isset($arrField['name'])) {
+            $arrField['name'] = $strField;
+        }
+
+        return static::dcaValueFromArray($arrField, $varValue);
+    }
+
+    /**
+     * Format field value according to Contao Core standard
+     *
+     * @param array $arrField
+     * @param       $varValue
+     *
+     * @return mixed
+     */
+    public static function dcaValueFromArray(array $arrField, $varValue)
+    {
+        $varValue = deserialize($varValue);
 
         // Get field value
-        if (strlen($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['foreignKey'])) {
-            $chunks = explode('.', $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['foreignKey']);
+        if (strlen($arrField['foreignKey'])) {
+            $chunks = explode('.', $arrField['foreignKey']);
             $varValue = empty($varValue) ? array(0) : $varValue;
             $objKey = \Database::getInstance()->execute("SELECT " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $varValue)) . ")");
 
@@ -103,31 +144,31 @@ class Format
 
         } elseif (is_array($varValue)) {
             foreach ($varValue as $kk => $vv) {
-                $varValue[$kk] = static::dcaValue($strTable, $strField, $vv);
+                $varValue[$kk] = static::dcaValueFromArray($arrField, $vv);
             }
 
             return implode(', ', $varValue);
 
-        } elseif ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['rgxp'] == 'date') {
+        } elseif ($arrField['eval']['rgxp'] == 'date') {
             return static::date($varValue);
 
-        } elseif ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['rgxp'] == 'time') {
+        } elseif ($arrField['eval']['rgxp'] == 'time') {
             return static::time($varValue);
 
-        } elseif ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['rgxp'] == 'datim' || in_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['flag'], array(5, 6, 7, 8, 9, 10)) || $strField == 'tstamp') {
+        } elseif ($arrField['eval']['rgxp'] == 'datim' || in_array($arrField['flag'], array(5, 6, 7, 8, 9, 10)) || $arrField['name'] == 'tstamp') {
             return static::datim($varValue);
 
-        } elseif ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['inputType'] == 'checkbox' && !$GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['multiple']) {
+        } elseif ($arrField['inputType'] == 'checkbox' && !$arrField['eval']['multiple']) {
             return strlen($varValue) ? $GLOBALS['TL_LANG']['MSC']['yes'] : $GLOBALS['TL_LANG']['MSC']['no'];
 
-        } elseif ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['inputType'] == 'textarea' && ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['allowHtml'] || $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['preserveTags'])) {
+        } elseif ($arrField['inputType'] == 'textarea' && ($arrField['eval']['allowHtml'] || $arrField['eval']['preserveTags'])) {
             return specialchars($varValue);
 
-        } elseif (is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'])) {
-            return isset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue]) ? ((is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue])) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['reference'][$varValue]) : $varValue;
+        } elseif (is_array($arrField['reference'])) {
+            return isset($arrField['reference'][$varValue]) ? ((is_array($arrField['reference'][$varValue])) ? $arrField['reference'][$varValue][0] : $arrField['reference'][$varValue]) : $varValue;
 
-        } elseif ($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['isAssociative'] || array_is_assoc($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'])) {
-            return isset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue]) ? ((is_array($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue])) ? $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue][0] : $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['options'][$varValue]) : $varValue;
+        } elseif ($arrField['eval']['isAssociative'] || array_is_assoc($arrField['options'])) {
+            return isset($arrField['options'][$varValue]) ? ((is_array($arrField['options'][$varValue])) ? $arrField['options'][$varValue][0] : $arrField['options'][$varValue]) : $varValue;
         }
 
         return $varValue;
