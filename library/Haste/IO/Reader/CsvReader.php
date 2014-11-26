@@ -16,6 +16,12 @@ class CsvReader implements \Iterator
 {
 
     /**
+     * Input file path
+     * @var string
+     */
+    protected $strFilePath;
+
+    /**
      * Input file
      * @var resource
      */
@@ -61,8 +67,7 @@ class CsvReader implements \Iterator
             throw new \InvalidArgumentException('Input file does not exist!');
         }
 
-        $this->resFile = @fopen(TL_ROOT . '/' . $strFile, 'r');
-        $this->blnValid = ($this->resFile !== false);
+        $this->strFilePath = TL_ROOT . '/' . $strFile;
     }
 
     /**
@@ -115,12 +120,11 @@ class CsvReader implements \Iterator
      */
     public function next()
     {
-        $this->arrCurrent = fgetcsv($this->resFile, 0, $this->strDelimiter, $this->strEnclosure, $this->strEscape);
+        $this->arrCurrent = $this->readLine();
 
         if (!is_array($this->arrCurrent)) {
             $this->arrCurrent = null;
             $this->blnValid = false;
-
         }
     }
 
@@ -129,8 +133,18 @@ class CsvReader implements \Iterator
      */
     public function rewind()
     {
+        // Lazy load
+        if ($this->resFile === null) {
+            $this->resFile = @fopen($this->strFilePath, 'r');
+            $this->blnValid = ($this->resFile !== false);
+            if ($this->valid()) {
+                $this->arrCurrent = $this->readLine();
+            }
+        } else {
+            $this->blnValid = true;
+        }
+
         fseek($this->resFile, 0);
-        $this->blnValid = true;
     }
 
     /**
@@ -140,5 +154,14 @@ class CsvReader implements \Iterator
     public function valid()
     {
         return $this->blnValid;
+    }
+
+    /**
+     * Return a line
+     * @return array|false
+     */
+    private function readLine()
+    {
+        return fgetcsv($this->resFile, 0, $this->strDelimiter, $this->strEnclosure, $this->strEscape);
     }
 }
