@@ -21,6 +21,10 @@ class ArrayMapper implements MapperInterface
      */
     protected $arrMap;
 
+    /**
+     * Preserve unmapped fields
+     * @var bool
+     */
     protected $blnPreserveUnmapped = true;
 
 
@@ -73,5 +77,14 @@ class ArrayMapper implements MapperInterface
         }
 
         return $arrData;
+    }
+
+    /**
+     * Returns the map
+     * @return array
+     */
+    public function getMap()
+    {
+        return $this->arrMap;
     }
 }
