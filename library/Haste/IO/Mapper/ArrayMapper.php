@@ -21,6 +21,10 @@ class ArrayMapper implements MapperInterface
      */
     protected $arrMap;
 
+    /**
+     * Preserve unmapped fields
+     * @var bool
+     */
     protected $blnPreserveUnmapped = true;
 
 
