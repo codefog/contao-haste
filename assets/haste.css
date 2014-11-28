@@ -1,0 +1,14 @@
+.haste_dateRangeFilter {
+    text-align: left;
+}
+.haste_dateRangeFilter > strong {
+    display:block;
+    margin: 0px 0px 5px 20px;
+}
+.haste_dateRangeFilter {
+    text-align: right;
+
+}
+.haste_dateRangeFilter .tl_text {
+    width: 60px;
+}

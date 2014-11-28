@@ -37,7 +37,7 @@ class Haste extends \Controller
 
     /**
      * Instantiate the Haste object
-     * @return  object
+     * @return static
      */
     public static function getInstance()
     {
