@@ -16,6 +16,13 @@ class Pagination
 {
 
     /**
+     * State of the pagination
+     * Can be either clean or dirty
+     */
+    const STATE_CLEAN = 0;
+    const STATE_DIRTY = 1;
+
+    /**
      * Total items
      *
      * @var integer
@@ -79,6 +86,13 @@ class Pagination
     protected $isValid = false;
 
     /**
+     * State
+     *
+     * @var integer
+     */
+    protected $state = self::STATE_DIRTY;
+
+    /**
      * Pagination object
      *
      * @var \Pagination|null
@@ -128,11 +142,21 @@ class Pagination
     }
 
     /**
+     * Check if data is dirty (pagination needs to be generated)
+     *
+     * @return bool
+     */
+    public function isDirty()
+    {
+        return (bool) ($this->state === static::STATE_DIRTY);
+    }
+
+    /**
      * @return int
      */
     public function getLimit()
     {
-        $this->generate();
+        $this->compile();
 
         return $this->limit;
     }
@@ -142,7 +166,7 @@ class Pagination
      */
     public function getOffset()
     {
-        $this->generate();
+        $this->compile();
 
         return $this->offset;
     }
@@ -168,6 +192,7 @@ class Pagination
      */
     public function setSeparator($separator)
     {
+        $this->state = self::STATE_DIRTY;
         $this->separator = $separator;
     }
 
@@ -184,15 +209,8 @@ class Pagination
      */
     public function setMaxPaginationLinks($maxPaginationLinks)
     {
+        $this->state = self::STATE_DIRTY;
         $this->maxPaginationLinks = $maxPaginationLinks;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isGenerated()
-    {
-        return $this->isGenerated;
     }
 
     /**
@@ -200,7 +218,7 @@ class Pagination
      */
     public function isValid()
     {
-        $this->generate();
+        $this->compile();
 
         return $this->isValid;
     }
@@ -218,6 +236,7 @@ class Pagination
      */
     public function setPerPage($perPage)
     {
+        $this->state = self::STATE_DIRTY;
         $this->perPage = $perPage;
     }
 
@@ -234,51 +253,28 @@ class Pagination
      */
     public function setTotal($total)
     {
+        $this->state = self::STATE_DIRTY;
         $this->total = $total;
     }
 
     /**
-     * Add the pagination to template
+     * Generate the pagination and return it as HTML string
      *
-     * @param \Template $template
-     * @param $key
-     */
-    public function addToTemplate(\Template $template, $key = null)
-    {
-        $this->addToObject($template, $key);
-    }
-
-    /**
-     * Add the pagination to object
-     *
-     * @param $object
-     * @param $key
-     */
-    public function addToObject($object, $key = null)
-    {
-        $this->generate();
-
-        // Set the default key
-        if ($key === null) {
-            $key = 'pagination';
-        }
-
-        if ($this->isValid() && $this->pagination !== null) {
-            $object->$key = $this->pagination->generate($this->getSeparator());
-        }
-    }
-
-    /**
-     * Generate the pagination
-     *
-     * @param integer
-     * @param integer
-     * @param string
-     * @param object
+     * @return string
      */
     public function generate()
     {
-        if ($this->isGenerated()) {
+        $this->compile();
+
+        return $this->pagination->generate($this->getSeparator());
+    }
+
+    /**
+     * Compile the pagination
+     */
+    protected function compile()
+    {
+        if (!$this->isDirty()) {
             return;
         }
 
@@ -293,6 +289,7 @@ class Pagination
 
             // The pagination is not valid if the page number is outside the range
             if ($page < 1 || $page > max(ceil($this->getTotal() / $this->getPerPage()), 1)) {
+                $this->state = self::STATE_CLEAN;
                 $this->isValid = false;
                 return;
             }
@@ -310,9 +307,20 @@ class Pagination
             $pagination = new \Pagination($this->getTotal(), $this->getPerPage(), $this->getMaxPaginationLinks(), $this->getKey());
         }
 
+        $this->state = self::STATE_CLEAN;
         $this->isValid = true;
         $this->limit = $limit;
         $this->offset = $offset;
         $this->pagination = $pagination;
+    }
+
+    /**
+     * Generate a pagination and return it as HTML string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->generate();
     }
 }

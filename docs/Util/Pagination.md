@@ -20,7 +20,7 @@ $objItems = $this->Database->prepare("SELECT * FROM tl_table")
     ->limit($objPagination->getLimit(), $objPagination->getOffset())
     ->execute();
 
-$objPagination->addToTemplate($this->Template);
+$this->Template->pagination = $objPagination->generate();
 ```
 
 Use the pagination with array:
@@ -40,5 +40,5 @@ if ($objPagination->applies()) {
     $arrItems = array_slice($arrItems, $objPagination->getOffset(), $objPagination->getLimit());
 }
 
-$objPagination->addToTemplate($this->Template);
+$this->Template->pagination = $objPagination->generate();
 ```
