@@ -104,9 +104,9 @@ class Pagination
     /**
      * @return bool
      */
-    public function hasLimit()
+    public function applies()
     {
-        return $this->getLimit() ? true : false;
+        return ($this->getLimit() || $this->getOffset()) ? true : false;
     }
 
     /**

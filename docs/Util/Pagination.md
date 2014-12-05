@@ -36,7 +36,7 @@ if (!$objPagination->isValid()) {
 }
 
 // Paginate the result
-if ($objPagination->hasLimit()) {
+if ($objPagination->applies()) {
     $arrItems = array_slice($arrItems, $objPagination->getOffset(), $objPagination->getLimit());
 }
 
