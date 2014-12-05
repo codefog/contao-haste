@@ -37,6 +37,13 @@ class Pagination
     protected $key;
 
     /**
+     * Separator
+     *
+     * @var string
+     */
+    protected $separator;
+
+    /**
      * Limit
      *
      * @var integer
@@ -49,6 +56,13 @@ class Pagination
      * @var integer
      */
     protected $offset = 0;
+
+    /**
+     * Max pagination links
+     *
+     * @var integer
+     */
+    protected $maxPaginationLinks;
 
     /**
      * Is generated
@@ -83,6 +97,10 @@ class Pagination
         $this->setTotal($total);
         $this->setPerPage($perPage);
         $this->setKey($key);
+
+        // Default values
+        $this->setSeparator("\n  ");
+        $this->setMaxPaginationLinks(\Config::get('maxPaginationLinks'));
     }
 
     /**
@@ -115,6 +133,7 @@ class Pagination
     public function getLimit()
     {
         $this->generate();
+
         return $this->limit;
     }
 
@@ -124,6 +143,7 @@ class Pagination
     public function getOffset()
     {
         $this->generate();
+
         return $this->offset;
     }
 
@@ -133,6 +153,38 @@ class Pagination
     public function getPagination()
     {
         return $this->pagination;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSeparator()
+    {
+        return $this->separator;
+    }
+
+    /**
+     * @param string $separator
+     */
+    public function setSeparator($separator)
+    {
+        $this->separator = $separator;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxPaginationLinks()
+    {
+        return $this->maxPaginationLinks;
+    }
+
+    /**
+     * @param int $maxPaginationLinks
+     */
+    public function setMaxPaginationLinks($maxPaginationLinks)
+    {
+        $this->maxPaginationLinks = $maxPaginationLinks;
     }
 
     /**
@@ -149,6 +201,7 @@ class Pagination
     public function isValid()
     {
         $this->generate();
+
         return $this->isValid;
     }
 
@@ -188,28 +241,36 @@ class Pagination
      * Add the pagination to template
      *
      * @param \Template $template
+     * @param $key
      */
-    public function addToTemplate(\Template $template)
+    public function addToTemplate(\Template $template, $key = null)
     {
-        $this->addToObject($template);
+        $this->addToObject($template, $key);
     }
 
     /**
      * Add the pagination to object
      *
      * @param $object
+     * @param $key
      */
-    public function addToObject($object)
+    public function addToObject($object, $key = null)
     {
         $this->generate();
 
+        // Set the default key
+        if ($key === null) {
+            $key = 'pagination';
+        }
+
         if ($this->isValid() && $this->pagination !== null) {
-            $object->pagination = $this->pagination->generate("\n  ");
+            $object->$key = $this->pagination->generate($this->getSeparator());
         }
     }
 
     /**
-     * Generate the pagination and return limit and offset values
+     * Generate the pagination
+     *
      * @param integer
      * @param integer
      * @param string
@@ -246,7 +307,7 @@ class Pagination
             }
 
             // Add the pagination menu
-            $pagination = new \Pagination($this->getTotal(), $this->getPerPage(), \Config::get('maxPaginationLinks'), $this->getKey());
+            $pagination = new \Pagination($this->getTotal(), $this->getPerPage(), $this->getMaxPaginationLinks(), $this->getKey());
         }
 
         $this->isValid = true;

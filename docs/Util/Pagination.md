@@ -28,7 +28,7 @@ Use the pagination with array:
 ```php
 $arrItems = range(1, 10)
 
-$objPagination = new \Haste\Util\Pagination($arrItems, $this->perPage, 'page_i' . $this->id);
+$objPagination = new \Haste\Util\Pagination(count($arrItems), $this->perPage, 'page_i' . $this->id);
 
 if (!$objPagination->isValid()) {
     $objHandler = new $GLOBALS['TL_PTY']['error_404']();
