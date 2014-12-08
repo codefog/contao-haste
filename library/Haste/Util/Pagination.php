@@ -72,14 +72,12 @@ class Pagination
 
     /**
      * State
-     *
      * @var integer
      */
     protected $state = self::STATE_DIRTY;
 
     /**
      * Pagination object
-     *
      * @var \Pagination|null
      */
     protected $pagination;
@@ -103,6 +101,8 @@ class Pagination
     }
 
     /**
+     * Gets the URL parameter
+     *
      * @return string
      */
     public function getUrlParameter()
@@ -111,6 +111,8 @@ class Pagination
     }
 
     /**
+     * Set the URL parameter
+     *
      * @param string $name
      *
      * @return $this
@@ -141,6 +143,8 @@ class Pagination
     }
 
     /**
+     * Gets the calculated limit
+     *
      * @return int
      */
     public function getLimit()
@@ -151,6 +155,8 @@ class Pagination
     }
 
     /**
+     * Gets the calculated offset
+     *
      * @return int
      */
     public function getOffset()
@@ -161,6 +167,8 @@ class Pagination
     }
 
     /**
+     * Gets the pagination object
+     *
      * @return null|\Pagination
      */
     public function getPagination()
@@ -190,6 +198,8 @@ class Pagination
     }
 
     /**
+     * Gets maximum pagination links
+     *
      * @return int
      */
     public function getMaxPaginationLinks()
@@ -198,6 +208,8 @@ class Pagination
     }
 
     /**
+     * Sets the maximum pagination links
+     *
      * @param int $maxPaginationLinks
      *
      * @return $this
@@ -223,6 +235,8 @@ class Pagination
     }
 
     /**
+     * Gets the number of rows per page
+     *
      * @return int
      */
     public function getPerPage()
@@ -231,6 +245,8 @@ class Pagination
     }
 
     /**
+     * Sets the number of rows per page
+     *
      * @param int $perPage
      *
      * @return $this
@@ -244,6 +260,8 @@ class Pagination
     }
 
     /**
+     * Gets the total number of rows
+     *
      * @return int
      */
     public function getTotal()
@@ -252,6 +270,8 @@ class Pagination
     }
 
     /**
+     * Sets the total number of rows
+     *
      * @param int $total
      *
      * @return $this
@@ -274,6 +294,16 @@ class Pagination
         $this->compile();
 
         return $this->pagination->generate($this->getSeparator());
+    }
+
+    /**
+     * Generate a pagination and return it as HTML string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->generate();
     }
 
     /**
@@ -317,15 +347,5 @@ class Pagination
         $this->limit = $limit;
         $this->offset = $offset;
         $this->pagination = $pagination;
-    }
-
-    /**
-     * Generate a pagination and return it as HTML string
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->generate();
     }
 }
