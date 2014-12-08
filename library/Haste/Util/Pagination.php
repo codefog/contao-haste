@@ -120,10 +120,14 @@ class Pagination
 
     /**
      * @param string $key
+     *
+     * @return Pagination
      */
     public function setKey($key)
     {
         $this->key = $key;
+
+        return $this;
     }
 
     /**
@@ -182,11 +186,15 @@ class Pagination
 
     /**
      * @param string $separator
+     *
+     * @return Pagination
      */
     public function setSeparator($separator)
     {
         $this->state = self::STATE_DIRTY;
         $this->separator = $separator;
+
+        return $this;
     }
 
     /**
@@ -199,11 +207,15 @@ class Pagination
 
     /**
      * @param int $maxPaginationLinks
+     *
+     * @return Pagination
      */
     public function setMaxPaginationLinks($maxPaginationLinks)
     {
         $this->state = self::STATE_DIRTY;
         $this->maxPaginationLinks = $maxPaginationLinks;
+
+        return $this;
     }
 
     /**
@@ -226,11 +238,15 @@ class Pagination
 
     /**
      * @param int $perPage
+     *
+     * @return Pagination
      */
     public function setPerPage($perPage)
     {
         $this->state = self::STATE_DIRTY;
         $this->perPage = $perPage;
+
+        return $this;
     }
 
     /**
@@ -243,11 +259,15 @@ class Pagination
 
     /**
      * @param int $total
+     *
+     * @return Pagination
      */
     public function setTotal($total)
     {
         $this->state = self::STATE_DIRTY;
         $this->total = $total;
+
+        return $this;
     }
 
     /**
