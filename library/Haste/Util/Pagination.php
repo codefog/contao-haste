@@ -38,7 +38,7 @@ class Pagination
      * URL parameter name
      * @var string
      */
-    protected $key;
+    protected $urlParameter;
 
     /**
      * Separator
@@ -87,15 +87,15 @@ class Pagination
     /**
      * Initialize the object
      *
-     * @param integer
-     * @param integer
-     * @param string
+     * @param int    $total
+     * @param int    $perPage
+     * @param string $urlParameter
      */
-    public function __construct($total, $perPage, $key)
+    public function __construct($total, $perPage, $urlParameter)
     {
         $this->setTotal($total);
         $this->setPerPage($perPage);
-        $this->setKey($key);
+        $this->setUrlParameter($urlParameter);
 
         // Default values
         $this->setSeparator("\n  ");
@@ -105,19 +105,19 @@ class Pagination
     /**
      * @return string
      */
-    public function getKey()
+    public function getUrlParameter()
     {
-        return $this->key;
+        return $this->urlParameter;
     }
 
     /**
-     * @param string $key
+     * @param string $name
      *
      * @return $this
      */
-    public function setKey($key)
+    public function setUrlParameter($name)
     {
-        $this->key = $key;
+        $this->urlParameter = $name;
 
         return $this;
     }
@@ -290,7 +290,7 @@ class Pagination
         $pagination = null;
 
         if ($this->getPerPage() > 0) {
-            $page = \Input::get($this->getKey()) ?: 1;
+            $page = \Input::get($this->getUrlParameter()) ?: 1;
 
             // The pagination is not valid if the page number is outside the range
             if ($page < 1 || $page > max(ceil($this->getTotal() / $this->getPerPage()), 1)) {
@@ -309,7 +309,7 @@ class Pagination
             }
 
             // Add the pagination menu
-            $pagination = new \Pagination($this->getTotal(), $this->getPerPage(), $this->getMaxPaginationLinks(), $this->getKey());
+            $pagination = new \Pagination($this->getTotal(), $this->getPerPage(), $this->getMaxPaginationLinks(), $this->getUrlParameter());
         }
 
         $this->state = self::STATE_CLEAN;
