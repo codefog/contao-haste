@@ -41,12 +41,6 @@ class Pagination
     protected $urlParameter;
 
     /**
-     * Separator
-     * @var string
-     */
-    protected $separator;
-
-    /**
      * Limit
      * @var int
      */
@@ -96,7 +90,6 @@ class Pagination
         $this->setUrlParameter($urlParameter);
 
         // Default values
-        $this->setSeparator("\n  ");
         $this->setMaxPaginationLinks(\Config::get('maxPaginationLinks'));
     }
 
@@ -174,27 +167,6 @@ class Pagination
     public function getPagination()
     {
         return $this->pagination;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSeparator()
-    {
-        return $this->separator;
-    }
-
-    /**
-     * @param string $separator
-     *
-     * @return $this
-     */
-    public function setSeparator($separator)
-    {
-        $this->state = self::STATE_DIRTY;
-        $this->separator = $separator;
-
-        return $this;
     }
 
     /**
@@ -293,7 +265,7 @@ class Pagination
     {
         $this->compile();
 
-        return $this->pagination->generate($this->getSeparator());
+        return $this->pagination->generate("\n  ");
     }
 
     /**
