@@ -122,7 +122,7 @@ class Pagination
      */
     public function applies()
     {
-        return ($this->getLimit() || $this->getOffset()) ? true : false;
+        return ($this->getLimit() > 0 || $this->getOffset() > 0);
     }
 
     /**
