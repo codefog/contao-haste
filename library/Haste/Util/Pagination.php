@@ -104,16 +104,6 @@ class Pagination
     }
 
     /**
-     * Check if pagination URL parameter is out of range
-     *
-     * @return bool
-     */
-    public function isOutOfRange()
-    {
-        return $this->outOfRange;
-    }
-
-    /**
      * Gets the total number of rows
      *
      * @return int
@@ -210,6 +200,18 @@ class Pagination
         $this->maxPaginationLinks = $maxPaginationLinks;
 
         return $this;
+    }
+
+    /**
+     * Check if pagination URL parameter is out of range
+     *
+     * @return bool
+     */
+    public function isOutOfRange()
+    {
+        $this->compile();
+
+        return $this->outOfRange;
     }
 
     /**
