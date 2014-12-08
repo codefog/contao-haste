@@ -24,56 +24,48 @@ class Pagination
 
     /**
      * Total items
-     *
-     * @var integer
+     * @var int
      */
     protected $total;
 
     /**
      * Items per page
-     *
-     * @var integer
+     * @var int
      */
     protected $perPage;
 
     /**
      * URL parameter name
-     *
      * @var string
      */
     protected $key;
 
     /**
      * Separator
-     *
      * @var string
      */
     protected $separator;
 
     /**
      * Limit
-     *
-     * @var integer
+     * @var int
      */
     protected $limit = 0;
 
     /**
      * Offset
-     *
-     * @var integer
+     * @var int
      */
     protected $offset = 0;
 
     /**
      * Max pagination links
-     *
-     * @var integer
+     * @var int
      */
     protected $maxPaginationLinks;
 
     /**
-     * Is valid
-     *
+     * The pagination is not valid if the page number is outside the range
      * @var bool
      */
     protected $isValid = false;
@@ -145,7 +137,7 @@ class Pagination
      */
     public function isDirty()
     {
-        return (bool) ($this->state === static::STATE_DIRTY);
+        return ($this->state === static::STATE_DIRTY);
     }
 
     /**
@@ -219,7 +211,9 @@ class Pagination
     }
 
     /**
-     * @return boolean
+     * The pagination is not valid if the page number is outside the range
+     *
+     * @return bool
      */
     public function isValid()
     {
