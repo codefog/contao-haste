@@ -72,13 +72,6 @@ class Pagination
     protected $maxPaginationLinks;
 
     /**
-     * Is generated
-     *
-     * @var bool
-     */
-    protected $isGenerated = false;
-
-    /**
      * Is valid
      *
      * @var bool
@@ -277,8 +270,6 @@ class Pagination
         if (!$this->isDirty()) {
             return;
         }
-
-        $this->isGenerated = true;
 
         $limit = 0;
         $offset = 0;
