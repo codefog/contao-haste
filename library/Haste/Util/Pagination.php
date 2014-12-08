@@ -166,6 +166,8 @@ class Pagination
      */
     public function getPagination()
     {
+        $this->compile();
+
         return $this->pagination;
     }
 
