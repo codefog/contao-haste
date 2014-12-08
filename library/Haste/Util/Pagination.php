@@ -23,6 +23,18 @@ class Pagination
     const STATE_DIRTY = 1;
 
     /**
+     * State
+     * @var integer
+     */
+    protected $state = self::STATE_DIRTY;
+
+    /**
+     * If the URL pagination parameter is out of range
+     * @type bool
+     */
+    protected $outOfRange = false;
+
+    /**
      * Total items
      * @var int
      */
@@ -41,38 +53,26 @@ class Pagination
     protected $urlParameter;
 
     /**
-     * Limit
-     * @var int
-     */
-    protected $limit = 0;
-
-    /**
-     * Offset
-     * @var int
-     */
-    protected $offset = 0;
-
-    /**
      * Max pagination links
      * @var int
      */
     protected $maxPaginationLinks;
 
     /**
-     * The pagination is not valid if the page number is outside the range
-     * @var bool
+     * Limit
+     * @var int
      */
-    protected $isValid = false;
+    protected $limit;
 
     /**
-     * State
-     * @var integer
+     * Offset
+     * @var int
      */
-    protected $state = self::STATE_DIRTY;
+    protected $offset;
 
     /**
      * Pagination object
-     * @var \Pagination|null
+     * @var \Pagination
      */
     protected $pagination;
 
@@ -94,38 +94,6 @@ class Pagination
     }
 
     /**
-     * Gets the URL parameter
-     *
-     * @return string
-     */
-    public function getUrlParameter()
-    {
-        return $this->urlParameter;
-    }
-
-    /**
-     * Set the URL parameter
-     *
-     * @param string $name
-     *
-     * @return $this
-     */
-    public function setUrlParameter($name)
-    {
-        $this->urlParameter = $name;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function applies()
-    {
-        return ($this->getLimit() > 0 || $this->getOffset() > 0);
-    }
-
-    /**
      * Check if data is dirty (pagination needs to be generated)
      *
      * @return bool
@@ -136,76 +104,38 @@ class Pagination
     }
 
     /**
-     * Gets the calculated limit
-     *
-     * @return int
-     */
-    public function getLimit()
-    {
-        $this->compile();
-
-        return $this->limit;
-    }
-
-    /**
-     * Gets the calculated offset
-     *
-     * @return int
-     */
-    public function getOffset()
-    {
-        $this->compile();
-
-        return $this->offset;
-    }
-
-    /**
-     * Gets the pagination object
-     *
-     * @return null|\Pagination
-     */
-    public function getPagination()
-    {
-        $this->compile();
-
-        return $this->pagination;
-    }
-
-    /**
-     * Gets maximum pagination links
-     *
-     * @return int
-     */
-    public function getMaxPaginationLinks()
-    {
-        return $this->maxPaginationLinks;
-    }
-
-    /**
-     * Sets the maximum pagination links
-     *
-     * @param int $maxPaginationLinks
-     *
-     * @return $this
-     */
-    public function setMaxPaginationLinks($maxPaginationLinks)
-    {
-        $this->state = self::STATE_DIRTY;
-        $this->maxPaginationLinks = $maxPaginationLinks;
-
-        return $this;
-    }
-
-    /**
-     * The pagination is not valid if the page number is outside the range
+     * Check if pagination URL parameter is out of range
      *
      * @return bool
      */
-    public function isValid()
+    public function isOutOfRange()
     {
-        $this->compile();
+        return $this->outOfRange;
+    }
 
-        return $this->isValid;
+    /**
+     * Gets the total number of rows
+     *
+     * @return int
+     */
+    public function getTotal()
+    {
+        return $this->total;
+    }
+
+    /**
+     * Sets the total number of rows
+     *
+     * @param int $total
+     *
+     * @return $this
+     */
+    public function setTotal($total)
+    {
+        $this->state = self::STATE_DIRTY;
+        $this->total = $total;
+
+        return $this;
     }
 
     /**
@@ -234,28 +164,91 @@ class Pagination
     }
 
     /**
-     * Gets the total number of rows
+     * Gets the URL parameter
      *
-     * @return int
+     * @return string
      */
-    public function getTotal()
+    public function getUrlParameter()
     {
-        return $this->total;
+        return $this->urlParameter;
     }
 
     /**
-     * Sets the total number of rows
+     * Set the URL parameter
      *
-     * @param int $total
+     * @param string $name
      *
      * @return $this
      */
-    public function setTotal($total)
+    public function setUrlParameter($name)
     {
-        $this->state = self::STATE_DIRTY;
-        $this->total = $total;
+        $this->urlParameter = $name;
 
         return $this;
+    }
+
+    /**
+     * Gets maximum pagination links
+     *
+     * @return int
+     */
+    public function getMaxPaginationLinks()
+    {
+        return $this->maxPaginationLinks;
+    }
+
+    /**
+     * Sets the maximum pagination links
+     *
+     * @param int $maxPaginationLinks
+     *
+     * @return $this
+     */
+    public function setMaxPaginationLinks($maxPaginationLinks)
+    {
+        $this->state = self::STATE_DIRTY;
+        $this->maxPaginationLinks = $maxPaginationLinks;
+
+        return $this;
+    }
+
+    /**
+     * Gets the calculated limit
+     *
+     * @return int
+     * @throws \OutOfRangeException
+     */
+    public function getLimit()
+    {
+        $this->compile();
+
+        return $this->limit;
+    }
+
+    /**
+     * Gets the calculated offset
+     *
+     * @return int
+     * @throws \OutOfRangeException
+     */
+    public function getOffset()
+    {
+        $this->compile();
+
+        return $this->offset;
+    }
+
+    /**
+     * Gets the pagination object
+     *
+     * @return \Pagination
+     * @throws \OutOfRangeException
+     */
+    public function getPagination()
+    {
+        $this->compile();
+
+        return $this->pagination;
     }
 
     /**
@@ -289,37 +282,35 @@ class Pagination
             return;
         }
 
-        $limit = 0;
-        $offset = 0;
-        $pagination = null;
+        $page = \Input::get($this->getUrlParameter()) ?: 1;
 
-        if ($this->getPerPage() > 0) {
-            $page = \Input::get($this->getUrlParameter()) ?: 1;
+        // Set limit and offset
+        $limit = $this->getPerPage() ?: $this->getTotal();
+        $offset = (max($page, 1) - 1) * $this->getPerPage();
 
-            // The pagination is not valid if the page number is outside the range
-            if ($page < 1 || $page > max(ceil($this->getTotal() / $this->getPerPage()), 1)) {
-                $this->state = self::STATE_CLEAN;
-                $this->isValid = false;
-                return;
-            }
-
-            // Set limit and offset
-            $limit = $this->getPerPage();
-            $offset += (max($page, 1) - 1) * $this->getPerPage();
-
-            // Overall limit
-            if ($offset + $limit > $this->getTotal()) {
-                $limit = $this->getTotal() - $offset;
-            }
-
-            // Add the pagination menu
-            $pagination = new \Pagination($this->getTotal(), $this->getPerPage(), $this->getMaxPaginationLinks(), $this->getUrlParameter());
+        // Overall limit
+        if ($offset + $limit > $this->getTotal()) {
+            $limit = $this->getTotal() - $offset;
         }
 
-        $this->state = self::STATE_CLEAN;
-        $this->isValid = true;
-        $this->limit = $limit;
-        $this->offset = $offset;
-        $this->pagination = $pagination;
+        $this->pagination = new \Pagination(
+            $this->getTotal(),
+            $this->getPerPage(),
+            $this->getMaxPaginationLinks(),
+            $this->getUrlParameter()
+        );
+
+        $this->state      = self::STATE_CLEAN;
+        $this->limit      = $limit;
+        $this->offset     = $offset;
+        $this->outOfRange = false;
+
+        // The pagination is not valid if the page number is outside the range
+        if ($page < 1
+            || ($this->getPerPage() == 0 && $page > 1)
+            || ($this->getPerPage() > 0 && $page > max(ceil($this->getTotal() / $this->getPerPage()), 1))
+        ) {
+            $this->outOfRange = true;
+        }
     }
 }
