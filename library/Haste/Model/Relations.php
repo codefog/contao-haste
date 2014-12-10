@@ -418,7 +418,7 @@ class Relations
             return;
         }
 
-        $arrIds = array();
+        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : array();
         $blnFilter = false;
         $session = \Session::getInstance()->getData();
 
