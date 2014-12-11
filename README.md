@@ -29,4 +29,5 @@ Haste is a collection of tools and classes to ease working with Contao.
 - [Model](docs/Model/index.md)
 - [Units/Mass](docs/Units/Mass.md)
 - [Util/Debug](docs/Util/Debug.md)
+- [Util/Pagination](docs/Util/Pagination.md)
 - [Util/Undo](docs/Util/Undo.md)
