@@ -1,0 +1,52 @@
+{
+    "name": "codefog/contao-haste",
+    "description": "A set of Contao classes that speed up the extension development",
+    "keywords": ["contao", "form"],
+    "type": "contao-module",
+    "license": "LGPL-3.0+",
+    "authors": [
+        {
+            "name": "Kamil Kuzminski",
+            "email": "kamil.kuzminski@codefog.pl",
+            "homepage": "http://codefog.pl",
+            "role": "Developer"
+        },
+        {
+            "name": "Yanick Witschi",
+            "email": "yanick.witschi@terminal42.ch",
+            "homepage": "http://www.terminal42.ch",
+            "role": "Developer"
+        },
+        {
+            "name": "Andreas Schempp",
+            "email": "andreas.schempp@terminal42.ch",
+            "homepage": "http://www.terminal42.ch",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/codefog/contao-haste/issues",
+        "irc": "irc://irc.freenode.org/contao.dev",
+        "source": "https://github.com/codefog/contao-haste"
+    },
+    "require": {
+        "php": ">=5.3",
+        "contao-community-alliance/composer-installer": "*",
+        "contao/core": ">=3,<4-dev"
+    },
+    "autoload": {
+        "psr-0": {
+            "Haste": "library"
+        }
+    },
+    "extra": {
+        "contao": {
+            "sources": {
+                "": "system/modules/haste"
+            }
+        },
+        "branch-alias": {
+            "dev-master": "4.1.x-dev"
+        }
+    }
+}
