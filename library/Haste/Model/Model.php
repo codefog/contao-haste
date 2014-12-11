@@ -68,10 +68,14 @@ abstract class Model extends \Model
 
     /**
      * Get the related values and return them as array
-     * @param string
-     * @param string
-     * @param mixed
+     *
+     * @param string $strTable
+     * @param string $strField
+     * @param mixed  $varValue
+     *
      * @return array
+     *
+     * @throws \Exception
      */
     public static function getRelatedValues($strTable, $strField, $varValue=null)
     {
@@ -86,5 +90,62 @@ abstract class Model extends \Model
         return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')") : ""))
                                        ->execute()
                                        ->fetchEach($arrRelation['related_field']);
+    }
+
+    /**
+     * Set the related values
+     *
+     * @param string $strTable
+     * @param string $strField
+     * @param mixed  $varReference
+     * @param mixed  $varValue
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public static function setRelatedValues($strTable, $strField, $varReference, $varValue)
+    {
+        $arrRelation = Relations::getRelation($strTable, $strField);
+
+        if ($arrRelation === false) {
+            throw new \Exception('Field ' . $strField . ' does not seem to be related!');
+        }
+
+        static::deleteRelatedValues($strTable, $strField, $varReference);
+
+        $arrValues = (array) $varValue;
+
+        foreach ($arrValues as $varValue) {
+            $arrSet = array(
+                $arrRelation['reference_field'] => $varReference,
+                $arrRelation['related_field'] => $varValue,
+            );
+
+            \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                ->set($arrSet)
+                ->execute();
+        }
+    }
+
+    /**
+     * Delete the related values
+     *
+     * @param string $strTable
+     * @param string $strField
+     * @param mixed  $varReference
+     *
+     * @throws \Exception
+     */
+    public static function deleteRelatedValues($strTable, $strField, $varReference)
+    {
+        $arrRelation = Relations::getRelation($strTable, $strField);
+
+        if ($arrRelation === false) {
+            throw new \Exception('Field ' . $strField . ' does not seem to be related!');
+        }
+
+        \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+            ->execute($varReference);
     }
 }
