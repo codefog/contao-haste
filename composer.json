@@ -11,7 +11,7 @@
         },
         {
             "name": "terminal42 gmbh",
-            "homepage": "http://terminal42.ch"
+            "homepage": "https://www.terminal42.ch"
         }
     ],
     "require": {
@@ -21,6 +21,13 @@
     },
     "replace": {
         "contao-legacy/haste": "self.version"
+    },
+    "autoload": {
+        "psr-0": {
+            "Haste\\": [
+                "system/modules/haste"
+            ]
+        }
     },
     "extra": {
         "contao": {
