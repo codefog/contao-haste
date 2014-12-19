@@ -14,6 +14,4 @@
 /**
  * Register namespace
  */
-if (class_exists('NamespaceClassLoader')) {
-    NamespaceClassLoader::add('Haste', 'system/modules/haste/library');
-}
+NamespaceClassLoader::add('Haste', 'system/modules/haste/library');
