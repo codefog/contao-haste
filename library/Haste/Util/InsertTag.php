@@ -59,6 +59,10 @@ class InsertTag
             return $this->replaceDcaValue($arrTag);
         }
 
+        if ($arrTag[0] == 'rand') {
+            return (count($arrTag) === 3) ? mt_rand((int) $arrTag[1], (int) $arrTag[2]) : mt_rand();
+        }
+
         return false;
     }
 
