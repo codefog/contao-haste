@@ -23,7 +23,7 @@ class ExcelFileWriter extends AbstractFileWriter
 
     /**
      * PHPExcel instance
-     * @var object
+     * @var \PHPExcel
      */
     protected $objPHPExcel;
 
@@ -113,9 +113,10 @@ class ExcelFileWriter extends AbstractFileWriter
         $currentColumn = 0;
 
         foreach ($arrData as $varValue) {
-            $this->objPHPExcel->getActiveSheet()->setCellValue(
+            $this->objPHPExcel->getActiveSheet()->setCellValueExplicit(
                 $this->getCharForColumn($currentColumn++).$this->currentRow,
-                (string) $varValue
+                (string) $varValue,
+                \PHPExcel_Cell_DataType::TYPE_STRING2
             );
         }
 
