@@ -113,8 +113,9 @@ class ExcelFileWriter extends AbstractFileWriter
         $currentColumn = 0;
 
         foreach ($arrData as $varValue) {
-            $this->objPHPExcel->getActiveSheet()->setCellValueExplicit(
-                $this->getCharForColumn($currentColumn++).$this->currentRow,
+            $this->objPHPExcel->getActiveSheet()->setCellValueExplicitByColumnAndRow(
+                $currentColumn++,
+                $this->currentRow,
                 (string) $varValue,
                 \PHPExcel_Cell_DataType::TYPE_STRING2
             );
@@ -130,23 +131,5 @@ class ExcelFileWriter extends AbstractFileWriter
     {
         $objWriter = \PHPExcel_IOFactory::createWriter($this->objPHPExcel, $this->strFormat);
         $objWriter->save(TL_ROOT . '/' . $this->strFile);
-    }
-
-    /**
-     * Generate excel column names from index (0 = A, 1 = B, 26 = AA, …)
-     * @param   int
-     * @return  string
-     */
-    protected function getCharForColumn($num)
-    {
-        $numeric = $num % 26;
-        $letter = chr(65 + $numeric);
-        $num2 = intval($num / 26);
-
-        if ($num2 > 0) {
-            return $this->getCharForColumn($num2 - 1) . $letter;
-        } else {
-            return $letter;
-        }
     }
 }
