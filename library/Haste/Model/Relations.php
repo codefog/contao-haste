@@ -32,9 +32,25 @@ class Relations
 
     /**
      * Purge cache
+     *
+     * This cache stores the table and record ID that has been already purged.
+     * It allows you to have multiple fields with the same relation in one DCA
+     * and prevents the earlier field values to be removed by the last one
+     * (the helper table is purged only once in this case, for the first field).
+     *
      * @var array
      */
     private static $arrPurgeCache = array();
+
+    /**
+     * Cache for "override all" mode
+     *
+     * This cache is in fact a hotfix for the "override all" mode. It simply
+     * does not allow the last record to be double-saved.
+     *
+     * @var array
+     */
+    private static $overrideAllCache = array();
 
     /**
      * Add the relation callbacks to DCA
@@ -98,27 +114,43 @@ class Relations
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
+            $cacheKey = $arrRelation['table'] . $dc->activeRecord->$arrRelation['reference'];
             $arrValues = deserialize($varValue, true);
 
-            if (!in_array($arrRelation['table'], static::$arrPurgeCache)) {
-                $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
-                static::$arrPurgeCache[] = $arrRelation['table'];
+            // Check the purge cache
+            if (!in_array($cacheKey, static::$arrPurgeCache)) {
+                $this->purgeRelatedRecords($arrRelation, $dc->activeRecord->$arrRelation['reference']);
+                static::$arrPurgeCache[] = $cacheKey;
             }
 
-            foreach ($arrValues as $value) {
-                $arrSet = array(
-                    $arrRelation['reference_field'] => $dc->$arrRelation['reference'],
-                    $arrRelation['related_field'] => $value,
-                );
+            $saveRecords = true;
 
-                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
-                    ->set($arrSet)
-                    ->execute();
+            // Do not save the record again in "override all" mode if it has been saved already
+            if (\Input::get('act') == 'overrideAll') {
+                if (in_array($cacheKey, static::$overrideAllCache)) {
+                    $saveRecords = false;
+                }
+
+                static::$overrideAllCache[] = $cacheKey;
             }
-        }
 
-        if ($arrRelation['forceSave']) {
-            return $varValue;
+            // Save the records in a relation table
+            if ($saveRecords) {
+                foreach ($arrValues as $value) {
+                    $arrSet = array(
+                        $arrRelation['reference_field'] => $dc->activeRecord->$arrRelation['reference'],
+                        $arrRelation['related_field'] => $value,
+                    );
+
+                    \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                        ->set($arrSet)
+                        ->execute();
+                }
+            }
+
+            if ($arrRelation['forceSave']) {
+                return $varValue;
+            }
         }
 
         return null;
