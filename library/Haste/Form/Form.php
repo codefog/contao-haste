@@ -385,6 +385,10 @@ class Form extends \Controller
             }
         }
 
+        if (!isset($arrDca['inputType'])) {
+            throw new \RuntimeException(sprintf('You did not specify any inputType for the field "%s"!', $strName));
+        }
+
         /** @type \Widget $strClass */
         $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
 
@@ -589,6 +593,23 @@ class Form extends \Controller
         }
 
         return $this;
+    }
+
+    /**
+     * Return true if the field has "inputType" set, false otherwise
+     *
+     * This is a default callback that can be used with addFieldsFromDca() method. It prevents from adding fields
+     * that do not have inputType specified which would result in an exception. The fields you typically would
+     * like to skip are: id, tstamp, pid, sorting.
+     *
+     * @param string $field
+     * @param array  $dca
+     *
+     * @return bool
+     */
+    public function skipFieldsWithoutInputType($field, array $dca)
+    {
+        return isset($dca['inputType']);
     }
 
     /**
