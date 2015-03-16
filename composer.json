@@ -37,7 +37,10 @@
         "contao": {
             "sources": {
                 "": "system/modules/haste"
-            }
+            },
+            "runonce": [
+                "system/modules/haste/config/upgrade.php"
+            ]
         }
     }
 }

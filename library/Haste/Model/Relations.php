@@ -432,8 +432,12 @@ class Relations
 
                 $arrTables[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['reference_field']] = "`" . $arrRelation['reference_field'] . "` " . $arrRelation['reference_sql'];
                 $arrTables[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['related_field']] = "`" . $arrRelation['related_field'] . "` " . $arrRelation['related_sql'];
-                $arrTables[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'][$arrRelation['reference_field'] . "_" . $arrRelation['related_field']] = "UNIQUE KEY `" . $arrRelation['reference_field'] . "_" . $arrRelation['related_field'] . "` (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`)";
                 $arrTables[$arrRelation['table']]['TABLE_OPTIONS'] = ' ENGINE=MyISAM  DEFAULT CHARSET=utf8';
+
+                // Add the index only if there is no other (avoid duplicate keys)
+                if (empty($arrTables[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'])) {
+                    $arrTables[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'][$arrRelation['reference_field'] . "_" . $arrRelation['related_field']] = "UNIQUE KEY `" . $arrRelation['reference_field'] . "_" . $arrRelation['related_field'] . "` (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`)";
+                }
             }
         }
 
@@ -640,17 +644,21 @@ class Relations
     }
 
     /**
-     * Get the relations table name in the following format:
+     * Get the relations table name in the following format (sorted alphabetically):
      * Parameters: tl_table_one, tl_table_two
      * Returned value: tl_table_one_table_two
-     * @param string
-     * @param string
+     *
+     * @param string $tableOne
+     * @param string $tableTwo
+     *
      * @return string
      */
-    public static function getTableName($strTableOne, $strTableTwo)
+    public static function getTableName($tableOne, $tableTwo)
     {
-        $arrTables = array($strTableOne, $strTableTwo);
-        natcasesort($arrTables);
-        return $arrTables[0] . '_' . str_replace('tl_', '', $arrTables[1]);
+        $tables = array($tableOne, $tableTwo);
+        natcasesort($tables);
+        $tables = array_values($tables);
+
+        return $tables[0] . '_' . str_replace('tl_', '', $tables[1]);
     }
 }
