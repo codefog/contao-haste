@@ -393,10 +393,13 @@ class Form extends \Controller
         }
 
         // Convert date formats into timestamps
-        if ($arrDca['eval']['rgxp'] == 'date' || $arrDca['eval']['rgxp'] == 'time' || $arrDca['eval']['rgxp'] == 'datim') {
-            $this->addValidator($strName, function($varValue) use ($arrDca) {
+        $rgxp = $arrDca['eval']['rgxp'];
+        if (in_array($rgxp, array('date', 'time', 'datim'))) {
+            $this->addValidator($strName, function($varValue) use ($rgxp) {
                 if ($varValue != '') {
-                    $objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$arrDca['eval']['rgxp'] . 'Format']);
+                    $key = $rgxp . 'Format';
+                    $format = isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->{$key} : $GLOBALS['TL_CONFIG'][$key];
+                    $objDate = new \Date($varValue, $format);
                     $varValue = $objDate->tstamp;
                 }
 
