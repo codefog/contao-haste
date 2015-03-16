@@ -125,6 +125,11 @@ and validate the user inputs etc.
     // parameter
     $objForm->addFieldsFromDca('tl_content', function(&$strField, &$arrDca) {
 
+        // make sure to skip elements without inputType or you will get an exception
+        if (!isset($arrDca['inputType'])) {
+            return false;
+        }
+
         // add anything you like
         if ($strField == 'myField') {
             $arrDca['eval']['mandatory'] = true;
@@ -133,6 +138,10 @@ and validate the user inputs etc.
         // you must return true otherwise the field will be skipped
         return true;
     });
+
+    // By default you can use the built-in callback that will skip fields without specified inputType
+    // which normally would lead to the exception
+    $objForm->addFieldsFromDca('tl_content', array($objForm, 'skipFieldsWithoutInputType'));
 ```
 
 ### Add the form fields from a form generator form ID
