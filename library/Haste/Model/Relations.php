@@ -625,12 +625,12 @@ class Relations
 
                 // Current table data
                 $varRelation['reference_table'] = $strTable;
-                $varRelation['reference_field'] = isset($arrField['referenceField']) ? $arrField['referenceField'] : (str_replace('tl_', '', $strTable) . '_' . $varRelation['reference']);
+                $varRelation['reference_field'] = isset($arrField['referenceColumn']) ? $arrField['referenceColumn'] : (str_replace('tl_', '', $strTable) . '_' . $varRelation['reference']);
                 $varRelation['reference_sql'] = isset($arrField['referenceSql']) ? $arrField['referenceSql'] : "int(10) unsigned NOT NULL default '0'";
 
                 // Related table data
                 $varRelation['related_table'] = $arrField['table'];
-                $varRelation['related_field'] = isset($arrField['relatedField']) ? $arrField['relatedField'] : (str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field']);
+                $varRelation['related_field'] = isset($arrField['fieldColumn']) ? $arrField['fieldColumn'] : (str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field']);
                 $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
 
                 // Force save
