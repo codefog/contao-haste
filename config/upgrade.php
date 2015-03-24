@@ -48,9 +48,13 @@ class HasteUpdater
                 $newTable = $relation['table'];
 
                 // Rename the table
-                if (\Database::getInstance()->tableExists($oldTable) && $oldTable != $newTable) {
-                    \Database::getInstance()->query("RENAME TABLE $oldTable TO $newTable");
-                    \System::log("Haste updater: renamed relations table $oldTable to $newTable", __METHOD__, TL_GENERAL);
+                if (\Database::getInstance()->tableExists($oldTable, null, true) && $oldTable != $newTable) {
+                    if (\Database::getInstance()->tableExists($newTable, null, true)) {
+                        \System::log("Haste updater: Could not rename $oldTable to $newTable automatically because $newTable already exists! You have to migrate the data manually!", __METHOD__, TL_ERROR);
+                    } else {
+                        \Database::getInstance()->query("RENAME TABLE $oldTable TO $newTable");
+                        \System::log("Haste updater: renamed relations table $oldTable to $newTable", __METHOD__, TL_GENERAL);
+                    }
                 }
             }
         }
