@@ -36,8 +36,29 @@ abstract class Model extends \Model
                     return null;
                 }
 
-                $objModel = $strClass::findBy(array($arrRelation['related_table'] . "." . $arrRelation['field'] . " IN('" . implode("','", $arrIds) . "')"), null, $arrOptions);
-                $this->arrRelated[$strKey] = $objModel;
+                $collection = array();
+
+                // Fetch from registry first (only possible if no options and the relation field is the PK)
+                if (empty($arrOptions) && $arrRelation['field'] === $strClass::getPk()) {
+                    foreach ($arrIds as $k => $id) {
+                        $model = \Model\Registry::getInstance()->fetch($arrRelation['related_table'], $id);
+                        if ($model !== null) {
+                            unset($arrIds[$k]);
+                        }
+
+                        $collection[$id] = $model;
+                    }
+                }
+
+                // Fetch remaining
+                if (!empty($arrIds)) {
+                    $remainingModels = $strClass::findBy(array($arrRelation['related_table'] . "." . $arrRelation['field'] . " IN('" . implode("','", $arrIds) . "')"), null, $arrOptions);
+                    foreach ($remainingModels as $remaining) {
+                        $collection[$remaining->{$arrRelation['field']}] = $remaining;
+                    }
+                }
+
+                $this->arrRelated[$strKey] = new \Model\Collection($collection, $strClass::getTable());
             }
         }
 
