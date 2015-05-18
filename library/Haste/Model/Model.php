@@ -169,4 +169,22 @@ abstract class Model extends \Model
         \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
             ->execute($varReference);
     }
+    
+    public function save()
+    {
+        $arrValues = array();
+        foreach ($this->arrRelations as $strField => $arrRelation) {
+            if ($arrRelation['type'] == 'haste-ManyToMany') {
+                $arrValues[$strField] = $this->$strField;
+            }
+        }
+        parent::save();
+        foreach($arrValues as $strField => $arrValue) {
+            // Check if $arrValue is an array. Otherwise don't change the relation table.
+            if (is_array($arrValue)) {
+                static::setRelatedValues(static::$strTable, $strField, $this->id, $arrValue);
+            }
+        }
+        return $this;
+    }
 }
