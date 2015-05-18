@@ -170,6 +170,9 @@ abstract class Model extends \Model
             ->execute($varReference);
     }
     
+    /**
+     * {@inheritdoc}
+     */
     public function save()
     {
         $arrValues = array();
@@ -178,13 +181,16 @@ abstract class Model extends \Model
                 $arrValues[$strField] = $this->$strField;
             }
         }
+        
         parent::save();
+        
         foreach($arrValues as $strField => $arrValue) {
             // Check if $arrValue is an array. Otherwise don't change the relation table.
             if (is_array($arrValue)) {
                 static::setRelatedValues(static::$strTable, $strField, $this->id, $arrValue);
             }
         }
+        
         return $this;
     }
 }
