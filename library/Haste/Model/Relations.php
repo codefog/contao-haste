@@ -115,7 +115,15 @@ class Relations
 
         if ($arrRelation !== false) {
             $cacheKey = $arrRelation['table'] . $dc->activeRecord->$arrRelation['reference'];
-            $arrValues = deserialize($varValue, true);
+
+            $field = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field];
+
+            // Support for csv values
+            if ($field['eval']['multiple'] && $field['eval']['csv']) {
+                $arrValues = explode($field['eval']['csv'], $varValue);
+            } else {
+                $arrValues = deserialize($varValue, true);
+            }
 
             // Check the purge cache
             if (!in_array($cacheKey, static::$arrPurgeCache)) {
