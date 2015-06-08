@@ -18,6 +18,18 @@ abstract class Model extends \Model
     /**
      * {@inheritdoc}
      */
+    public function __set($strKey, $varValue)
+	{
+		if ($this->arrRelations[$strKey]['type'] == 'haste-ManyToMany' && !is_array($varValue))
+		{
+			throw new \InvalidArgumentException('Value has to be an array');
+		}
+		parent::__set($strKey, $varValue);
+	}
+	
+    /**
+     * {@inheritdoc}
+     */
     public function getRelated($strKey, array $arrOptions=array())
     {
         $arrRelation = Relations::getRelation(static::$strTable, $strKey);
