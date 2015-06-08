@@ -81,8 +81,24 @@ abstract class Model extends \Model
         }
 
         $arrValues = (array) $varValue;
+        $strOrder = "";
 
-        return \Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')") : ""))
+        // Preserve the values order by using the force saved values in the table in the ORDER BY statement
+        if (count($arrValues) == 1 && $arrRelation['forceSave']) {
+            $objRecord = \Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['related_table'] . " WHERE " . $arrRelation['field'] . "=?")
+                ->limit(1)
+                ->execute($arrValues[0]);
+
+            $arrRecordValues = deserialize($objRecord->$strField, true);
+
+            if (empty($arrRecordValues)) {
+                $arrRecordValues = array(0);
+            }
+
+            $strOrder = " ORDER BY " . \Database::getInstance()->findInSet($arrRelation['reference_field'], $arrRecordValues);
+        }
+
+        return \Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')") : "") . $strOrder)
                                        ->execute()
                                        ->fetchEach($arrRelation['reference_field']);
     }
@@ -107,8 +123,24 @@ abstract class Model extends \Model
         }
 
         $arrValues = (array) $varValue;
+        $strOrder = "";
 
-        return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')") : ""))
+        // Preserve the values order by using the force saved values in the table in the ORDER BY statement
+        if (count($arrValues) == 1 && $arrRelation['forceSave']) {
+            $objRecord = \Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['reference_table'] . " WHERE " . $arrRelation['reference'] . "=?")
+                ->limit(1)
+                ->execute($arrValues[0]);
+
+            $arrRecordValues = deserialize($objRecord->$strField, true);
+
+            if (empty($arrRecordValues)) {
+                $arrRecordValues = array(0);
+            }
+
+            $strOrder = " ORDER BY " . \Database::getInstance()->findInSet($arrRelation['related_field'], $arrRecordValues);
+        }
+
+        return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')") : "") . $strOrder)
                                        ->execute()
                                        ->fetchEach($arrRelation['related_field']);
     }
