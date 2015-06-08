@@ -18,6 +18,20 @@ abstract class Model extends \Model
     /**
      * {@inheritdoc}
      */
+    public function __set($strKey, $varValue)
+    {
+        if ($this->arrRelations[$strKey]['type'] == 'haste-ManyToMany'
+            && !is_array($varValue)
+        ) {
+            throw new \InvalidArgumentException('Values set on many-to-many relation fields have to be an array');
+        }
+
+        parent::__set($strKey, $varValue);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getRelated($strKey, array $arrOptions=array())
     {
         $arrRelation = Relations::getRelation(static::$strTable, $strKey);
@@ -200,5 +214,30 @@ abstract class Model extends \Model
 
         \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
             ->execute($varReference);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function save()
+    {
+        $arrValues = array();
+
+        foreach ($this->arrRelations as $strField => $arrRelation) {
+            if ($arrRelation['type'] == 'haste-ManyToMany') {
+                $arrValues[$strField] = $this->$strField;
+            }
+        }
+        
+        parent::save();
+        
+        foreach($arrValues as $strField => $arrValue) {
+            // Check if $arrValue is an array. Otherwise don't change the relation table.
+            if (is_array($arrValue)) {
+                static::setRelatedValues(static::$strTable, $strField, $this->id, $arrValue);
+            }
+        }
+        
+        return $this;
     }
 }
