@@ -98,7 +98,7 @@ abstract class Model extends \Model
         $strOrder = "";
 
         // Preserve the values order by using the force saved values in the table in the ORDER BY statement
-        if (count($arrValues) == 1 && $arrRelation['forceSave']) {
+        if (count($arrValues) == 1 && $arrRelation['forceSave'] && \Database::getInstance()->fieldExists($strField, $arrRelation['related_table'])) {
             $objRecord = \Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['related_table'] . " WHERE " . $arrRelation['field'] . "=?")
                 ->limit(1)
                 ->execute($arrValues[0]);
@@ -140,7 +140,7 @@ abstract class Model extends \Model
         $strOrder = "";
 
         // Preserve the values order by using the force saved values in the table in the ORDER BY statement
-        if (count($arrValues) == 1 && $arrRelation['forceSave']) {
+        if (count($arrValues) == 1 && $arrRelation['forceSave'] && \Database::getInstance()->fieldExists($strField, $arrRelation['reference_table'])) {
             $objRecord = \Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['reference_table'] . " WHERE " . $arrRelation['reference'] . "=?")
                 ->limit(1)
                 ->execute($arrValues[0]);
