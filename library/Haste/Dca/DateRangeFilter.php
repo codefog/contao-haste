@@ -39,7 +39,7 @@ class DateRangeFilter
         }
 
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
-            if ($arrField['rangeFilter']
+            if (!empty($arrField['rangeFilter'])
                 && in_array($arrField['eval']['rgxp'], array('date', 'time', 'datim'))
             ) {
                 $this->arrFieldsToFilter[] = $strField;
