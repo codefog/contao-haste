@@ -175,77 +175,20 @@ class Format
     }
 
     /**
-     * Format a version number to human readable with long status text
-     *
-     * Example:
-     * <code>
-     * echo Format::version(10030042);
-     * // will output: 1.3.4 alpha3
-     * </code>
-     *
-     * @param int $aVersion The encoded version
-     *
-     * @return string The version in human readable format
+     * @deprecated Deprecated since Haste 4.8, to be removed in Haste 5.
+     *             Use RepositoryVersion::format() instead.
      */
     public static function repositoryVersion($aVersion)
     {
-        $mStatusName = array(
-            'alpha1', 'alpha2', 'alpha3',
-            'beta1', 'beta2', 'beta3',
-            'rc1', 'rc2', 'rc3',
-            'stable'
-        );
-
-        $aVersion    = (int) $aVersion;
-
-        if (!$aVersion) {
-            return '';
-        }
-
-        $status     = $aVersion % 10;
-        $aVersion   = (int) ($aVersion / 10);
-        $micro      = $aVersion % 1000;
-        $aVersion   = (int) ($aVersion / 1000);
-        $minor      = $aVersion % 1000;
-        $major      = (int) ($aVersion / 1000);
-
-        return "$major.$minor.$micro " . $mStatusName[$status];
+        return RepositoryVersion::format($aVersion);
     }
 
     /**
-     * Format a version number to human readable with short status text
-     * Example:
-     * <code>
-     * echo Format::shortVersion(10030042);
-     * // will output: 1.3.4 a3
-     * </code>
-     *
-     * @param int $aVersion The encoded version
-     *
-     * @return string  The version in human readable format
+     * @deprecated Deprecated since Haste 4.8, to be removed in Haste 5.
+     *             Use RepositoryVersion::formatShort() instead.
      */
     public static function repositoryShortVersion($aVersion)
     {
-        $mShortStatusName = array(
-            '&#945;1', '&#945;2', '&#945;3',
-            '&#946;1', '&#946;2', '&#946;3',
-            'r1', 'r2', 'r3',
-            'st'
-        );
-
-        $aVersion    = (int) $aVersion;
-
-        if (!$aVersion) {
-            return '';
-        }
-
-        $status     = $aVersion % 10;
-        $aVersion   = (int)($aVersion / 10);
-        $micro      = $aVersion % 1000;
-        $aVersion   = (int)($aVersion / 1000);
-        $minor      = $aVersion % 1000;
-        $major      = (int)($aVersion / 1000);
-
-        return $status < 9 ? "$major.$minor.$micro ".$mShortStatusName[$status] : "$major.$minor.$micro";
+        return RepositoryVersion::formatShort($aVersion);
     }
 }
