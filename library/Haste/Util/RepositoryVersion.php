@@ -40,54 +40,55 @@ class RepositoryVersion
      * // will output: 1.3.4 alpha3
      * </code>
      *
-     * @param int $aVersion The encoded version
+     * @param int $version The encoded version
      *
      * @return string The version in human readable format
      */
-    public static function format($aVersion)
+    public static function format($version)
     {
-        $aVersion    = (int) $aVersion;
+        $version    = (int) $version;
 
-        if (!$aVersion) {
+        if (!$version) {
             return '';
         }
 
-        $status     = $aVersion % 10;
-        $aVersion   = (int) ($aVersion / 10);
-        $micro      = $aVersion % 1000;
-        $aVersion   = (int) ($aVersion / 1000);
-        $minor      = $aVersion % 1000;
-        $major      = (int) ($aVersion / 1000);
+        $status     = $version % 10;
+        $version   = (int) ($version / 10);
+        $micro      = $version % 1000;
+        $version   = (int) ($version / 1000);
+        $minor      = $version % 1000;
+        $major      = (int) ($version / 1000);
 
         return "$major.$minor.$micro " . static::$mStatusName[$status];
     }
 
     /**
      * Format a version number to human readable with short status text
+     *
      * Example:
      * <code>
      * echo Format::shortVersion(10030042);
      * // will output: 1.3.4 a3
      * </code>
      *
-     * @param int $aVersion The encoded version
+     * @param int $version The encoded version
      *
      * @return string  The version in human readable format
      */
-    public static function formatShort($aVersion)
+    public static function formatShort($version)
     {
-        $aVersion    = (int) $aVersion;
+        $version    = (int) $version;
 
-        if (!$aVersion) {
+        if (!$version) {
             return '';
         }
 
-        $status     = $aVersion % 10;
-        $aVersion   = (int)($aVersion / 10);
-        $micro      = $aVersion % 1000;
-        $aVersion   = (int)($aVersion / 1000);
-        $minor      = $aVersion % 1000;
-        $major      = (int)($aVersion / 1000);
+        $status     = $version % 10;
+        $version   = (int) ($version / 10);
+        $micro      = $version % 1000;
+        $version   = (int) ($version / 1000);
+        $minor      = $version % 1000;
+        $major      = (int) ($version / 1000);
 
         return $status < 9 ? "$major.$minor.$micro ".static::$mShortStatusName[$status] : "$major.$minor.$micro";
     }
@@ -100,14 +101,16 @@ class RepositoryVersion
      * echo Repository::encodeVersion('2.9.21 beta2');
      * // will output: 20090214
      * </code>
-     * @param string $aVersion Human readable representation of a version.
+     *
+     * @param string $version Human readable representation of a version.
+     *
      * @return int The encoded version number
      */
-    public static function encode($aVersion)
+    public static function encode($version)
     {
         $matches = array();
 
-        if (preg_match('/(\d{1,3})\.(\d{1,3})\.(\d{1,3})([ \-](\w+))?/', $aVersion, $matches)) {
+        if (preg_match('/(\d{1,3})\.(\d{1,3})\.(\d{1,3})([ \-](\w+))?/', $version, $matches)) {
             $stat = strtolower($matches[5]);
             $v = array_search($stat, array_map('strtolower', static::$mStatusName));
 
@@ -117,7 +120,7 @@ class RepositoryVersion
 
             return (($matches[1] * 1000 + $matches[2]) * 1000 + $matches[3]) * 10 + $v;
 
-        } elseif (preg_match('/(\d{1,3})\.(\d{1,3})\.(\w*)/', $aVersion, $matches)) {
+        } elseif (preg_match('/(\d{1,3})\.(\d{1,3})\.(\w*)/', $version, $matches)) {
             $stat = strtolower($matches[3]);
             $v = array_search($stat, array_map('strtolower', static::$mStatusName));
 
