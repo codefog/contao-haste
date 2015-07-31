@@ -619,7 +619,7 @@ class Relations
 
         if (!isset(static::$arrRelationsCache[$strCacheKey])) {
             $varRelation = false;
-            $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
+            $arrField    = &$GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
 
             if (is_array($arrField) && isset($arrField['table']) && $arrField['type'] == 'haste-ManyToMany') {
                 $varRelation = array();
