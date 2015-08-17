@@ -13,6 +13,7 @@
 
 namespace Haste\Dca;
 use Haste\Http\Response\JsonResponse;
+use Haste\Util\Debug;
 
 /**
  * Class AjaxOperations
@@ -43,7 +44,9 @@ class AjaxOperations
             $operation = &$GLOBALS['TL_DCA'][$table]['list']['operations'][$name];
 
             // Add the JavaScript
-            $GLOBALS['TL_JAVASCRIPT']['hasteAjaxOperations'] = 'system/modules/haste/assets/ajaxoperations.js|static';
+
+            $GLOBALS['TL_JAVASCRIPT']['hasteAjaxOperations'] =
+                Debug::uncompressedFile('system/modules/haste/assets/ajaxoperations.min.js') . '|static';
 
             // Add default button callback to display the correct initial state
             // but only add it if not already present
