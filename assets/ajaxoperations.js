@@ -20,7 +20,14 @@ var HasteAjaxOperations = {
             followRedirects: true,
             url: window.location.href,
             onSuccess: function(json) {
-                image.src = json.nextIcon;
+
+                var iconPath = json.nextIcon;
+                if (iconPath.indexOf('/') == -1) {
+                    iconPath = Contao.script_url + 'system/themes/' + Contao.theme + '/images/' + json.nextIcon;
+                }
+
+                image.src = iconPath;
+
                 el.setAttribute('data-haste-ajax-operation-value', json.nextValue);
             }
         }).post({

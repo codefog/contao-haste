@@ -211,16 +211,9 @@ class AjaxOperations
             \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
                 ->execute($states[$nextIndex]['value'], $id);
 
-
-            // Add the theme path if only the file name is given
-            $nextIcon = $states[$nextIndex]['icon'];
-            if (strpos($nextIcon, '/') === false) {
-                $nextIcon = 'system/themes/' . \Backend::getTheme() . '/images/' . $nextIcon;
-            }
-
             $response = array(
                 'nextValue' => $states[$nextIndex]['value'],
-                'nextIcon'  => $nextIcon
+                'nextIcon'  => $states[$nextIndex]['icon']
             );
         }
 

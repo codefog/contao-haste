@@ -132,7 +132,7 @@ In the case of the published settings:
 ```php
 [
     'nextValue' => '1',
-    'nextIcon'  => 'system/themes/default/images/visible.gif'
+    'nextIcon'  => 'visible.gif'
 ]
 ```
 
