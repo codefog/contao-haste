@@ -81,8 +81,7 @@ class AjaxOperations
         }
 
         $value = $options[$nextIndex]['value'];
-
-        $this->executeSaveCallback($dc, $value, $hasteAjaxOperationSettings);
+        $value = $this->executeSaveCallback($dc, $value, $hasteAjaxOperationSettings);
 
         // Update DB
         \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
