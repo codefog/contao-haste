@@ -60,6 +60,11 @@ class AjaxOperations
 
             \Controller::redirect('contao/main.php?act=error');
         }
+
+        // Initialize versioning
+        $versions = new \Versions($dc->table, $id);
+        $versions->initialize();
+
         // Determine next value and icon
         $options = $this->getOptions($hasteAjaxOperationSettings);
         $nextIndex = 0;
@@ -83,6 +88,15 @@ class AjaxOperations
         \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
             ->execute($value, $id);
 
+        $versions->create();
+        \System::log(sprintf('A new version of record "%s.id=%s" has been created',
+                $dc->table,
+                $id
+            ),
+            __METHOD__,
+            TL_GENERAL
+        );
+        
         $response = array(
             'nextValue' => $options[$nextIndex]['value'],
             'nextIcon'  => $options[$nextIndex]['icon']
