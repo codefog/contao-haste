@@ -122,23 +122,33 @@ class AjaxOperations
                 // (set to '' as the button_callback will return the correct icon)
                 $operation['icon'] = '';
 
-                $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
-
                 // Add the onclick attribute
-                if (!isset($operation['attributes'])) {
-                    $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
-                } else {
-                    // onclick attribute already present
-                    if (strpos($operation['attributes'], 'onclick="') !== false) {
-                        $operation['attributes'] = str_replace(
-                            'onclick="',
-                            'onclick="' . $clickEventString,
-                            $operation['attributes']
-                        );
-                    } else {
-                        $operation['attributes'] = $clickEventString . $operation['attributes'];
-                    }
-                }
+                $this->addOnClickAttribute($operation);
+            }
+        }
+    }
+
+    /**
+     * Adds the "onclick" attribute to the operation DCA.
+     * 
+     * @param $operation
+     */
+    private function addOnClickAttribute(&$operation)
+    {
+        $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
+
+        if (!isset($operation['attributes'])) {
+            $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
+        } else {
+            // onclick attribute already present
+            if (strpos($operation['attributes'], 'onclick="') !== false) {
+                $operation['attributes'] = str_replace(
+                    'onclick="',
+                    'onclick="' . $clickEventString,
+                    $operation['attributes']
+                );
+            } else {
+                $operation['attributes'] = $clickEventString . $operation['attributes'];
             }
         }
     }
@@ -189,7 +199,7 @@ class AjaxOperations
             );
         };
     }
-    
+
     /**
      * Gets the possible options for that operation
      * Must be an array in the following format:
