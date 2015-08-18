@@ -68,13 +68,12 @@ class AjaxOperations
 
         // Update DB
         \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
-            ->execute($options[$nextIndex]['value'], $id);
+            ->execute($value, $id);
 
         $response = array(
-            'nextValue' => $value,
+            'nextValue' => $options[$nextIndex]['value'],
             'nextIcon'  => $options[$nextIndex]['icon']
         );
-
 
         $response = new JsonResponse($response);
         $response->send();
