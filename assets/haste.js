@@ -19,7 +19,13 @@ var Haste = {
         new Request.JSON({
             followRedirects: true,
             url: window.location.href,
-            onSuccess: function(json) {
+            onComplete: function(json) {
+
+                // Support Contao redirects
+                if (this.getHeader('X-Ajax-Location')) {
+                    window.location.replace(this.getHeader('X-Ajax-Location'));
+                    return;
+                }
 
                 var iconPath = json.nextIcon;
                 if (iconPath.indexOf('/') == -1) {

@@ -47,6 +47,19 @@ class AjaxOperations
             return;
         }
 
+        // Check permissions
+        if (!$this->checkPermission($dc->table, $hasteAjaxOperationSettings)) {
+
+            \System::log(sprintf('Not enough permissions to toggle field %s::%s',
+                $dc->table,
+                $hasteAjaxOperationSettings['field']
+                ),
+                __METHOD__,
+                TL_ERROR
+            );
+
+            \Controller::redirect('contao/main.php?act=error');
+        }
         // Determine next value and icon
         $options = $this->getOptions($hasteAjaxOperationSettings);
         $nextIndex = 0;
