@@ -154,6 +154,38 @@ class AjaxOperations
     }
 
     /**
+     * Checks if user has the permissions for the field.
+     *
+     * @param       $table
+     * @param array $hasteAjaxOperationSettings
+     *
+     * @return bool
+     */
+    private function checkPermission($table, array $hasteAjaxOperationSettings)
+    {
+        $hasPermission = true;
+
+        if (!\BackendUser::getInstance()->hasAccess(
+            $table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
+        ) {
+
+            $hasPermission = false;
+        }
+
+        if (is_array($hasteAjaxOperationSettings['check_permission_callback'])) {
+
+            \System::importStatic($hasteAjaxOperationSettings['check_permission_callback'][0])
+                ->$hasteAjaxOperationSettings['check_permission_callback'][1]($table, $hasteAjaxOperationSettings, $hasPermission);
+        }
+        elseif (is_callable($hasteAjaxOperationSettings['check_permission_callback'])) {
+
+            $hasteAjaxOperationSettings['check_permission_callback']($table, $hasteAjaxOperationSettings, $hasPermission);
+        }
+
+        return $hasPermission;
+    }
+
+    /**
      * Gets the default button callback.
      *
      * @param string $name
@@ -167,9 +199,7 @@ class AjaxOperations
         return function (array $row, $href, $label, $title, $icon, $attributes) use ($name, $table, $hasteAjaxOperationSettings) {
 
             // If the user doesn't have access, hide the button
-            if (!\BackendUser::getInstance()->hasAccess(
-                $table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
-            ) {
+            if (!$this->checkPermission($table, $hasteAjaxOperationSettings)) {
 
                 return '';
             }

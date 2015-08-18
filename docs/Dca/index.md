@@ -84,6 +84,25 @@ green, orange and red. Easy:
 Done. You can now click on the icon and it will just rotate between those three
 options.
 
+### Permissions
+
+By default, haste checks for the permissions using `BackendUser::hasAccess()`.
+If you want to extend the permission checks, use the `check_permission_callback`
+modifying `$hasPermission` by reference:
+
+```php
+'haste_ajax_operation'  => [
+    'field'                     => 'status',
+    'check_permission_callback' => function($table, $hasteAjaxOperationSettings, &$hasPermission) {
+
+        if (!check($table, $hasteAjaxOperationSettings)) {
+            $hasPermission = false;
+        }
+    }
+]
+```
+
+
 ### More customizing
 
 If you want to customize what's stored when the ajax request is executed, use
