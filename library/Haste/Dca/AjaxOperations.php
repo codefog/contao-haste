@@ -130,7 +130,7 @@ class AjaxOperations
 
     /**
      * Adds the "onclick" attribute to the operation DCA.
-     * 
+     *
      * @param $operation
      */
     private function addOnClickAttribute(&$operation)
