@@ -23,136 +23,6 @@ use Haste\Util\Debug;
 class AjaxOperations
 {
     /**
-     * Modifies the DCA.
-     *
-     * @param string $table
-     */
-    public function modifyDca($table)
-    {
-        if (TL_MODE !== 'BE'
-            || !isset($GLOBALS['TL_DCA'][$table]['list']['operations'])
-            || !is_array($GLOBALS['TL_DCA'][$table]['list']['operations'])
-        ) {
-            return;
-        }
-
-        foreach ($GLOBALS['TL_DCA'][$table]['list']['operations'] as $name => $settings) {
-            if (!isset($settings['haste_ajax_operation'])) {
-                continue;
-            }
-
-            $operation = &$GLOBALS['TL_DCA'][$table]['list']['operations'][$name];
-
-            // Add the JavaScript
-            $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/haste.min.js') . '|static';
-
-            // Add default button callback to display the correct initial state
-            // but only add it if not already present
-            if (!isset($settings['button_callback'])) {
-                $operation['button_callback'] = $this->getDefaultButtonCallback($name, $table, $settings['haste_ajax_operation']);
-
-                // Make sure an icon is set to prevent DC_Table errors
-                // (set to '' as the button_callback will return the correct icon)
-                $operation['icon'] = '';
-
-                $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
-
-                // Add the onclick attribute
-                if (!isset($operation['attributes'])) {
-                    $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
-                } else {
-                    // onclick attribute already present
-                    if (strpos($operation['attributes'], 'onclick="') !== false) {
-                        $operation['attributes'] = str_replace(
-                            'onclick="',
-                            'onclick="' . $clickEventString,
-                            $operation['attributes']
-                        );
-                    } else {
-                        $operation['attributes'] = $clickEventString . $operation['attributes'];
-                    }
-                }
-            }
-        }
-    }
-
-
-    /**
-     * Gets the possible options for that operation
-     * Must be an array in the following format:
-     *  [
-     *      [
-     *          'value'     => '',
-     *          'icon'      => 'invisible.gif'
-     *      ],
-     *      [
-     *          'value'     => '1',
-     *          'icon'      => 'visible.gif'
-     *      ]
-     * ]
-     *
-     * whereas "value" stands for the value to be stored and "icon"
-     * for the path to the icon for that option.
-     *
-     * @param array $hasteAjaxOperationSettings
-     *
-     * @return array
-     */
-    private function getOptions(array $hasteAjaxOperationSettings)
-    {
-        return (array) $hasteAjaxOperationSettings['options'];
-    }
-
-
-    /**
-     * Gets the default button callback.
-     *
-     * @param string $name
-     * @param string $table
-     * @param array  $hasteAjaxOperationSettings
-     *
-     * @return \Closure
-     */
-    private function getDefaultButtonCallback($name, $table, array $hasteAjaxOperationSettings)
-    {
-        return function (array $row, $href, $label, $title, $icon, $attributes) use ($name, $table, $hasteAjaxOperationSettings) {
-
-            // If the user doesn't have access, hide the button
-            if (!\BackendUser::getInstance()->hasAccess(
-                $table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
-            ) {
-
-                return '';
-            }
-
-            $value = $row[$hasteAjaxOperationSettings['field']];
-            $options = $this->getOptions($hasteAjaxOperationSettings);
-            $icon = null;
-
-            foreach ($options as $k => $option) {
-                if ($option['value'] == $value) {
-                    $icon = $option['icon'];
-                }
-            }
-
-            // Default is the first value in the options array
-            if (null === $icon) {
-                $icon = $option[0]['icon'];
-            }
-
-            return sprintf('<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
-                $value,
-                $name,
-                \Backend::addToUrl($href),
-                specialchars($title),
-                $attributes,
-                \Image::getHtml($icon, $label)
-            );
-        };
-    }
-
-
-    /**
      * Execute AJAX post actions to toggle.
      *
      * @param string         $action
@@ -217,5 +87,132 @@ class AjaxOperations
 
         $response = new JsonResponse($response);
         $response->send();
+    }
+
+    /**
+     * Modifies the DCA.
+     *
+     * @param string $table
+     */
+    public function modifyDca($table)
+    {
+        if (TL_MODE !== 'BE'
+            || !isset($GLOBALS['TL_DCA'][$table]['list']['operations'])
+            || !is_array($GLOBALS['TL_DCA'][$table]['list']['operations'])
+        ) {
+            return;
+        }
+
+        foreach ($GLOBALS['TL_DCA'][$table]['list']['operations'] as $name => $settings) {
+            if (!isset($settings['haste_ajax_operation'])) {
+                continue;
+            }
+
+            $operation = &$GLOBALS['TL_DCA'][$table]['list']['operations'][$name];
+
+            // Add the JavaScript
+            $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/haste.min.js') . '|static';
+
+            // Add default button callback to display the correct initial state
+            // but only add it if not already present
+            if (!isset($settings['button_callback'])) {
+                $operation['button_callback'] = $this->getDefaultButtonCallback($name, $table, $settings['haste_ajax_operation']);
+
+                // Make sure an icon is set to prevent DC_Table errors
+                // (set to '' as the button_callback will return the correct icon)
+                $operation['icon'] = '';
+
+                $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
+
+                // Add the onclick attribute
+                if (!isset($operation['attributes'])) {
+                    $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
+                } else {
+                    // onclick attribute already present
+                    if (strpos($operation['attributes'], 'onclick="') !== false) {
+                        $operation['attributes'] = str_replace(
+                            'onclick="',
+                            'onclick="' . $clickEventString,
+                            $operation['attributes']
+                        );
+                    } else {
+                        $operation['attributes'] = $clickEventString . $operation['attributes'];
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the default button callback.
+     *
+     * @param string $name
+     * @param string $table
+     * @param array  $hasteAjaxOperationSettings
+     *
+     * @return \Closure
+     */
+    private function getDefaultButtonCallback($name, $table, array $hasteAjaxOperationSettings)
+    {
+        return function (array $row, $href, $label, $title, $icon, $attributes) use ($name, $table, $hasteAjaxOperationSettings) {
+
+            // If the user doesn't have access, hide the button
+            if (!\BackendUser::getInstance()->hasAccess(
+                $table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
+            ) {
+
+                return '';
+            }
+
+            $value = $row[$hasteAjaxOperationSettings['field']];
+            $options = $this->getOptions($hasteAjaxOperationSettings);
+            $icon = null;
+
+            foreach ($options as $k => $option) {
+                if ($option['value'] == $value) {
+                    $icon = $option['icon'];
+                }
+            }
+
+            // Default is the first value in the options array
+            if (null === $icon) {
+                $icon = $option[0]['icon'];
+            }
+
+            return sprintf('<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
+                $value,
+                $name,
+                \Backend::addToUrl($href),
+                specialchars($title),
+                $attributes,
+                \Image::getHtml($icon, $label)
+            );
+        };
+    }
+    
+    /**
+     * Gets the possible options for that operation
+     * Must be an array in the following format:
+     *  [
+     *      [
+     *          'value'     => '',
+     *          'icon'      => 'invisible.gif'
+     *      ],
+     *      [
+     *          'value'     => '1',
+     *          'icon'      => 'visible.gif'
+     *      ]
+     * ]
+     *
+     * whereas "value" stands for the value to be stored and "icon"
+     * for the path to the icon for that option.
+     *
+     * @param array $hasteAjaxOperationSettings
+     *
+     * @return array
+     */
+    private function getOptions(array $hasteAjaxOperationSettings)
+    {
+        return (array) $hasteAjaxOperationSettings['options'];
     }
 }
