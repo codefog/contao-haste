@@ -1,14 +1,14 @@
-var HasteAjaxOperations = {
+var Haste = {
 
     /**
-     * Toggle operation
+     * Toggle ajax operation
      *
      * @param {object} el   The DOM element
      * @param {string} id   The ID of the target element
      *
      * @returns {boolean}
      */
-    toggleOperation: function(el, id) {
+    toggleAjaxOperation: function(el, id) {
         el.blur();
 
         var image = $(el).getFirst('img'),

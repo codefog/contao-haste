@@ -44,9 +44,7 @@ class AjaxOperations
             $operation = &$GLOBALS['TL_DCA'][$table]['list']['operations'][$name];
 
             // Add the JavaScript
-
-            $GLOBALS['TL_JAVASCRIPT']['hasteAjaxOperations'] =
-                Debug::uncompressedFile('system/modules/haste/assets/ajaxoperations.min.js') . '|static';
+            $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/haste.min.js') . '|static';
 
             // Add default button callback to display the correct initial state
             // but only add it if not already present
@@ -57,7 +55,7 @@ class AjaxOperations
                 // (set to '' as the button_callback will return the correct icon)
                 $operation['icon'] = '';
 
-                $clickEventString = 'return HasteAjaxOperations.toggleOperation(this, %s);';
+                $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
 
                 // Add the onclick attribute
                 if (!isset($operation['attributes'])) {
