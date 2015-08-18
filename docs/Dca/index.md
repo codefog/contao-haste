@@ -36,7 +36,7 @@ $GLOBALS['TL_DCA']['tl_mytable']['list']['operations']['toggle'] = [
     'attributes'            => 'onclick="Backend.getScrollOffset();"',
     'haste_ajax_operation'  => [
         'field'     => 'published',
-        'states'    => [
+        'options'    => [
             [
                 'value'     => '',
                 'icon'      => 'invisible.gif'
@@ -51,11 +51,11 @@ $GLOBALS['TL_DCA']['tl_mytable']['list']['operations']['toggle'] = [
 ```
 
 As you can see `haste_ajax_operation` contains the configuration array for this
-operation. We only have to tell it to what `field` we refer and the possible states
+operation. We only have to tell it to what `field` we refer and the possible options
 with the value and the corresponding icon. Done. You've just implemented the regular
 toggle feature.
 
-### Multiple states
+### Multiple options
 
 In contrast to the default core implementation, Haste supports multiple states.
 Let's say you would like to implement a light traffic system with three values:
@@ -63,8 +63,8 @@ green, orange and red. Easy:
 
 ```php
 'haste_ajax_operation'  => [
-    'field'     => 'state',
-    'states'    => [
+    'field'     => 'status',
+    'options'    => [
         [
             'value'     => 'green',
             'icon'      => 'system/modules/my_module/assets/green.png'
@@ -82,27 +82,16 @@ green, orange and red. Easy:
 ```
 
 Done. You can now click on the icon and it will just rotate between those three
-states.
+options.
 
 ### More customizing
-
-If you want to dynamically define the states use the `states_callback` and make
-sure the returned value has the same format as if you would have defined them
-using the `states` array:
-
-```php
-'haste_ajax_operation'  => [
-    'field'             => 'state',
-    'states_callback'   => function() { // do whatever you like }
-]
-```
 
 If you want to customize what's stored when the ajax request is executed, use
 the `ajax_callback`:
 
 ```php
 'haste_ajax_operation'  => [
-    'field'             => 'state',
+    'field'             => 'status',
     'ajax_callback'     => function($hasteAjaxOperationSettings, $dc, $id, $currentValue) {
 
         // $hasteAjaxOperationSettings contains what you defined in the DCA

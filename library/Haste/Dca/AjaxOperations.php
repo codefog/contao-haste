@@ -78,7 +78,7 @@ class AjaxOperations
 
 
     /**
-     * Gets the possible states for that operation
+     * Gets the possible options for that operation
      * Must be an array in the following format:
      *  [
      *      [
@@ -92,27 +92,15 @@ class AjaxOperations
      * ]
      *
      * whereas "value" stands for the value to be stored and "icon"
-     * for the path to the icon for that state.
+     * for the path to the icon for that option.
      *
      * @param array $hasteAjaxOperationSettings
      *
      * @return array
      */
-    private function getStates(array $hasteAjaxOperationSettings)
+    private function getOptions(array $hasteAjaxOperationSettings)
     {
-        if (is_array($hasteAjaxOperationSettings['states_callback'])) {
-
-            return (array) \System::importStatic($hasteAjaxOperationSettings['states_callback'][0])
-                ->$hasteAjaxOperationSettings['states_callback'][1]($hasteAjaxOperationSettings);
-        }
-        elseif (is_callable($hasteAjaxOperationSettings['states_callback'])) {
-
-            return (array) $hasteAjaxOperationSettings['states_callback']($hasteAjaxOperationSettings);
-        }
-        else {
-
-            return (array) $hasteAjaxOperationSettings['states'];
-        }
+        return (array) $hasteAjaxOperationSettings['options'];
     }
 
 
@@ -129,18 +117,18 @@ class AjaxOperations
         return function (array $row, $href, $label, $title, $icon, $attributes) use ($name, $hasteAjaxOperationSettings) {
 
             $value = $row[$hasteAjaxOperationSettings['field']];
-            $states = $this->getStates($hasteAjaxOperationSettings);
+            $options = $this->getOptions($hasteAjaxOperationSettings);
             $icon = null;
 
-            foreach ($states as $k => $state) {
-                if ($state['value'] == $value) {
-                    $icon = $state['icon'];
+            foreach ($options as $k => $option) {
+                if ($option['value'] == $value) {
+                    $icon = $option['icon'];
                 }
             }
 
-            // Default is the first value in the states array
+            // Default is the first value in the options array
             if (null === $icon) {
-                $icon = $states[0]['icon'];
+                $icon = $option[0]['icon'];
             }
 
             return sprintf('<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
@@ -194,27 +182,27 @@ class AjaxOperations
         else {
 
             // Determine next value and icon
-            $states = $this->getStates($hasteAjaxOperationSettings);
+            $options = $this->getOptions($hasteAjaxOperationSettings);
             $nextIndex = 0;
 
-            foreach ($states as $k => $state) {
-                if ($state['value'] == $currentValue) {
+            foreach ($options as $k => $option) {
+                if ($option['value'] == $currentValue) {
                     $nextIndex = $k + 1;
                 }
             }
 
             // Make sure that if $nextIndex does not exist it's the first
-            if (!isset($states[$nextIndex])) {
+            if (!isset($options[$nextIndex])) {
                 $nextIndex = 0;
             }
 
             // Update DB
             \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
-                ->execute($states[$nextIndex]['value'], $id);
+                ->execute($options[$nextIndex]['value'], $id);
 
             $response = array(
-                'nextValue' => $states[$nextIndex]['value'],
-                'nextIcon'  => $states[$nextIndex]['icon']
+                'nextValue' => $options[$nextIndex]['value'],
+                'nextIcon'  => $options[$nextIndex]['icon']
             );
         }
 
