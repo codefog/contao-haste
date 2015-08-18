@@ -47,43 +47,34 @@ class AjaxOperations
             return;
         }
 
-        // Response must contain an array like this:
-        // ['nextValue'=>'nextValue', 'nextIcon'=>'pathToNextIcon']
-        if (is_array($hasteAjaxOperationSettings['ajax_callback'])) {
+        // Determine next value and icon
+        $options = $this->getOptions($hasteAjaxOperationSettings);
+        $nextIndex = 0;
 
-            $response = (array) \System::importStatic($hasteAjaxOperationSettings['ajax_callback'][0])
-                ->$hasteAjaxOperationSettings['ajax_callback'][1]($hasteAjaxOperationSettings, $dc, $id, $currentValue);
+        foreach ($options as $k => $option) {
+            if ($option['value'] == $currentValue) {
+                $nextIndex = $k + 1;
+            }
         }
-        elseif (is_callable($hasteAjaxOperationSettings['ajax_callback'])) {
 
-            $response = (array) $hasteAjaxOperationSettings['ajax_callback']($hasteAjaxOperationSettings, $dc, $id, $currentValue);
-        }
-        else {
-
-            // Determine next value and icon
-            $options = $this->getOptions($hasteAjaxOperationSettings);
+        // Make sure that if $nextIndex does not exist it's the first
+        if (!isset($options[$nextIndex])) {
             $nextIndex = 0;
-
-            foreach ($options as $k => $option) {
-                if ($option['value'] == $currentValue) {
-                    $nextIndex = $k + 1;
-                }
-            }
-
-            // Make sure that if $nextIndex does not exist it's the first
-            if (!isset($options[$nextIndex])) {
-                $nextIndex = 0;
-            }
-
-            // Update DB
-            \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
-                ->execute($options[$nextIndex]['value'], $id);
-
-            $response = array(
-                'nextValue' => $options[$nextIndex]['value'],
-                'nextIcon'  => $options[$nextIndex]['icon']
-            );
         }
+
+        $value = $options[$nextIndex]['value'];
+
+        $this->executeSaveCallback($dc, $value, $hasteAjaxOperationSettings);
+
+        // Update DB
+        \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
+            ->execute($options[$nextIndex]['value'], $id);
+
+        $response = array(
+            'nextValue' => $value,
+            'nextIcon'  => $options[$nextIndex]['icon']
+        );
+
 
         $response = new JsonResponse($response);
         $response->send();
@@ -183,6 +174,35 @@ class AjaxOperations
         }
 
         return $hasPermission;
+    }
+
+    /**
+     * Executes the save_callback.
+     *
+     * @param \DataContainer $dc
+     * @param mixed          $value
+     * @param array          $hasteAjaxOperationSettings
+     *
+     * @return mixed
+     */
+    private function executeSaveCallback(\DataContainer $dc, $value, array $hasteAjaxOperationSettings)
+    {
+        $field = $hasteAjaxOperationSettings['field'];
+
+        // Trigger the save_callback
+        if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'])) {
+            foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] as $callback) {
+                if (is_array($callback)) {
+
+                    $value = \System::importStatic($callback[0])->$callback[1]($value, $dc);
+                }
+                elseif (is_callable($callback)) {
+                    $value = $callback($value, $dc);
+                }
+            }
+        }
+
+        return $value;
     }
 
     /**
