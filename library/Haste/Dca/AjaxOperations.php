@@ -49,7 +49,7 @@ class AjaxOperations
             // Add default button callback to display the correct initial state
             // but only add it if not already present
             if (!isset($settings['button_callback'])) {
-                $operation['button_callback'] = $this->getDefaultButtonCallback($name, $settings['haste_ajax_operation']);
+                $operation['button_callback'] = $this->getDefaultButtonCallback($name, $table, $settings['haste_ajax_operation']);
 
                 // Make sure an icon is set to prevent DC_Table errors
                 // (set to '' as the button_callback will return the correct icon)
@@ -108,13 +108,22 @@ class AjaxOperations
      * Gets the default button callback.
      *
      * @param string $name
+     * @param string $table
      * @param array  $hasteAjaxOperationSettings
      *
      * @return \Closure
      */
-    private function getDefaultButtonCallback($name, array $hasteAjaxOperationSettings)
+    private function getDefaultButtonCallback($name, $table, array $hasteAjaxOperationSettings)
     {
-        return function (array $row, $href, $label, $title, $icon, $attributes) use ($name, $hasteAjaxOperationSettings) {
+        return function (array $row, $href, $label, $title, $icon, $attributes) use ($name, $table, $hasteAjaxOperationSettings) {
+
+            // If the user doesn't have access, hide the button
+            if (!\BackendUser::getInstance()->hasAccess(
+                $table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
+            ) {
+
+                return '';
+            }
 
             $value = $row[$hasteAjaxOperationSettings['field']];
             $options = $this->getOptions($hasteAjaxOperationSettings);
