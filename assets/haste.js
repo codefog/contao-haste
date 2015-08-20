@@ -1,4 +1,4 @@
-var Haste = Haste | {};
+var Haste = Haste || {};
 
 /**
  * Toggle ajax operation
