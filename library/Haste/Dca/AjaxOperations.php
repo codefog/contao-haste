@@ -49,9 +49,10 @@ class AjaxOperations
         // Check permissions
         if (!$this->checkPermission($dc->table, $hasteAjaxOperationSettings)) {
 
-            \System::log(sprintf('Not enough permissions to toggle field %s::%s',
-                $dc->table,
-                $hasteAjaxOperationSettings['field']
+            \System::log(
+                sprintf('Not enough permissions to toggle field %s::%s',
+                    $dc->table,
+                    $hasteAjaxOperationSettings['field']
                 ),
                 __METHOD__,
                 TL_ERROR
@@ -87,7 +88,8 @@ class AjaxOperations
             ->execute($value, $id);
 
         $versions->create();
-        \System::log(sprintf('A new version of record "%s.id=%s" has been created',
+        \System::log(
+            sprintf('A new version of record "%s.id=%s" has been created',
                 $dc->table,
                 $id
             ),
