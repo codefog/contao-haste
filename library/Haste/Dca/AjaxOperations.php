@@ -35,7 +35,6 @@ class AjaxOperations
             return;
         }
 
-        \Controller::loadDataContainer($dc->table);
         $id = \Input::post('id');
         $currentValue = \Input::post('value');
         $operation = \Input::post('operation');
