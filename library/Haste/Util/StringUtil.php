@@ -126,4 +126,35 @@ class StringUtil
 
         return $varValue;
     }
+
+    /**
+     * Flatten input data, Simple Tokens can't handle arrays
+     *
+     * @param mixed  $varValue
+     * @param string $strKey
+     * @param array  $arrData
+     */
+    public function flatten($varValue, $strKey, &$arrData)
+    {
+        if (is_object($varValue)) {
+            return;
+        } elseif (!is_array($varValue)) {
+            $arrData[$strKey] = $varValue;
+            return;
+        }
+
+        $blnAssoc = array_is_assoc($varValue);
+        $arrValues = array();
+
+        foreach ($varValue as $k => $v) {
+            if ($blnAssoc && !is_array($v)) {
+                $this->flatten($v, $strKey.'_'.$k, $arrData);
+            } else {
+                $arrData[$strKey.'_'.$v] = '1';
+                $arrValues[]             = $v;
+            }
+        }
+
+        $arrData[$strKey] = implode(', ', $arrValues);
+    }
 }
