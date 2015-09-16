@@ -134,7 +134,7 @@ class StringUtil
      * @param string $strKey
      * @param array  $arrData
      */
-    public function flatten($varValue, $strKey, &$arrData)
+    public static function flatten($varValue, $strKey, array &$arrData)
     {
         if (is_object($varValue)) {
             return;
@@ -148,7 +148,7 @@ class StringUtil
 
         foreach ($varValue as $k => $v) {
             if ($blnAssoc && !is_array($v)) {
-                $this->flatten($v, $strKey.'_'.$k, $arrData);
+                static::flatten($v, $strKey.'_'.$k, $arrData);
             } else {
                 $arrData[$strKey.'_'.$v] = '1';
                 $arrValues[]             = $v;
