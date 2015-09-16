@@ -12,6 +12,9 @@
          bootstrap="bootstrap.php"
         >
     <php>
+        <ini name="display_errors" value="1"/>
+        <!--<ini name="error_reporting" value="2147483647" />-->
+        <ini name="display_startup_errors" value="1"/>
         <ini name="intl.error_level" value="0"/>
         <ini name="memory_limit" value="-1"/>
     </php>

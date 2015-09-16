@@ -147,7 +147,7 @@ class StringUtil
         $arrValues = array();
 
         foreach ($varValue as $k => $v) {
-            if ($blnAssoc && !is_array($v)) {
+            if ($blnAssoc || is_array($v)) {
                 static::flatten($v, $strKey.'_'.$k, $arrData);
             } else {
                 $arrData[$strKey.'_'.$v] = '1';
