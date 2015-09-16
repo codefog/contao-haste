@@ -72,7 +72,7 @@ class InsertTag
         }
 
         if ($arrTag[0] == 'options_label') {
-            $this->replaceOptionLabel($arrTag);
+            return $this->replaceOptionsLabel($arrTag);
         }
 
         return false;
@@ -163,7 +163,7 @@ class InsertTag
      *
      * @param array $arrTag
      */
-    private function replaceOptionLabel($arrTag)
+    private function replaceOptionsLabel($arrTag)
     {
         $id    = $arrTag[1];
         $value = $arrTag[2];
