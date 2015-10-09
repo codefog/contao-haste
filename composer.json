@@ -17,8 +17,7 @@
     "require": {
         "php": ">=5.3.2",
         "contao/core": ">=3.2",
-        "contao-community-alliance/composer-plugin": "2.*",
-        "terminal42/contao-namespace-class-loader": "1.*"
+        "contao-community-alliance/composer-plugin": "2.*"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8@dev"
@@ -29,7 +28,7 @@
     "autoload": {
         "psr-0": {
             "Haste\\": [
-                "system/modules/haste/library/"
+                "library/"
             ]
         }
     },

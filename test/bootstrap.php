@@ -157,3 +157,7 @@ function ampersand($strString, $blnEncode=true)
 {
     return preg_replace('/&(amp;)?/i', ($blnEncode ? '&amp;' : '&'), $strString);
 }
+function array_is_assoc($arrArray)
+{
+    return (is_array($arrArray) && array_keys($arrArray) !== range(0, (sizeof($arrArray) - 1)));
+}

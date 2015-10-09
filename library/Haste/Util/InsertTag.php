@@ -18,8 +18,10 @@ class InsertTag
 {
     /**
      * Recursively replace insert tags
-     * @param    array|string
-     * @return   array|string
+     *
+     * @param array|string $varValue
+     *
+     * @return array|string
      */
     public static function replaceRecursively($varValue)
     {
@@ -40,8 +42,10 @@ class InsertTag
 
     /**
      * Replace generally useful insert tags
-     * @param   $strTag string
-     * @return  string|false
+     *
+     * @param string $strTag
+     *
+     * @return string|false
      */
     public function replaceHasteInsertTags($strTag)
     {
@@ -63,6 +67,14 @@ class InsertTag
             return (count($arrTag) === 3) ? mt_rand((int) $arrTag[1], (int) $arrTag[2]) : mt_rand();
         }
 
+        if ($arrTag[0] == 'flag') {
+            return (string) $arrTag[1];
+        }
+
+        if ($arrTag[0] == 'options_label') {
+            return $this->replaceOptionsLabel($arrTag);
+        }
+
         return false;
     }
 
@@ -79,8 +91,9 @@ class InsertTag
      * {{formatted_datetime::timestamp::time}}      - formats a given timestamp with the global time format
      * {{formatted_datetime::timestamp::Y-m-d H:i}} - formats a given timestamp with the specified format
      *
-     * @param   array
-     * @return  string
+     * @param array $arrTag
+     *
+     * @return string
      */
     private function replaceFormattedDateTime($arrTag)
     {
@@ -108,8 +121,9 @@ class InsertTag
      *
      * {{dca_label::table::field}}
      *
-     * @param   array
-     * @return  string
+     * @param array $arrTag
+     *
+     * @return string
      */
     private function replaceDcaLabel($arrTag)
     {
@@ -127,8 +141,9 @@ class InsertTag
      *
      * {{dca_value::table::field::value}}
      *
-     * @param   array
-     * @return  string
+     * @param array $arrTag
+     *
+     * @return string
      */
     private function replaceDcaValue($arrTag)
     {
@@ -137,5 +152,39 @@ class InsertTag
         $varValue = $arrTag[3];
 
         return Format::dcaValue($strTable, $strField, $varValue);
+    }
+
+    /**
+     * Replace {{option_label::*}} insert tag
+     *
+     * use case:
+     *
+     * {{option_label::ID::value}}
+     *
+     * @param array $arrTag
+     */
+    private function replaceOptionsLabel($arrTag)
+    {
+        $id    = $arrTag[1];
+        $value = $arrTag[2];
+        $field = \FormFieldModel::findByPk($id);
+
+        if (null === $field) {
+            return $value;
+        }
+
+        $options = deserialize($field->options);
+
+        if (empty($options) || !is_array($options)) {
+            return $value;
+        }
+
+        foreach ($options as $option) {
+            if ($value == $option['value']) {
+                return $option['label'];
+            }
+        }
+
+        return $value;
     }
 }
