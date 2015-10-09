@@ -661,6 +661,23 @@ class Form extends \Controller
     }
 
     /**
+     * Add form jumpTo from a back end form generator form ID
+     *
+     * @param int      $intId       The form generator form ID
+     *
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    public function addJumpToFromFormGenerator($intId)
+    {
+        if (($objForm = \FormModel::findById($intId)) === null) {
+            throw new \InvalidArgumentException('Form ID "' . $intId . '" does not exist.');
+        }
+
+        return $objForm->jumpTo;
+    }
+
+    /**
      * Get a form field by a given name
      *
      * @param string $strName The form field name
