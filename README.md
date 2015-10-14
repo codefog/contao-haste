@@ -15,7 +15,9 @@ Haste is a collection of tools and classes to ease working with Contao.
 
 ## Dependencies ##
 
-* NamespaceClassLoader: https://github.com/terminal42/contao-NamespaceClassLoader
+* Contao version 3.2 or later
+* [NamespaceClassLoader](https://github.com/terminal42/contao-NamespaceClassLoader)
+  or Composer class loader
 
 
 ## Components ##
@@ -31,3 +33,10 @@ Haste is a collection of tools and classes to ease working with Contao.
 - [Util/Debug](docs/Util/Debug.md)
 - [Util/Pagination](docs/Util/Pagination.md)
 - [Util/Undo](docs/Util/Undo.md)
+- [Util/StringUtil](docs/Util/StringUtil.md)
+
+
+## Insert tags ##
+
+Haste also provides several insert tags to ease working with Contao.
+See the [insert tags documentation](docs/Util/InsertTags.md).
