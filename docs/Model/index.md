@@ -5,8 +5,7 @@ Provides a methods to handle "many to many" relation between tables.
 Important notes:
 
 - Please update the database after defining the new relation.
-- Currently the ```eager``` load is not supported.
-- The relation table name is consists of the original table name and related table name, e.g. tl_table_one_table_two.
+- The relation table name consists of the original table name and related table name unless specified differently, e.g. tl_table_one_table_two.
 - If you delete a record in the related table then the relation tables are automatically updated.
 
 
@@ -30,6 +29,7 @@ $GLOBALS['TL_DCA']['tl_table_one']['fields']['my_field']['relation'] = array
     'fieldColumn' => 'my_related_field', // a custom column name in relation table (optional)
     'relationTable' => '', // custom relation table name (optional)
     'forceSave' => true // false by default. If set to true it does not only store the values in the relation tables but also the "my_relation" field
+    'bidirectional' => true // false by default. If set to true relations are handled bidirectional (e.g. project A is related to project B but project B is also related to project A)
 );
 ```
 

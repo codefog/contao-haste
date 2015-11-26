@@ -33,6 +33,8 @@ class MandatoryOn implements ValidatorInterface
      * @param Form    $objForm
      *
      * @return mixed Widget value
+     *
+     * @throws \Exception If value is not provided
      */
     public function validate($varValue, $objWidget, $objForm)
     {
@@ -47,11 +49,7 @@ class MandatoryOn implements ValidatorInterface
                 && $this->arrMatches[$objTarget->name]
                 && in_array($varTargetValue, $this->arrMatches[$objTarget->name])
             ) {
-                $objWidget->class = 'error';
-                $objWidget->addError($GLOBALS['TL_LANG']['MSC']['mandatory']);
-
-                // Don't add this error twice
-                break;
+                throw new \Exception($GLOBALS['TL_LANG']['MSC']['mandatory']);
             }
         }
 
