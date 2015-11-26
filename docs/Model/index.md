@@ -29,6 +29,7 @@ $GLOBALS['TL_DCA']['tl_table_one']['fields']['my_field']['relation'] = array
     'fieldColumn' => 'my_related_field', // a custom column name in relation table (optional)
     'relationTable' => '', // custom relation table name (optional)
     'forceSave' => true // false by default. If set to true it does not only store the values in the relation tables but also the "my_relation" field
+    'bidirectional' => true // false by default. If set to true relations are handled bidirectional (e.g. project A is related to project B but project B is also related to project A)
 );
 ```
 

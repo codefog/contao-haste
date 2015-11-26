@@ -147,12 +147,23 @@ class Relations
                 foreach ($arrValues as $value) {
                     $arrSet = array(
                         $arrRelation['reference_field'] => $dc->activeRecord->$arrRelation['reference'],
-                        $arrRelation['related_field'] => $value,
+                        $arrRelation['related_field']   => $value,
                     );
 
                     \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                         ->set($arrSet)
                         ->execute();
+
+                    if ($arrRelation['bidirectional']) {
+                        $arrSet = array(
+                            $arrRelation['reference_field'] => $value,
+                            $arrRelation['related_field']   => $dc->activeRecord->$arrRelation['reference'],
+                        );
+
+                        \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                            ->set($arrSet)
+                            ->execute();
+                    }
                 }
             }
 
@@ -316,6 +327,11 @@ class Relations
             while ($objValues->next()) {
                 \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
                     ->execute($varReference, $objValues->$arrRelation['related_field']);
+
+                if ($arrRelation['bidirectional']) {
+                    \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['related_field'] . "`, `" . $arrRelation['reference_field'] . "`) VALUES (?, ?)")
+                        ->execute($varReference, $objValues->$arrRelation['related_field']);
+                }
             }
         }
     }
@@ -356,6 +372,11 @@ class Relations
 
                 \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
                     ->execute($dc->$arrRelation['field']);
+
+                if ($arrRelation['bidirectional']) {
+                    \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                        ->execute($dc->$arrRelation['field']);
+                }
             }
         }
     }
@@ -417,6 +438,11 @@ class Relations
     {
         \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
             ->execute($varId);
+
+        if ($arrRelation['bidirectional']) {
+            \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
+                ->execute($varId);
+        }
     }
 
     /**
@@ -643,6 +669,9 @@ class Relations
 
                 // Force save
                 $varRelation['forceSave'] = $arrField['forceSave'];
+
+                // Bidirectional
+                $varRelation['bidirectional'] = $arrField['bidirectional'];
             }
 
             static::$arrRelationsCache[$strCacheKey] = $varRelation;
