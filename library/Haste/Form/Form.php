@@ -864,6 +864,11 @@ class Form extends \Controller
                 if (!$objWidget->hasErrors() && $this->objModel !== null) {
                     $this->objModel->$strName =  $varValue;
                 }
+
+                // Re-check the status in case a custom validator has added an error
+                if ($objWidget->hasErrors()) {
+                    $this->blnValid = false;
+                }
             }
         }
 
