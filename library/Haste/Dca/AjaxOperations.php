@@ -35,7 +35,7 @@ class AjaxOperations
             return;
         }
 
-        $id = \Input::post('id');
+        $id = $dc->id = \Input::post('id');
         $currentValue = \Input::post('value');
         $operation = \Input::post('operation');
 
