@@ -658,6 +658,33 @@ class Form extends \Controller
     }
 
     /**
+     * Adds a form field from the form generator without trying to convert a DCA configuration.
+     *
+     * @param string             $strName
+     * @param array              $arrDca
+     * @param ArrayPosition|null $position
+     */
+    public function addFieldFromFormGenerator($strName, array $arrDca, ArrayPosition $position = null)
+    {
+        $this->checkFormFieldNameIsValid($strName);
+
+        if (null === $position) {
+            $position = ArrayPosition::last();
+        }
+
+        // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
+        $strName = $arrDca['name'] ?: 'field_' . $arrDca['id'];
+
+        // Make sure it has a "name" attribute because it is mandatory
+        if (!isset($arrDca['name'])) {
+            $arrDca['name'] = $strName;
+        }
+
+        $this->arrFormFields = $position->addToArray($this->arrFormFields, array($strName=>$arrDca));
+        $this->intState = self::STATE_DIRTY;
+    }
+
+    /**
      * Get a form field by a given name
      *
      * @param string $strName The form field name
