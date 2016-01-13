@@ -636,6 +636,8 @@ class Form extends \Controller
             // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
             $strName = $objFields->name ?: 'field_' . $objFields->id;
 
+            $this->checkFormFieldNameIsValid($strName);
+
             $arrDca = $objFields->row();
 
             // Make sure it has a "name" attribute because it is mandatory
@@ -643,16 +645,11 @@ class Form extends \Controller
                 $arrDca['name'] = $strName;
             }
 
-            $arrFields[$strName] = $arrDca;
-        }
-
-        foreach ($arrFields as $k => $v) {
-
-            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
+            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$strName, &$arrDca))) {
                 continue;
             }
 
-            $this->arrFormFields[$k] = $v;
+            $this->arrFormFields[$strName] = $arrDca;
         }
 
         $this->intState = self::STATE_DIRTY;
