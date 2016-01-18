@@ -97,7 +97,7 @@ class Undo
                 foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
                     if (is_array($callback)) {
                         $objClass = new $callback[0]();
-                        $objClass->$callback[1]($hasteData, $insertId, $table, $row);
+                        $objClass->{$callback[1]}($hasteData, $insertId, $table, $row);
                     } elseif (is_callable($callback)) {
                         $callback($hasteData, $insertId, $table, $row);
                     }
