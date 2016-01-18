@@ -114,7 +114,7 @@ class Relations
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
-            $cacheKey = $arrRelation['table'] . $dc->activeRecord->$arrRelation['reference'];
+            $cacheKey = $arrRelation['table'] . $dc->activeRecord->{$arrRelation['reference']};
 
             $field = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field];
 
@@ -127,7 +127,7 @@ class Relations
 
             // Check the purge cache
             if (!in_array($cacheKey, static::$arrPurgeCache)) {
-                $this->purgeRelatedRecords($arrRelation, $dc->activeRecord->$arrRelation['reference']);
+                $this->purgeRelatedRecords($arrRelation, $dc->activeRecord->{$arrRelation['reference']});
                 static::$arrPurgeCache[] = $cacheKey;
             }
 
@@ -146,7 +146,7 @@ class Relations
             if ($saveRecords) {
                 foreach ($arrValues as $value) {
                     $arrSet = array(
-                        $arrRelation['reference_field'] => $dc->activeRecord->$arrRelation['reference'],
+                        $arrRelation['reference_field'] => $dc->activeRecord->{$arrRelation['reference']},
                         $arrRelation['related_field']   => $value,
                     );
 
@@ -157,7 +157,7 @@ class Relations
                     if ($arrRelation['bidirectional']) {
                         $arrSet = array(
                             $arrRelation['reference_field'] => $value,
-                            $arrRelation['related_field']   => $dc->activeRecord->$arrRelation['reference'],
+                            $arrRelation['related_field']   => $dc->activeRecord->{$arrRelation['reference']},
                         );
 
                         \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
@@ -201,22 +201,22 @@ class Relations
                         'table' => $dc->table,
                         'relationTable' => $strTable,
                         'relationField' => $strField,
-                        'reference' => $dc->$arrRelation['reference'],
-                        'values' => Model::getRelatedValues($strTable, $strField, $dc->$arrRelation['reference'])
+                        'reference' => $dc->{$arrRelation['reference']},
+                        'values' => Model::getRelatedValues($strTable, $strField, $dc->{$arrRelation['reference']})
                     );
 
-                    $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['reference']);
+                    $this->purgeRelatedRecords($arrRelation, $dc->{$arrRelation['reference']});
                 } else {
                     $arrUndo[] = array
                     (
                         'table' => $dc->table,
                         'relationTable' => $strTable,
                         'relationField' => $strField,
-                        'reference' => $dc->$arrRelation['field'],
-                        'values' => Model::getReferenceValues($strTable, $strField, $dc->$arrRelation['field'])
+                        'reference' => $dc->{$arrRelation['field']},
+                        'values' => Model::getReferenceValues($strTable, $strField, $dc->{$arrRelation['field']})
                     );
 
-                    $this->purgeRelatedRecords($arrRelation, $dc->$arrRelation['field']);
+                    $this->purgeRelatedRecords($arrRelation, $dc->{$arrRelation['field']});
                 }
             }
         }
@@ -317,20 +317,20 @@ class Relations
                     ->execute($intId);
 
                 if ($objReference->numRows) {
-                    $varReference = $objReference->$arrRelation['reference'];
+                    $varReference = $objReference->{$arrRelation['reference']};
                 }
             }
 
             $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                ->execute($dc->$arrRelation['reference']);
+                ->execute($dc->{$arrRelation['reference']});
 
             while ($objValues->next()) {
                 \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
-                    ->execute($varReference, $objValues->$arrRelation['related_field']);
+                    ->execute($varReference, $objValues->{$arrRelation['related_field']});
 
                 if ($arrRelation['bidirectional']) {
                     \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['related_field'] . "`, `" . $arrRelation['reference_field'] . "`) VALUES (?, ?)")
-                        ->execute($varReference, $objValues->$arrRelation['related_field']);
+                        ->execute($varReference, $objValues->{$arrRelation['related_field']});
                 }
             }
         }
@@ -371,11 +371,11 @@ class Relations
                 }
 
                 \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
-                    ->execute($dc->$arrRelation['field']);
+                    ->execute($dc->{$arrRelation['field']});
 
                 if ($arrRelation['bidirectional']) {
                     \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                        ->execute($dc->$arrRelation['field']);
+                        ->execute($dc->{$arrRelation['field']});
                 }
             }
         }
@@ -403,7 +403,7 @@ class Relations
             $objDelete = \Database::getInstance()->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
 
             while ($objDelete->next()) {
-                $this->purgeRelatedRecords($arrRelation, $objDelete->$arrRelation['reference']);
+                $this->purgeRelatedRecords($arrRelation, $objDelete->{$arrRelation['reference']});
             }
         }
 
@@ -423,7 +423,7 @@ class Relations
         $arrRelation = static::getRelation($dc->table, $dc->field);
 
         if ($arrRelation !== false) {
-            $varValue = Model::getRelatedValues($dc->table, $dc->field,$dc->$arrRelation['reference']);
+            $varValue = Model::getRelatedValues($dc->table, $dc->field,$dc->{$arrRelation['reference']});
         }
 
         return $varValue;

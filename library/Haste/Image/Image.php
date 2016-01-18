@@ -42,7 +42,7 @@ class Image
         if (isset($GLOBALS['TL_HOOKS']['watermarkImage']) && is_array($GLOBALS['TL_HOOKS']['watermarkImage'])) {
             foreach ($GLOBALS['TL_HOOKS']['watermarkImage'] as $callback) {
                 $objCallback = \System::importStatic($callback[0]);
-                $return = $objCallback->$callback[1]($image, $watermark, $position, $target);
+                $return = $objCallback->{$callback[1]}($image, $watermark, $position, $target);
 
                 if (is_string($return)) {
                     return $return;

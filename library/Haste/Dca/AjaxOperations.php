@@ -192,7 +192,7 @@ class AjaxOperations
         if (is_array($hasteAjaxOperationSettings['check_permission_callback'])) {
 
             \System::importStatic($hasteAjaxOperationSettings['check_permission_callback'][0])
-                ->$hasteAjaxOperationSettings['check_permission_callback'][1]($table, $hasteAjaxOperationSettings, $hasPermission);
+                ->{$hasteAjaxOperationSettings['check_permission_callback'][1]}($table, $hasteAjaxOperationSettings, $hasPermission);
         }
         elseif (is_callable($hasteAjaxOperationSettings['check_permission_callback'])) {
 
@@ -220,7 +220,7 @@ class AjaxOperations
             foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] as $callback) {
                 if (is_array($callback)) {
 
-                    $value = \System::importStatic($callback[0])->$callback[1]($value, $dc);
+                    $value = \System::importStatic($callback[0])->{$callback[1]}($value, $dc);
                 }
                 elseif (is_callable($callback)) {
                     $value = $callback($value, $dc);
