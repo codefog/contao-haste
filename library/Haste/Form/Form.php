@@ -424,14 +424,15 @@ class Form extends \Controller
                         $strTable = $objModel->getTable();
                     }
 
-                    $dc = (object) array(
-                        'id'            => $intId,
-                        'table'         => $strTable,
-                        'value'         => $varValue,
-                        'field'         => $strName,
-                        'inputName'     => $objWidget->name,
-                        'activeRecord'  => $objModel
-                    );
+                    \Controller::loadDataContainer($strTable);
+
+                    $dc = new \DC_Table($strTable);
+                    $dc->id = $intId;
+                    $dc->table = $strTable;
+                    $dc->value = $varValue;
+                    $dc->field = $strName;
+                    $dc->inputName = $objWidget->name;
+                    $dc->activeRecord = $objModel;
 
                     foreach ($arrDca['save_callback'] as $callback) {
                         if (is_array($callback)) {
