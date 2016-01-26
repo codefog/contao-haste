@@ -25,6 +25,9 @@
     "replace": {
         "contao-legacy/haste": "self.version"
     },
+    "suggest": {
+        "phpoffice/phpexcel": "Required for the Haste\\IO\\ExcelFileWriter component."
+    },
     "autoload": {
         "psr-0": {
             "Haste\\": [
