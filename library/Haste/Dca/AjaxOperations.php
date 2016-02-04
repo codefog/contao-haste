@@ -262,7 +262,7 @@ class AjaxOperations
 
             // Default is the first value in the options array
             if (null === $icon) {
-                $icon = $option[0]['icon'];
+                $icon = $options[0]['icon'];
             }
 
             return sprintf('<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
