@@ -12,6 +12,8 @@
 
 namespace Haste\Test\Util;
 
+include_once __DIR__ . '/../../../../../library/Haste/Util/StringUtil.php';
+
 use Haste\Util\StringUtil;
 
 include_once __DIR__ . '/../../../../../library/Haste/Util/StringUtil.php';
