@@ -12,6 +12,8 @@
 
 namespace Haste\Test\Util;
 
+include_once __DIR__ . '/../../../../../library/Haste/Util/StringUtil.php';
+
 use Haste\Util\StringUtil;
 
 class StringUtilTest extends \PHPUnit_Framework_TestCase
