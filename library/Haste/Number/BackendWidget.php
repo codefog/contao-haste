@@ -12,7 +12,6 @@
 
 namespace Haste\Number;
 
-
 /**
  * Class BackendWidget
  * Provide methods to handle Number input.

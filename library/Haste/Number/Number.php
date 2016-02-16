@@ -50,41 +50,48 @@ class Number
 
     /**
      * Adds up another Number instance
-     * @param   Number
-     * @return  Number
+     *
+     * @param \Haste\Number\Number $objToAdd
+     *
+     * @return \Haste\Number\Number
      */
-    public function add(Number $objToAdd)
+    public function add(\Haste\Number\Number $objToAdd)
     {
         return new self($this->getAmount() + $objToAdd->getAmount());
     }
 
     /**
      * Subtracts another Number instance
-     * @param   Number
-     * @return  Number
+     *
+     * @param \Haste\Number\Number $objToSubstract
+     *
+     * @return \Haste\Number\Number
      */
-    public function subtract(Number $objToSubstract)
+    public function subtract(\Haste\Number\Number $objToSubstract)
     {
         return new self($this->getAmount() - $objToSubstract->getAmount());
     }
 
     /**
      * Multiplies with another Number instance
-     * @param   Number
-     * @return  Number
+     *
+     * @param \Haste\Number\Number $objToMultiplyWith
+     *
+     * @return \Haste\Number\Number
      */
-    public function multiply(Number $objToMultiplyWith)
+    public function multiply(\Haste\Number\Number $objToMultiplyWith)
     {
         return new self((int) $this->getAmount() * $objToMultiplyWith->getAmount() / 10000);
     }
 
-
     /**
      * Divides by another Number instance
-     * @param   Number
-     * @return  Number
+     *
+     * @param \Haste\Number\Number $objToDivideBy
+     *
+     * @return \Haste\Number\Number
      */
-    public function divide(Number $objToDivideBy)
+    public function divide(\Haste\Number\Number $objToDivideBy)
     {
         return new self((int) (($this->getAmount() * 10000) / $objToDivideBy->getAmount()));
     }
@@ -92,37 +99,43 @@ class Number
     /**
      * Check if two Number instances are equal
      *
-     * @param   Number
-     * @return  boolean
+     * @param \Haste\Number\Number
+     *
+     * @return bool
      */
-    public function equals(Number $objToCompare)
+    public function equals(\Haste\Number\Number $objToCompare)
     {
         return $this->getAmount() === $objToCompare->getAmount();
     }
 
     /**
      * Check if greater than another Number instance
-     * @param   Number
-     * @return  boolean
+     *
+     * @param \Haste\Number\Number
+     *
+     * @return bool
      */
-    public function greaterThan(Number $objToCompare)
+    public function greaterThan(\Haste\Number\Number $objToCompare)
     {
         return $this->getAmount() > $objToCompare->getAmount();
     }
 
     /**
      * Check if less than another Number instance
-     * @param   Number
-     * @return  boolean
+     *
+     * @param \Haste\Number\Number
+     *
+     * @return bool
      */
-    public function lessThan(Number $objToCompare)
+    public function lessThan(\Haste\Number\Number $objToCompare)
     {
         return $this->getAmount() < $objToCompare->getAmount();
     }
 
     /**
      * Check if zero
-     * @return  boolean
+     *
+     * @return boolean
      */
     public function isZero()
     {
@@ -131,7 +144,8 @@ class Number
 
     /**
      * Check if positive
-     * @return  boolean
+     *
+     * @return bool
      */
     public function isPositive()
     {
@@ -140,7 +154,8 @@ class Number
 
     /**
      * Check if negative
-     * @return  boolean
+     *
+     * @return bool
      */
     public function isNegative()
     {
@@ -149,6 +164,7 @@ class Number
 
     /**
      * Get the float value
+     *
      * @return float
      */
     public function getAsFloat()
@@ -158,6 +174,7 @@ class Number
 
     /**
      * Get the string value
+     *
      * @return string
      */
     public function getAsString()
@@ -184,7 +201,8 @@ class Number
 
     /**
      * Echoes the correct value
-     * @return  string
+     *
+     * @return string
      */
     public function __toString()
     {
@@ -193,9 +211,12 @@ class Number
 
     /**
      * Create Number instance from PHP value
-     * @param   mixed
-     * @return  static
-     * @throws  \InvalidArgumentException
+     *
+     * @param mixed
+     *
+     * @return static
+     *
+     * @throws \InvalidArgumentException
      */
     public static function create($varInput)
     {
