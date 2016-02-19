@@ -46,9 +46,11 @@ class FileUpload extends \FileUpload
      */
     private $target;
 
-    public function __construct()
+    public function __construct($name)
     {
         parent::__construct();
+
+        $this->setName($name);
 
         $this->extensions     = trimsplit(',', strtolower($GLOBALS['TL_CONFIG']['uploadTypes']));
         $this->maxFileSize    = $GLOBALS['TL_CONFIG']['maxFileSize'];
