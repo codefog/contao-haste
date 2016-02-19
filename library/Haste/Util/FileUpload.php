@@ -75,10 +75,14 @@ class FileUpload extends \FileUpload
 
     /**
      * @param bool $doNotOverwrite
+     *
+     * @return $this
      */
     public function setDoNotOverwrite($doNotOverwrite)
     {
         $this->doNotOverwrite = (bool) $doNotOverwrite;
+
+        return $this;
     }
 
     /**
@@ -91,18 +95,26 @@ class FileUpload extends \FileUpload
 
     /**
      * @param array $extensions
+     *
+     * @return $this
      */
     public function setExtensions(array $extensions)
     {
         $this->extensions = array_map('strtolower', $extensions);
+
+        return $this;
     }
 
     /**
      * @param string $extension
+     *
+     * @return $this
      */
     public function addExtension($extension)
     {
         $this->extensions[] = strtolower($extension);
+
+        return $this;
     }
 
     /**
@@ -115,10 +127,14 @@ class FileUpload extends \FileUpload
 
     /**
      * @param int $maxFileSize
+     *
+     * @return $this
      */
     public function setMaxFileSize($maxFileSize)
     {
         $this->maxFileSize = $maxFileSize;
+
+        return $this;
     }
 
     /**
@@ -131,10 +147,14 @@ class FileUpload extends \FileUpload
 
     /**
      * @param int $imageWidth
+     *
+     * @return $this
      */
     public function setImageWidth($imageWidth)
     {
         $this->imageWidth = $imageWidth;
+
+        return $this;
     }
 
     /**
@@ -147,10 +167,14 @@ class FileUpload extends \FileUpload
 
     /**
      * @param int $imageHeight
+     *
+     * @return $this
      */
     public function setImageHeight($imageHeight)
     {
         $this->imageHeight = $imageHeight;
+
+        return $this;
     }
 
     /**
@@ -163,10 +187,14 @@ class FileUpload extends \FileUpload
 
     /**
      * @param int $gdMaxImgWidth
+     *
+     * @return $this
      */
     public function setGdMaxImgWidth($gdMaxImgWidth)
     {
         $this->gdMaxImgWidth = $gdMaxImgWidth;
+
+        return $this;
     }
 
     /**
@@ -179,10 +207,14 @@ class FileUpload extends \FileUpload
 
     /**
      * @param int $gdMaxImgHeight
+     *
+     * @return $this
      */
     public function setGdMaxImgHeight($gdMaxImgHeight)
     {
         $this->gdMaxImgHeight = $gdMaxImgHeight;
+
+        return $this;
     }
 
     /**
