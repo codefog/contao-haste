@@ -239,7 +239,11 @@ class FileUpload extends \FileUpload
      */
     protected function getFilesFromGlobal()
     {
-        $files = parent::getFilesFromGlobal();
+        if (is_array($_FILES[$this->strName]['name'])) {
+            $files = parent::getFilesFromGlobal();
+        } else {
+            $files = array($_FILES[$this->strName]);
+        }
 
         if ($this->doNotOverwrite) {
             foreach ($files as $k => $file) {
