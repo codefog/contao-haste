@@ -35,6 +35,6 @@ class DateTime extends \DateTime
      */
     public static function createFromTimestamp($tstamp, \DateTimeZone $timezone=null)
     {
-        return static::createFromFormat('U', $tstamp, $timezone);
+        return new static('@'.$tstamp);
     }
 }
