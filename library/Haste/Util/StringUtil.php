@@ -44,7 +44,7 @@ class StringUtil
 
         // PHP 7 compatibility
         // See #309 (https://github.com/contao/core-bundle/issues/309)
-        if (version_compare('3.5.5', VERSION . '.' . BUILD, '>=')) {
+        if (version_compare(VERSION . '.' . BUILD, '3.5.5', '>=')) {
             // Must decode, tokens could be encoded
             $strText = \StringUtil::decodeEntities($strText);
         } else {
@@ -64,7 +64,7 @@ class StringUtil
 
         // PHP 7 compatibility
         // See #309 (https://github.com/contao/core-bundle/issues/309)
-        if (version_compare('3.5.5', VERSION . '.' . BUILD, '>=')) {
+        if (version_compare(VERSION . '.' . BUILD, '3.5.5', '>=')) {
             // first parse the tokens as they might have if-else clauses
             $strBuffer = \StringUtil::parseSimpleTokens($strText, $arrTokens);
         } else {
@@ -84,7 +84,7 @@ class StringUtil
 
         // PHP 7 compatibility
         // See #309 (https://github.com/contao/core-bundle/issues/309)
-        if (version_compare('3.5.5', VERSION . '.' . BUILD, '>=')) {
+        if (version_compare(VERSION . '.' . BUILD, '3.5.5', '>=')) {
             $strBuffer = \StringUtil::restoreBasicEntities($strBuffer);
         } else {
             $strBuffer = \String::restoreBasicEntities($strBuffer);
