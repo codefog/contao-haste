@@ -30,11 +30,23 @@ class DateTime extends \DateTime
 
     /**
      * Create new DateTime object from timestamp
-     * @param   int
-     * @param   DateTimeZone
+     *
+     * @param int                $tstamp
+     * @param \DateTimeZone|null $timezone
+     *
+     * @return static
+     *
+     * @deprecated Deprecated since Haste 4.12, to be removed in 5.0. Use new DateTime('@' . $time) instead.
      */
-    public static function createFromTimestamp($tstamp, \DateTimeZone $timezone=null)
+    public static function createFromTimestamp($tstamp, \DateTimeZone $timezone = null)
     {
+        if (null !== $timezone) {
+            trigger_error(
+                'Passing a timezone when creating DateTime from timestamp is not supported by PHP.',
+                E_USER_DEPRECATED
+            );
+        }
+
         return new static('@'.$tstamp);
     }
 }
