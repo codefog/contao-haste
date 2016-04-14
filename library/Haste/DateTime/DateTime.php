@@ -29,6 +29,34 @@ class DateTime extends \DateTime
     }
 
     /**
+     * Create an instance of Haste\DateTime\DateTime from given format.
+     *
+     * @param string             $format
+     * @param string             $time
+     * @param \DateTimeZone|null $timezone
+     *
+     * @return static
+     */
+    public static function createFromFormat($format, $time, \DateTimeZone $timezone = null)
+    {
+        if (null === $timezone) {
+            $native = \DateTime::createFromFormat($format, $time);
+        } else {
+            $native = \DateTime::createFromFormat($format, $time, $timezone);
+        }
+
+        if (!$native instanceof \DateTime) {
+            return $native;
+        }
+
+        $date = new static();
+        $date->setTimezone($native->getTimezone());
+        $date->setTimestamp($native->getTimestamp());
+
+        return $date;
+    }
+
+    /**
      * Create new DateTime object from timestamp
      *
      * @param int                $tstamp
