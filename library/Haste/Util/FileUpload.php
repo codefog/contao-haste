@@ -18,6 +18,11 @@ class FileUpload extends \FileUpload
     /**
      * @var int
      */
+    protected $minFileSize = 0;
+
+    /**
+     * @var int
+     */
     protected $maxFileSize;
 
     /**
@@ -113,6 +118,26 @@ class FileUpload extends \FileUpload
     public function addExtension($extension)
     {
         $this->extensions[] = strtolower($extension);
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMinFileSize()
+    {
+        return $this->minFileSize;
+    }
+
+    /**
+     * @param int $minFileSize
+     *
+     * @return $this
+     */
+    public function setMinFileSize($minFileSize)
+    {
+        $this->minFileSize = $minFileSize;
 
         return $this;
     }
@@ -252,6 +277,20 @@ class FileUpload extends \FileUpload
         if ($this->doNotOverwrite) {
             foreach ($files as $k => $file) {
                 $files[$k]['name'] = static::getFileName($file['name'], $this->target);
+            }
+        }
+
+        // Validate minimum file size and skip from parent call
+        if ($this->minFileSize > 0) {
+            $minlength_kb_readable = static::getReadableSize($this->minFileSize);
+
+            foreach ($files as $k => $file) {
+                if (!$file['error'] && $file['size'] < $this->minFileSize) {
+                    \Message::addError(sprintf($GLOBALS['TL_LANG']['ERR']['minFileSize'], $minlength_kb_readable));
+                    \System::log('File "'.$file['name'].'" exceeds the minimum file size of '.$minlength_kb_readable, __METHOD__, TL_ERROR);
+                    $this->blnHasError = true;
+                    unset($files[$k]);
+                }
             }
         }
 
