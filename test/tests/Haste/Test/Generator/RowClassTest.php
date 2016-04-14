@@ -13,7 +13,7 @@ include_once __DIR__ . '/../../../../../library/Haste/Generator/RowClass.php';
 
 use Haste\Generator\RowClass;
 
-class ZodiacSignTest extends \PHPUnit_Framework_TestCase
+class RowClassTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testKey()

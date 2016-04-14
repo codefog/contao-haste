@@ -17,9 +17,12 @@ class DateTime extends \DateTime
 
     /**
      * Calculate age from timestamp
-     * @return  int
+     *
+     * @param \DateTime|null $objDiff
+     *
+     * @return int
      */
-    public function getAge(\DateTime $objDiff=null)
+    public function getAge(\DateTime $objDiff = null)
     {
         if ($objDiff === null) {
             $objDiff = new \DateTime();
