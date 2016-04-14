@@ -22,6 +22,7 @@
  * Errors
  */
 $GLOBALS['TL_LANG']['ERR']['numberInputNotAllowed'] = 'Enter a valid number (e.g. 5\'000, 5.00, 5,00, 5\'000.00)';
+$GLOBALS['TL_LANG']['ERR']['maxFileSize'] = 'The maximum size for file uploads is %s';
 
 /**
  * Miscellaneous

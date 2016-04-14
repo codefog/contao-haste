@@ -227,9 +227,13 @@ class FileUpload extends \FileUpload
         $uploadTypes = $GLOBALS['TL_CONFIG']['uploadTypes'];
         $GLOBALS['TL_CONFIG']['uploadTypes'] = implode(',', $this->extensions);
 
+        $filesizeLabel = $GLOBALS['TL_LANG']['ERR']['filesize'];
+        $GLOBALS['TL_LANG']['ERR']['filesize'] = $GLOBALS['TL_LANG']['ERR']['maxFileSize'];
+
         $result = parent::uploadTo($strTarget);
 
         $GLOBALS['TL_CONFIG']['uploadTypes'] = $uploadTypes;
+        $GLOBALS['TL_LANG']['ERR']['filesize'] = $filesizeLabel;
 
         return $result;
     }
