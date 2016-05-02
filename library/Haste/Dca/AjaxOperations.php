@@ -88,14 +88,16 @@ class AjaxOperations
             ->execute($value, $id);
 
         $versions->create();
-        \System::log(
-            sprintf('A new version of record "%s.id=%s" has been created',
-                $dc->table,
-                $id
-            ),
-            __METHOD__,
-            TL_GENERAL
-        );
+        if ($GLOBALS['TL_DCA'][$dc->table]['config']['enableVersioning']) {
+            \System::log(
+                sprintf('A new version of record "%s.id=%s" has been created',
+                    $dc->table,
+                    $id
+                ),
+                __METHOD__,
+                TL_GENERAL
+            );
+        }
         
         $response = array(
             'nextValue' => $options[$nextIndex]['value'],
