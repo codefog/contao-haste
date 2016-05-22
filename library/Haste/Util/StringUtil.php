@@ -43,7 +43,11 @@ class StringUtil
         }
 
         // Must decode, tokens could be encoded
-        $strText = \String::decodeEntities($strText);
+        if (version_compare(VERSION . '.' . BUILD, '3.5.1', '<')) {
+            $strText = \String::decodeEntities($strText);
+        } else {
+            $strText = \StringUtil::decodeEntities($strText);
+        }
 
         // Replace all opening and closing tags with a hash so they don't get stripped
         // by parseSimpleTokens() - this is useful e.g. for XML content
@@ -56,7 +60,11 @@ class StringUtil
         $strText = str_replace($arrOriginal, $arrReplacement, $strText);
 
         // first parse the tokens as they might have if-else clauses
-        $strBuffer = \String::parseSimpleTokens($strText, $arrTokens);
+        if (version_compare(VERSION . '.' . BUILD, '3.5.1', '<')) {
+            $strBuffer = \String::parseSimpleTokens($strText, $arrTokens);
+        } else {
+            $strBuffer = \StringUtil::parseSimpleTokens($strText, $arrTokens);
+        }
 
         $strBuffer = str_replace($arrReplacement, $arrOriginal, $strBuffer);
 
@@ -68,7 +76,11 @@ class StringUtil
             $strBuffer = static::recursiveReplaceTokensAndTags($strBuffer, $arrTokens, $intTextFlags);
         }
 
-        $strBuffer = \String::restoreBasicEntities($strBuffer);
+        if (version_compare(VERSION . '.' . BUILD, '3.5.1', '<')) {
+            $strBuffer = \String::restoreBasicEntities($strBuffer);
+        } else {
+            $strBuffer = \StringUtil::restoreBasicEntities($strBuffer);
+        }
 
         if ($intTextFlags > 0) {
             $strBuffer = static::convertToText($strBuffer, $intTextFlags);
