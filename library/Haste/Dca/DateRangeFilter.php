@@ -221,7 +221,14 @@ class DateRangeFilter
         }
 
         $format = $GLOBALS['TL_CONFIG'][$rgxp . 'Format'];
-        $key = ($from) ? 'dayBegin' : 'dayEnd';
+
+        // Determine the correct key for time and date formats
+        if ($rgxp === 'time' || $rgxp === 'datim') {
+            $key = 'tstamp';
+        } else {
+            $key = ($from) ? 'dayBegin' : 'dayEnd';
+        }
+
         try {
             $date = new \Date($value, $format);
         } catch(\Exception $e) {
