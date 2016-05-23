@@ -182,8 +182,8 @@ class AjaxOperations
     {
         $hasPermission = true;
 
-        if (!\BackendUser::getInstance()->hasAccess(
-            $table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
+        if ($GLOBALS['TL_DCA'][$table]['fields'][$hasteAjaxOperationSettings['field']]['exclude']
+            && !\BackendUser::getInstance()->hasAccess($table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
         ) {
 
             $hasPermission = false;
