@@ -42,8 +42,15 @@ class StringUtil
             $arrTokens = static::convertToText($arrTokens, $intTextFlags);
         }
 
-        // Must decode, tokens could be encoded
-        $strText = \String::decodeEntities($strText);
+        // PHP 7 compatibility
+        // See #309 (https://github.com/contao/core-bundle/issues/309)
+        if (version_compare(VERSION . '.' . BUILD, '3.5.1', '>=')) {
+            // Must decode, tokens could be encoded
+            $strText = \StringUtil::decodeEntities($strText);
+        } else {
+            // Must decode, tokens could be encoded
+            $strText = \String::decodeEntities($strText);
+        }
 
         // Replace all opening and closing tags with a hash so they don't get stripped
         // by parseSimpleTokens() - this is useful e.g. for XML content
@@ -55,8 +62,15 @@ class StringUtil
 
         $strText = str_replace($arrOriginal, $arrReplacement, $strText);
 
-        // first parse the tokens as they might have if-else clauses
-        $strBuffer = \String::parseSimpleTokens($strText, $arrTokens);
+        // PHP 7 compatibility
+        // See #309 (https://github.com/contao/core-bundle/issues/309)
+        if (version_compare(VERSION . '.' . BUILD, '3.5.1', '>=')) {
+            // first parse the tokens as they might have if-else clauses
+            $strBuffer = \StringUtil::parseSimpleTokens($strText, $arrTokens);
+        } else {
+            // first parse the tokens as they might have if-else clauses
+            $strBuffer = \String::parseSimpleTokens($strText, $arrTokens);
+        }
 
         $strBuffer = str_replace($arrReplacement, $arrOriginal, $strBuffer);
 
@@ -68,7 +82,13 @@ class StringUtil
             $strBuffer = static::recursiveReplaceTokensAndTags($strBuffer, $arrTokens, $intTextFlags);
         }
 
-        $strBuffer = \String::restoreBasicEntities($strBuffer);
+        // PHP 7 compatibility
+        // See #309 (https://github.com/contao/core-bundle/issues/309)
+        if (version_compare(VERSION . '.' . BUILD, '3.5.1', '>=')) {
+            $strBuffer = \StringUtil::restoreBasicEntities($strBuffer);
+        } else {
+            $strBuffer = \String::restoreBasicEntities($strBuffer);
+        }
 
         if ($intTextFlags > 0) {
             $strBuffer = static::convertToText($strBuffer, $intTextFlags);
