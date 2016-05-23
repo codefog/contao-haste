@@ -17,9 +17,12 @@ class DateTime extends \DateTime
 
     /**
      * Calculate age from timestamp
-     * @return  int
+     *
+     * @param \DateTime|null $objDiff
+     *
+     * @return int
      */
-    public function getAge(\DateTime $objDiff=null)
+    public function getAge(\DateTime $objDiff = null)
     {
         if ($objDiff === null) {
             $objDiff = new \DateTime();
@@ -29,12 +32,52 @@ class DateTime extends \DateTime
     }
 
     /**
-     * Create new DateTime object from timestamp
-     * @param   int
-     * @param   DateTimeZone
+     * Create an instance of Haste\DateTime\DateTime from given format.
+     *
+     * @param string             $format
+     * @param string             $time
+     * @param \DateTimeZone|null $timezone
+     *
+     * @return static
      */
-    public static function createFromTimestamp($tstamp, \DateTimeZone $timezone=null)
+    public static function createFromFormat($format, $time, \DateTimeZone $timezone = null)
     {
-        return static::createFromFormat('U', $tstamp, $timezone);
+        if (null === $timezone) {
+            $native = \DateTime::createFromFormat($format, $time);
+        } else {
+            $native = \DateTime::createFromFormat($format, $time, $timezone);
+        }
+
+        if (!$native instanceof \DateTime) {
+            return $native;
+        }
+
+        $date = new static();
+        $date->setTimezone($native->getTimezone());
+        $date->setTimestamp($native->getTimestamp());
+
+        return $date;
+    }
+
+    /**
+     * Create new DateTime object from timestamp
+     *
+     * @param int                $tstamp
+     * @param \DateTimeZone|null $timezone
+     *
+     * @return static
+     *
+     * @deprecated Deprecated since Haste 4.12, to be removed in 5.0. Use new DateTime('@' . $time) instead.
+     */
+    public static function createFromTimestamp($tstamp, \DateTimeZone $timezone = null)
+    {
+        if (null !== $timezone) {
+            trigger_error(
+                'Passing a timezone when creating DateTime from timestamp is not supported by PHP.',
+                E_USER_DEPRECATED
+            );
+        }
+
+        return new static('@'.$tstamp);
     }
 }

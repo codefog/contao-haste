@@ -35,3 +35,15 @@ $objResponse = new Haste\Http\Response\JsonResponse();
 $objResponse = new Haste\Http\Response\HtmlResponse();
 $objResponse = new Haste\Http\Response\XmlResponse();
 ```
+
+### Redirecting ###
+
+Use the `RedirectResponse` to send a visitor to another URL.
+Defaults to HTTP status code 301 (Moved Permanently).
+
+```php
+<?php
+
+$objResponse = new Haste\Http\Response\RedirectResponse('http://example.com', 303);
+$objResponse->send();
+```

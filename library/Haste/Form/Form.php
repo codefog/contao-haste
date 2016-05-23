@@ -636,6 +636,8 @@ class Form extends \Controller
             // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
             $strName = $objFields->name ?: 'field_' . $objFields->id;
 
+            $this->checkFormFieldNameIsValid($strName);
+
             $arrDca = $objFields->row();
 
             // Make sure it has a "name" attribute because it is mandatory
@@ -643,21 +645,43 @@ class Form extends \Controller
                 $arrDca['name'] = $strName;
             }
 
-            $arrFields[$strName] = $arrDca;
-        }
-
-        foreach ($arrFields as $k => $v) {
-
-            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
+            if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$strName, &$arrDca))) {
                 continue;
             }
 
-            $this->arrFormFields[$k] = $v;
+            $this->arrFormFields[$strName] = $arrDca;
         }
 
         $this->intState = self::STATE_DIRTY;
 
         return $this;
+    }
+
+    /**
+     * Adds a form field from the form generator without trying to convert a DCA configuration.
+     *
+     * @param string             $strName
+     * @param array              $arrDca
+     * @param ArrayPosition|null $position
+     */
+    public function addFieldFromFormGenerator($strName, array $arrDca, ArrayPosition $position = null)
+    {
+        $this->checkFormFieldNameIsValid($strName);
+
+        if (null === $position) {
+            $position = ArrayPosition::last();
+        }
+
+        // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
+        $strName = $arrDca['name'] ?: 'field_' . $arrDca['id'];
+
+        // Make sure it has a "name" attribute because it is mandatory
+        if (!isset($arrDca['name'])) {
+            $arrDca['name'] = $strName;
+        }
+
+        $this->arrFormFields = $position->addToArray($this->arrFormFields, array($strName=>$arrDca));
+        $this->intState = self::STATE_DIRTY;
     }
 
     /**
