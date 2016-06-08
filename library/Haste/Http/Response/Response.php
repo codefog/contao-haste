@@ -12,7 +12,9 @@
 
 namespace Haste\Http\Response;
 
+use Contao\CoreBundle\Exception\ResponseException;
 use Haste\Util\InsertTag;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Response
 {
@@ -227,7 +229,7 @@ class Response
         }
 
         // Status
-        $strVersion = ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.0') ? '1.0' : '1.1';
+        $strVersion = ('HTTP/1.0' === $_SERVER['SERVER_PROTOCOL']) ? '1.0' : '1.1';
         header(sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, static::$arrStatuses[$this->intStatus]));
 
         // Headers
@@ -245,10 +247,16 @@ class Response
      */
     public function send($blnExit = true)
     {
+        $this->prepare();
+
+        if ($blnExit && class_exists('Contao\CoreBundle\Exception\ResponseException')) {
+            throw new ResponseException(
+                new SymfonyResponse($this->strContent, $this->intStatus, $this->arrHeaders)
+            );
+        }
+
         // Clean the output buffer
         ob_end_clean();
-
-        $this->prepare();
 
         // Send
         $this->sendHeaders();
@@ -269,7 +277,7 @@ class Response
     {
         $strOutput = '';
         $this->prepare();
-        $strVersion = ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.0') ? '1.0' : '1.1';
+        $strVersion = ('HTTP/1.0' === $_SERVER['SERVER_PROTOCOL']) ? '1.0' : '1.1';
         $strOutput .= sprintf('HTTP/%s %s %s', $strVersion, $this->intStatus, static::$arrStatuses[$this->intStatus]) . "\n";
 
         // Headers
