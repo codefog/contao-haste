@@ -27,7 +27,7 @@ class DcaFieldMapper extends ArrayMapper
     public function __construct($strTable)
     {
         if (!is_array($GLOBALS['TL_DCA'][$strTable])) {
-            Haste::getInstance()->call('loadDataContainer', $strTable);
+            \Controller::loadDataContainer($strTable);
         }
 
         if (!is_array($GLOBALS['TL_DCA'][$strTable]['fields'])) {

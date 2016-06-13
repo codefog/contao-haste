@@ -21,7 +21,7 @@ class HasteTest extends \PHPUnit_Framework_TestCase
 
     public function testCall()
     {
-        $this->assertSame(Haste::getInstance()->call('replaceInsertTags', 'foobar'), 'foobar');
-        $this->assertSame(Haste::getInstance()->call('generateFrontendUrl', 'foobar'), 'foobar');
+        $this->assertSame(\Controller::replaceInsertTags('foobar'), 'foobar');
+        $this->assertSame(\Controller::generateFrontendUrl('foobar'), 'foobar');
     }
 } 

@@ -75,7 +75,7 @@ class StringUtil
         $strBuffer = str_replace($arrReplacement, $arrOriginal, $strBuffer);
 
         // then replace the insert tags
-        $strBuffer = Haste::getInstance()->call('replaceInsertTags', array($strBuffer, false));
+        $strBuffer = \Controller::replaceInsertTags($strBuffer, false);
 
         // check if the inserttags have returned a simple token or an insert tag to parse
         if ((strpos($strBuffer, '##') !== false || strpos($strBuffer, '{{') !== false) && $strBuffer != $strText) {

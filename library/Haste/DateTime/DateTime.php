@@ -36,18 +36,19 @@ class DateTime extends \DateTime
      *
      * @param string             $format
      * @param string             $time
-     * @param \DateTimeZone|null $timezone
+     * @param \DateTimeZone|null $object
      *
      * @return static
      */
-    public static function createFromFormat($format, $time, \DateTimeZone $timezone = null)
+    public static function createFromFormat($format, $time, $object = null)
     {
-        if (null === $timezone) {
+        if (null === $object) {
             $native = \DateTime::createFromFormat($format, $time);
         } else {
-            $native = \DateTime::createFromFormat($format, $time, $timezone);
+            $native = \DateTime::createFromFormat($format, $time, $object);
         }
 
+        // \DateTime::createFromFormat might fail and return false
         if (!$native instanceof \DateTime) {
             return $native;
         }
