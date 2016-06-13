@@ -23,31 +23,27 @@ abstract class AbstractFrontendModule extends Module
     public function generate()
     {
         if ('BE' === TL_MODE) {
-            $objTemplate = new BackendTemplate('be_wildcard');
-
-            $objTemplate->wildcard = '### ' . strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
-            $objTemplate->title    = $this->headline;
-            $objTemplate->id       = $this->id;
-            $objTemplate->link     = $this->name;
-            $objTemplate->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
-
-            return $objTemplate->parse();
+            return $this->generateWildcard();
         }
 
-        $buffer = parent::generate();
-
-        return $this->outputIsEmpty($buffer) ? '' : $buffer;
+        return parent::generate();
     }
 
     /**
-     * Returns whether the generated output should be empty.
+     * Generate wildcard template for backend output.
      *
-     * @param string $buffer
-     *
-     * @return bool
+     * @return string
      */
-    protected function outputIsEmpty($buffer)
+    protected function generateWildcard()
     {
-        return false;
+        $objTemplate = new BackendTemplate('be_wildcard');
+
+        $objTemplate->wildcard = '### ' . strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
+        $objTemplate->title    = $this->headline;
+        $objTemplate->id       = $this->id;
+        $objTemplate->link     = $this->name;
+        $objTemplate->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
+
+        return $objTemplate->parse();
     }
 }
