@@ -41,7 +41,7 @@ class ModelData
         $arrData = array();
 
         \System::loadLanguageFile($strTable);
-        Haste::getInstance()->call('loadDataContainer', $strTable);
+        \Controller::loadDataContainer($strTable);
 
         $arrFields = &$GLOBALS['TL_DCA'][$strTable]['fields'];
 

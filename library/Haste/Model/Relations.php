@@ -284,7 +284,7 @@ class Relations
                     continue;
                 }
 
-                Haste::getInstance()->call('loadDataContainer', substr($strFile, 0, -4));
+                \Controller::loadDataContainer(substr($strFile, 0, -4));
             }
         }
     }
@@ -638,7 +638,7 @@ class Relations
     public static function getRelation($strTable, $strField)
     {
         if (!isset($GLOBALS['TL_DCA'][$strTable])) {
-            Haste::getInstance()->call('loadDataContainer', $strTable);
+            \Controller::loadDataContainer($strTable);
         }
 
         $strCacheKey = $strTable . '_' . $strField;

@@ -27,6 +27,9 @@ class Haste extends \Controller
      * @param mixed  $arguments
      *
      * @return mixed
+     *
+     * @deprecated Deprecated since Haste 4.13, to be removed in Haste 5.0
+     *             No longer needed because necessary Contao core methods are all public static.
      */
     public function call($name, $arguments = null)
     {

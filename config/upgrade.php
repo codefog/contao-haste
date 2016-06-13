@@ -77,7 +77,7 @@ class HasteUpdater
                     continue;
                 }
 
-                \Haste\Haste::getInstance()->call('loadDataContainer', substr($file, 0, -4));
+                \Controller::loadDataContainer(substr($file, 0, -4));
             }
         }
     }

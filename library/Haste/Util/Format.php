@@ -66,7 +66,7 @@ class Format
     public static function dcaLabel($strTable, $strField)
     {
         \System::loadLanguageFile($strTable);
-        Haste::getInstance()->call('loadDataContainer', $strTable);
+        \Controller::loadDataContainer($strTable);
         $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
 
         // Add the "name" key (backwards compatibility)
@@ -111,7 +111,7 @@ class Format
     public static function dcaValue($strTable, $strField, $varValue)
     {
         \System::loadLanguageFile($strTable);
-        Haste::getInstance()->call('loadDataContainer', $strTable);
+        \Controller::loadDataContainer($strTable);
         $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
 
         // Add the "name" key (backwards compatibility)

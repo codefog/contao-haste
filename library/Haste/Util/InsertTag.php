@@ -36,7 +36,7 @@ class InsertTag
             return $varValue;
         }
 
-        return Haste::getInstance()->call('replaceInsertTags', array($varValue, false));
+        return \Controller::replaceInsertTags($varValue, false);
     }
 
 
