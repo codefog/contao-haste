@@ -129,7 +129,7 @@ class StringUtil
         // Replace friendly email before stripping tags
         if (!($options & static::NO_EMAILS)) {
             $arrEmails = array();
-            preg_match_all('{<.+@.+\.[A-Za-z]{2,6}>}', $varValue, $arrEmails);
+            preg_match_all('{<.+@.+\.[A-Za-z]+>}', $varValue, $arrEmails);
 
             if (!empty($arrEmails[0])) {
                 foreach ($arrEmails[0] as $k => $v) {
