@@ -18,11 +18,16 @@ use Contao\Module;
 abstract class AbstractFrontendModule extends Module
 {
     /**
+     * @var bool
+     */
+    private $wildcard = true;
+
+    /**
      * @inheritdoc
      */
     public function generate()
     {
-        if ('BE' === TL_MODE) {
+        if ('BE' === TL_MODE && $this->showWildcard()) {
             return $this->generateWildcard();
         }
 
@@ -45,5 +50,25 @@ abstract class AbstractFrontendModule extends Module
         $objTemplate->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
 
         return $objTemplate->parse();
+    }
+
+    /**
+     * Returns whether the wildcard should be shown in the backend.
+     *
+     * @return bool
+     */
+    protected function showWildcard()
+    {
+        return $this->wildcard;
+    }
+
+    /**
+     * Sets whether the wildcard should be shown in the backend.
+     *
+     * @param bool $wildcard
+     */
+    protected function setWildcard($wildcard)
+    {
+        $this->wildcard = $wildcard;
     }
 }
