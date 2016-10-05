@@ -22,6 +22,17 @@ abstract class AbstractFrontendModule extends Module
      */
     private $wildcard = true;
 
+    public function __construct($objModule, $strColumn)
+    {
+        parent::__construct($objModule, $strColumn);
+
+        foreach ($this->getSerializedProperties() as $name => $forceArray) {
+            if (array_key_exists($name, $this->arrData)) {
+                $this->arrData[$name] = deserialize($this->arrData, $forceArray);
+            }
+        }
+    }
+
     /**
      * @inheritdoc
      */
@@ -70,5 +81,18 @@ abstract class AbstractFrontendModule extends Module
     protected function setWildcard($wildcard)
     {
         $this->wildcard = $wildcard;
+    }
+
+    /**
+     * An array of serialized properties that will be deserialized on construction.
+     *
+     * Array key should be the property name, and value should be true or false whether
+     * to force array deserialization or not.
+     *
+     * @return array
+     */
+    protected function getSerializedProperties()
+    {
+        return [];
     }
 }
