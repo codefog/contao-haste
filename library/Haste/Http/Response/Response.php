@@ -213,9 +213,15 @@ class Response
     {
         // Fix charset
         $strContentType = $this->getHeader('Content-Type');
-        if (strpos($strContentType, 'charset') === false) {
+
+        if (false === strpos($strContentType, 'charset')) {
             $strCharset = $GLOBALS['TL_CONFIG']['characterSet'] ?: 'utf-8';
             $this->setHeader('Content-Type', $strContentType . '; charset=' . $strCharset);
+        }
+
+        // Always remove existing headers to prevent duplicates
+        foreach ($this->arrHeaders as $name => $value) {
+            header_remove($name);
         }
     }
 

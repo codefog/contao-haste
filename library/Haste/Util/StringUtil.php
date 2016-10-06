@@ -12,8 +12,6 @@
 
 namespace Haste\Util;
 
-use Haste\Haste;
-
 /**
  * @author Andreas Schempp <https://github.com/aschempp>
  */
@@ -25,6 +23,8 @@ class StringUtil
     const NO_TAGS = 1;
     const NO_BREAKS = 2;
     const NO_EMAILS = 4;
+    const NO_INSERTTAGS = 8;
+    const NO_ENTITIES = 16;
 
 
     /**
@@ -115,10 +115,21 @@ class StringUtil
             return $varValue;
         }
 
+        if ($options & static::NO_ENTITIES) {
+            $varValue = \StringUtil::restoreBasicEntities($varValue);
+            $varValue = html_entity_decode($varValue);
+
+            // Convert non-breaking to regular white space
+            $varValue = str_replace("\xC2\xA0", ' ', $varValue);
+
+            // Remove invisible control characters and unused code points
+            $varValue = preg_replace('/[\pC]/u', '', $varValue);
+        }
+
         // Replace friendly email before stripping tags
         if (!($options & static::NO_EMAILS)) {
             $arrEmails = array();
-            preg_match_all('{<.+@.+\.[A-Za-z]{2,6}>}', $varValue, $arrEmails);
+            preg_match_all('{<.+@.+\.[A-Za-z]+>}', $varValue, $arrEmails);
 
             if (!empty($arrEmails[0])) {
                 foreach ($arrEmails[0] as $k => $v) {
@@ -130,6 +141,10 @@ class StringUtil
         // Remove HTML tags but keep line breaks for <br> and <p>
         if ($options & static::NO_TAGS) {
             $varValue = strip_tags(preg_replace('{(?!^)<(br|p|/p).*?/?>\n?(?!$)}is', "\n", $varValue));
+        }
+
+        if ($options & static::NO_INSERTTAGS) {
+            $varValue = strip_insert_tags($varValue);
         }
 
         // Remove line breaks (e.g. for subject)
