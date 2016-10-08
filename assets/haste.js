@@ -28,8 +28,16 @@ Haste.toggleAjaxOperation = function(el, id) {
             }
 
             var iconPath = json.nextIcon;
+
             if (iconPath.indexOf('/') == -1) {
-                iconPath = Contao.script_url + 'system/themes/' + Contao.theme + '/images/' + json.nextIcon;
+                var folder = 'images';
+
+                // Support SVG images in Contao 4
+                if (/\.svg$/i.test(iconPath)) {
+                    folder = 'icons';
+                }
+
+                iconPath = Contao.script_url + 'system/themes/' + Contao.theme + '/' + folder + '/' + json.nextIcon;
             }
 
             image.src = iconPath;
