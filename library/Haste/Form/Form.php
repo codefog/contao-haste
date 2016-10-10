@@ -380,7 +380,7 @@ class Form extends \Controller
             }
 
             // Try to load the default value from bound Model
-            if ($this->objModel !== null) {
+            if (!$arrDca['ignoreModelValue'] && $this->objModel !== null) {
                 $arrDca['value'] = $this->objModel->$strName;
             }
         }
@@ -531,12 +531,14 @@ class Form extends \Controller
         $this->addFormField('FORM_SUBMIT', array(
             'name' => 'FORM_SUBMIT',
             'inputType' => 'hidden',
+            'ignoreModelValue' => true,
             'value' => $this->getFormId()
         ));
 
         $this->addFormField('REQUEST_TOKEN', array(
             'name' => 'REQUEST_TOKEN',
             'inputType' => 'hidden',
+            'ignoreModelValue' => true,
             'value' => REQUEST_TOKEN
         ));
     }
