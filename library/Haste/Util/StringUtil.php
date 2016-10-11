@@ -168,8 +168,9 @@ class StringUtil
      * @param mixed  $varValue
      * @param string $strKey
      * @param array  $arrData
+     * @param string $strPattern
      */
-    public static function flatten($varValue, $strKey, array &$arrData)
+    public static function flatten($varValue, $strKey, array &$arrData, $strPattern = ', ')
     {
         if (is_object($varValue)) {
             return;
@@ -190,6 +191,6 @@ class StringUtil
             }
         }
 
-        $arrData[$strKey] = implode(', ', $arrValues);
+        $arrData[$strKey] = implode($strPattern, $arrValues);
     }
 }
