@@ -26,9 +26,16 @@ abstract class AbstractFrontendModule extends Module
     {
         parent::__construct($objModule, $strColumn);
 
-        foreach ($this->getSerializedProperties() as $name => $forceArray) {
+        foreach ($this->getSerializedProperties() as $k => $name) {
+            $force = true;
+
+            if (is_bool($name)) {
+                $force = $name;
+                $name  = $k;
+            }
+
             if (array_key_exists($name, $this->arrData)) {
-                $this->arrData[$name] = deserialize($this->arrData, $forceArray);
+                $this->arrData[$name] = deserialize($this->arrData[$name], $force);
             }
         }
     }
@@ -85,9 +92,8 @@ abstract class AbstractFrontendModule extends Module
 
     /**
      * An array of serialized properties that will be deserialized on construction.
-     *
-     * Array key should be the property name, and value should be true or false whether
-     * to force array deserialization or not.
+     * If you don't want to control the $forceArray option of deserialize(),
+     * set the property name as key and a boolean value in the array.
      *
      * @return array
      */
