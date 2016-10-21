@@ -38,6 +38,29 @@ class StringUtil
      */
     public static function recursiveReplaceTokensAndTags($strText, $arrTokens, $intTextFlags = 0)
     {
+        $strBuffer = static::doReplaceTokensAndTags($strText, $arrTokens, $intTextFlags);
+
+        // Check if the inserttags have returned a simple token or an insert tag to parse
+        if ((strpos($strBuffer, '##') !== false || strpos($strBuffer, '{{') !== false)
+            && ($strTemp = static::doReplaceTokensAndTags($strBuffer, $arrTokens, $intTextFlags)) !== $strText
+        ) {
+            $strBuffer = $strTemp;
+        }
+
+        return $strBuffer;
+    }
+
+    /**
+     * Do the actual action on replacing simple tokens and insert tags
+     *
+     * @param string $strText
+     * @param array  $arrTokens    Array of Tokens
+     * @param int    $intTextFlags Filters the tokens and the text for a given set of options
+     *
+     * @return string
+     */
+    protected static function doReplaceTokensAndTags($strText, $arrTokens, $intTextFlags = 0)
+    {
         if ($intTextFlags > 0) {
             $arrTokens = static::convertToText($arrTokens, $intTextFlags);
         }
@@ -76,11 +99,6 @@ class StringUtil
 
         // then replace the insert tags
         $strBuffer = \Controller::replaceInsertTags($strBuffer, false);
-
-        // check if the inserttags have returned a simple token or an insert tag to parse
-        if ((strpos($strBuffer, '##') !== false || strpos($strBuffer, '{{') !== false) && $strBuffer != $strText) {
-            $strBuffer = static::recursiveReplaceTokensAndTags($strBuffer, $arrTokens, $intTextFlags);
-        }
 
         // PHP 7 compatibility
         // See #309 (https://github.com/contao/core-bundle/issues/309)
