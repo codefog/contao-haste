@@ -60,16 +60,16 @@ class StringUtil
         $arrOriginal            = array('<', '>');
         $arrReplacement         = array($strTagOpenReplacement, $strTagCloseReplacement);
 
-        $strText = str_replace($arrOriginal, $arrReplacement, $strText);
+        $strBuffer = str_replace($arrOriginal, $arrReplacement, $strText);
 
         // PHP 7 compatibility
         // See #309 (https://github.com/contao/core-bundle/issues/309)
         if (version_compare(VERSION . '.' . BUILD, '3.5.1', '>=')) {
             // first parse the tokens as they might have if-else clauses
-            $strBuffer = \StringUtil::parseSimpleTokens($strText, $arrTokens);
+            $strBuffer = \StringUtil::parseSimpleTokens($strBuffer, $arrTokens);
         } else {
             // first parse the tokens as they might have if-else clauses
-            $strBuffer = \String::parseSimpleTokens($strText, $arrTokens);
+            $strBuffer = \String::parseSimpleTokens($strBuffer, $arrTokens);
         }
 
         $strBuffer = str_replace($arrReplacement, $arrOriginal, $strBuffer);
