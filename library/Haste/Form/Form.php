@@ -926,7 +926,7 @@ class Form extends \Controller
 
         $objObject->action = $this->getFormAction();
         $objObject->formId = $this->getFormId();
-        $objObject->method = $this->getMethod();
+        $objObject->method = strtolower($this->getMethod());
         $objObject->enctype = $this->getEnctype();
         $objObject->widgets = $this->arrWidgets;
         $objObject->valid = $this->isValid();
@@ -959,34 +959,27 @@ class Form extends \Controller
     /**
      * Generate a form and return it as HTML string
      *
+     * @param string|null $templateName The form wrapper template name or null to auto-select (based on Contao version).
+     *
      * @return string
      */
-    public function generate()
+    public function generate($templateName = null)
     {
-        $this->createWidgets();
+        if (null === $templateName) {
+            $templateName = 'form';
 
-        $objTemplate = new \FrontendTemplate('form');
+            try {
+                \TemplateLoader::getPath($templateName, 'html5');
+            } catch (\Exception $e) {
+                $templateName = 'form_wrapper';
+            }
+        }
+
+        $objTemplate = new \FrontendTemplate($templateName);
         $objTemplate->class = 'hasteform_' . $this->getFormId();
-        $objTemplate->tableless = $this->blnTableless;
-        $objTemplate->action = $this->getFormAction();
-        $objTemplate->formId = $this->getFormId();
-        $objTemplate->method = strtolower($this->getMethod());
-        $objTemplate->enctype = $this->getEnctype();
-        $objTemplate->novalidate = $this->generateNoValidate();
         $objTemplate->formSubmit = $this->getFormId();
 
-        /** @type \Widget $objWidget */
-        $arrWidgets = $this->splitHiddenAndVisibleWidgets();
-
-        // Generate hidden form fields
-        foreach ((array) $arrWidgets['hidden'] as $objWidget) {
-            $objTemplate->hidden .= $objWidget->parse();
-        }
-
-        // Generate visible form fields
-        foreach ((array) $arrWidgets['visible'] as $objWidget) {
-            $objTemplate->fields .= $objWidget->parse();
-        }
+        $this->addToTemplate($objTemplate);
 
         return $objTemplate->parse();
     }
