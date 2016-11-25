@@ -129,7 +129,7 @@ class Form extends \Controller
 
         $this->strFormId = $strId;
 
-        if (!in_array($strMethod, array('GET', 'POST'))) {
+        if (!in_array($strMethod, array('GET', 'POST'), true)) {
             throw new \InvalidArgumentException('The method has to be either GET or POST.');
         }
 
@@ -187,7 +187,7 @@ class Form extends \Controller
     public function preserveGetParameters($arrExclude = array())
     {
         foreach ($_GET as $k => $v) {
-            if (in_array($k, $arrExclude)) {
+            if (in_array($k, $arrExclude, false)) {
                 continue;
             }
 
@@ -398,7 +398,7 @@ class Form extends \Controller
 
         // Convert date formats into timestamps
         $rgxp = $arrDca['eval']['rgxp'];
-        if (in_array($rgxp, array('date', 'time', 'datim'))) {
+        if (in_array($rgxp, array('date', 'time', 'datim'), true)) {
             $this->addValidator($strName, function($varValue) use ($rgxp) {
                 if ($varValue != '') {
                     $key = $rgxp . 'Format';
@@ -632,8 +632,6 @@ class Form extends \Controller
             throw new \InvalidArgumentException('Form ID "' . $intId . '" does not exist or has no published fields.');
         }
 
-        $arrFields = array();
-
         while ($objFields->next()) {
             // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
             $strName = $objFields->name ?: 'field_' . $objFields->id;
@@ -831,7 +829,7 @@ class Form extends \Controller
         $this->intState = self::STATE_CLEAN;
 
         if ($this->hasUploads()) {
-            if ($this->getMethod() == 'GET') {
+            if ('GET' === $this->getMethod()) {
                 throw new \RuntimeException('How do you want me to upload your file using GET?');
             }
 
@@ -886,14 +884,14 @@ class Form extends \Controller
                     }
                 }
 
-                // Bind to Model instance
-                if (!$objWidget->hasErrors() && $this->objModel !== null) {
-                    $this->objModel->$strName =  $varValue;
-                }
-
-                // Re-check the status in case a custom validator has added an error
+                /** @noinspection NotOptimalIfConditionsInspection */
                 if ($objWidget->hasErrors()) {
+                    // Re-check the status in case a custom validator has added an error
                     $this->blnValid = false;
+
+                } elseif ($this->objModel !== null) {
+                    // Bind to Model instance
+                    $this->objModel->$strName =  $varValue;
                 }
             }
         }
@@ -1055,7 +1053,7 @@ class Form extends \Controller
             throw new \InvalidArgumentException('You cannot use a numeric form field name.');
         }
 
-        if (in_array($strName, $this->arrFormFields)) {
+        if (in_array($strName, $this->arrFormFields, true)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
         }
     }
