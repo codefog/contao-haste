@@ -12,6 +12,7 @@
 
 namespace Haste\Model;
 
+use Contao\DataContainer;
 use Haste\Haste;
 use Haste\Util\Undo;
 
@@ -346,7 +347,9 @@ class Relations
 
         // Try to find the \DataContainer instance (see #37)
         foreach (func_get_args() as $arg) {
-            if ($arg instanceof \DataContainer) {
+            if ($arg instanceof \DataContainer
+                || $arg instanceof DataContainer
+            ) {
                 $dc = $arg;
                 break;
             }
