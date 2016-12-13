@@ -31,26 +31,21 @@ class Url
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
-        $queries = explode('&', $strQueryString);
+        parse_str($strQueryString, $queries);
 
-        // Overwrite existing parameters and ignore "language", see #64
-        foreach ($queries as $k => $v) {
-            $explode = explode('=', $v, 2);
-
-            if ($v === '' || $k === 'language' || preg_match('/(^|&(amp;)?)' . preg_quote($explode[0], '/') . '=/i', $strQuery)) {
-                unset($queries[$k]);
-            }
-        }
+        $queries = array_filter($queries);
+        unset($queries['language']);
 
         $href = '';
 
         if (!empty($queries)) {
-            $href = '?' . implode('&', $queries) . '&';
+            parse_str($strQuery, $new);
+            $href = '?' . http_build_query(array_merge($queries, $new));
         } elseif (!empty($strQuery)) {
-            $href = '?';
+            $href = '?' . $strQuery;
         }
 
-        return $strScript . $href . $strQuery;
+        return $strScript . $href;
     }
 
     /**
@@ -69,21 +64,15 @@ class Url
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
-        $queries = explode('&', $strQueryString);
+        parse_str($strQueryString, $queries);
 
-        // Remove given parameters
-        foreach ($queries as $k => $v) {
-            $explode = explode('=', $v, 2);
-
-            if ($v === '' || in_array($explode[0], $arrParams)) {
-                unset($queries[$k]);
-            }
-        }
+        $queries = array_filter($queries);
+        $queries = array_diff_key($queries, array_flip($arrParams));
 
         $href = '';
 
         if (!empty($queries)) {
-            $href .= '?' . implode('&', $queries);
+            $href .= '?' . http_build_query($queries);
         }
 
         return $strScript . $href;
