@@ -102,13 +102,14 @@ class Format
     /**
      * Format DCA field value according to Contao Core standard
      *
-     * @param string $strTable
-     * @param string $strField
-     * @param mixed $varValue
+     * @param string              $strTable
+     * @param string              $strField
+     * @param mixed               $varValue
+     * @param \DataContainer|null $objDc
      *
      * @return mixed
      */
-    public static function dcaValue($strTable, $strField, $varValue)
+    public static function dcaValue($strTable, $strField, $varValue, \DataContainer $objDc = null)
     {
         \System::loadLanguageFile($strTable);
         \Controller::loadDataContainer($strTable);
@@ -119,30 +120,41 @@ class Format
             $arrField['name'] = $strField;
         }
 
-        return static::dcaValueFromArray($arrField, $varValue);
+        return static::dcaValueFromArray($arrField, $varValue, $objDc);
     }
 
     /**
      * Format field value according to Contao Core standard
      *
-     * @param array $arrField
-     * @param       $varValue
+     * @param array               $arrField
+     * @param                     $varValue
+     * @param \DataContainer|null $objDc
      *
      * @return mixed
      */
-    public static function dcaValueFromArray(array $arrField, $varValue)
+    public static function dcaValueFromArray(array $arrField, $varValue, \DataContainer $objDc = null)
     {
         $varValue = deserialize($varValue);
 
-        // Get field value
-        if (strlen($arrField['foreignKey'])) {
-            $chunks = explode('.', $arrField['foreignKey']);
-            $varValue = empty($varValue) ? array(0) : $varValue;
-            $objKey = \Database::getInstance()->execute("SELECT " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $varValue)) . ")");
+        if (is_array($arrField['options_callback'])) { // Options callback (array)
 
-            return implode(', ', $objKey->fetchEach('value'));
+            $arrCallback = $arrField['options_callback'];
+            $arrField['options'] = \System::importStatic($arrCallback[0])->{$arrCallback[1]}($objDc);
 
-        } elseif (is_array($varValue)) {
+        } elseif (is_callable($arrField['options_callback'])) { // Options callback (callable)
+            $arrField['options'] = $arrField['options_callback']($objDc);
+
+        } elseif (isset($arrField['foreignKey'])) { // foreignKey
+            $chunks = explode('.', $arrField['foreignKey'], 2);
+            $objOptions = \Database::getInstance()->query("SELECT id, " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $varValue)) . ")");
+            $arrField['options'] = array();
+
+            while ($objOptions->next()) {
+                $arrField['options'][$objOptions->id] = $objOptions->value;
+            }
+        }
+
+        if (is_array($varValue)) {
             foreach ($varValue as $kk => $vv) {
                 $varValue[$kk] = static::dcaValueFromArray($arrField, $vv);
             }

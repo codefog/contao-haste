@@ -129,12 +129,12 @@ class NumberTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(1309999760, Number::create('13.0999.976')->getAmount());
         $this->assertSame(1309999760, Number::create('13\'0999.976')->getAmount());
         $this->assertSame(1309999760, Number::create(130999.976)->getAmount());
-        $this->assertSame(1309999799, Number::create(130999.97999999)->getAmount());
+        $this->assertSame(1309999799, Number::create(130999.979999)->getAmount());
     }
 
     /**
      * @dataProvider createExceptionProvider
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      */
     public function testCreateExceptions($data)
     {

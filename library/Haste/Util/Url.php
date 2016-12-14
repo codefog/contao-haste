@@ -31,33 +31,30 @@ class Url
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
-        $queries = explode('&', $strQueryString);
+        parse_str($strQueryString, $queries);
 
-        // Overwrite existing parameters and ignore "language", see #64
-        foreach ($queries as $k => $v) {
-            $explode = explode('=', $v, 2);
-
-            if ($v === '' || $k === 'language' || preg_match('/(^|&(amp;)?)' . preg_quote($explode[0], '/') . '=/i', $strQuery)) {
-                unset($queries[$k]);
-            }
-        }
+        $queries = array_filter($queries);
+        unset($queries['language']);
 
         $href = '';
 
         if (!empty($queries)) {
-            $href = '?' . implode('&', $queries) . '&';
+            parse_str($strQuery, $new);
+            $href = '?' . http_build_query(array_merge($queries, $new));
         } elseif (!empty($strQuery)) {
-            $href = '?';
+            $href = '?' . $strQuery;
         }
 
-        return $strScript . $href . $strQuery;
+        return $strScript . $href;
     }
 
     /**
      * Remove query parameters from the current URL
-     * @param   array
-     * @param   mixed
-     * @return  string
+     *
+     * @param array           $arrParams
+     * @param string|int|null $varUrl
+     *
+     * @return string
      */
     public static function removeQueryString(array $arrParams, $varUrl=null)
     {
@@ -69,13 +66,39 @@ class Url
 
         list($strScript, $strQueryString) = explode('?', $strUrl, 2);
 
-        $queries = explode('&', $strQueryString);
+        parse_str($strQueryString, $queries);
 
-        // Remove given parameters
+        $queries = array_filter($queries);
+        $queries = array_diff_key($queries, array_flip($arrParams));
+
+        $href = '';
+
+        if (!empty($queries)) {
+            $href .= '?' . http_build_query($queries);
+        }
+
+        return $strScript . $href;
+    }
+
+    /**
+     * Remove query parameters from the current URL using a callback method.
+     *
+     * @param callable        $callback
+     * @param string|int|null $varUrl
+     *
+     * @return string
+     */
+    public static function removeQueryStringCallback(callable $callback, $varUrl=null)
+    {
+        $strUrl = static::prepareUrl($varUrl);
+
+        list($strScript, $strQueryString) = explode('?', $strUrl, 2);
+
+        parse_str($strQueryString, $queries);
+
+        // Cannot use array_filter because flags ARRAY_FILTER_USE_BOTH is only supported in PHP 5.6
         foreach ($queries as $k => $v) {
-            $explode = explode('=', $v, 2);
-
-            if ($v === '' || in_array($explode[0], $arrParams)) {
+            if (true !== call_user_func($callback, $v, $k)) {
                 unset($queries[$k]);
             }
         }
@@ -83,7 +106,7 @@ class Url
         $href = '';
 
         if (!empty($queries)) {
-            $href .= '?' . implode('&', $queries);
+            $href .= '?' . http_build_query($queries);
         }
 
         return $strScript . $href;
@@ -91,8 +114,10 @@ class Url
 
     /**
      * Prepare URL from ID and keep query string from current string
-     * @param   mixed
-     * @return  string
+     *
+     * @param string|int|null
+     *
+     * @return string
      */
     protected static function prepareUrl($varUrl)
     {
