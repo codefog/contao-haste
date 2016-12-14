@@ -35,6 +35,21 @@ class UrlTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expectedResult, Url::removeQueryString($paramsToRemove, $request));
     }
 
+    /**
+     * @dataProvider removeQueryStringProvider
+     */
+    public function testRemoveQueryStringCallback($request, $paramsToRemove, $expectedResult)
+    {
+        $actualResult = Url::removeQueryStringCallback(
+            function ($value, $key) use ($paramsToRemove) {
+                return !in_array($key, $paramsToRemove, true);
+            },
+            $request
+        );
+
+        $this->assertSame($expectedResult, $actualResult);
+    }
+
 
     public function addQueryStringProvider()
     {
