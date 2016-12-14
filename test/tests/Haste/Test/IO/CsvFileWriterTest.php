@@ -21,9 +21,7 @@ use Haste\IO\Writer\CsvFileWriter;
 
 class CsvFileWriterTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $tempFile;
-
 
     public function setUp()
     {
@@ -33,27 +31,25 @@ class CsvFileWriterTest extends \PHPUnit_Framework_TestCase
         $this->tempFile = basename($file);
     }
 
-
     /**
      * @dataProvider arrayDataProvider
      */
     public function testArrayData(array $testData, $delimiter, $expectedResult)
     {
-        $objReader = new \Haste\IO\Reader\ArrayReader($testData);
+        $objReader = new ArrayReader($testData);
 
-        $objWriter = new \Haste\IO\Writer\CsvFileWriter($this->tempFile);
+        $objWriter = new CsvFileWriter($this->tempFile);
         $objWriter->setDelimiter($delimiter);
         $objWriter->writeFrom($objReader);
 
         $this->assertEquals($expectedResult, file_get_contents(TL_ROOT . '/' . $this->tempFile));
     }
 
-
     public function arrayDataProvider()
     {
         return array(
             // Empty values
-            array(array(), ''),
+            array(array(), '', null),
 
             // Comma separated
             array(
