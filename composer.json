@@ -38,7 +38,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-develop": "4.13.x-dev"
+            "dev-develop": "4.15.x-dev"
         },
         "contao": {
             "sources": {
