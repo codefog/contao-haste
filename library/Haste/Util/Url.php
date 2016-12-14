@@ -50,9 +50,11 @@ class Url
 
     /**
      * Remove query parameters from the current URL
-     * @param   array
-     * @param   mixed
-     * @return  string
+     *
+     * @param array           $arrParams
+     * @param string|int|null $varUrl
+     *
+     * @return string
      */
     public static function removeQueryString(array $arrParams, $varUrl=null)
     {
@@ -112,8 +114,10 @@ class Url
 
     /**
      * Prepare URL from ID and keep query string from current string
-     * @param   mixed
-     * @return  string
+     *
+     * @param string|int|null
+     *
+     * @return string
      */
     protected static function prepareUrl($varUrl)
     {
