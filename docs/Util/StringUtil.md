@@ -38,7 +38,7 @@ $data  = array();
 
 // Result
 $data = array(
-    'prefix_foo' => 'bar'
+    'prefix_foo' => 'bar',
     'prefix' => '',
 );
 ```
