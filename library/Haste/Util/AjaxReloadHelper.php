@@ -1,0 +1,193 @@
+<?php
+
+namespace Haste\Util;
+
+use Contao\ContentModel;
+use Contao\Controller;
+use Contao\ModuleModel;
+use Haste\Http\Response\JsonResponse;
+use Haste\Http\Response\Response;
+
+class AjaxReloadHelper
+{
+    /**
+     * Content element listeners
+     * @var array
+     */
+    private static $elements = [];
+
+    /**
+     * Module listeners
+     * @var array
+     */
+    private static $modules = [];
+
+    /**
+     * Subscribe the content element
+     *
+     * @param int    $id
+     * @param array  $events
+     * @param string $inColumn
+     */
+    public static function subscribeContentElement($id, array $events, $inColumn = 'main')
+    {
+        $id = (int)$id;
+
+        foreach ($events as $event) {
+            if (!static::$elements[$event][$id]) {
+                static::$elements[$event][$id] = ['id' => $id, 'column' => $inColumn];
+            }
+        }
+    }
+
+    /**
+     * Subscribe the frontend module
+     *
+     * @param int    $id
+     * @param array  $events
+     * @param string $inColumn
+     */
+    public static function subscribeFrontendModule($id, array $events, $inColumn = 'main')
+    {
+        $id = (int)$id;
+
+        foreach ($events as $event) {
+            if (!static::$modules[$event][$id]) {
+                static::$modules[$event][$id] = ['id' => $id, 'column' => $inColumn];
+            }
+        }
+    }
+
+    /**
+     * Return true if there are listeners
+     *
+     * @return bool
+     */
+    public static function hasListeners()
+    {
+        return count(static::$modules) > 0 || count(static::$elements) > 0;
+    }
+
+    /**
+     * Dispatch the event
+     *
+     * @param string $event
+     *
+     * @return Response
+     */
+    public static function dispatch($event)
+    {
+        if (!static::$modules[$event] && !static::$elements[$event]) {
+            return new Response('Bad Request', 400);
+        }
+
+        $items = [];
+
+        if (static::$elements[$event]) {
+            foreach (static::$elements[$event] as $id => $element) {
+                $items[] = [
+                    'id'     => 'ce_'.$id,
+                    'buffer' => Controller::getContentElement($element['id'], $element['column']),
+                ];
+            }
+        }
+
+        if (static::$modules[$event]) {
+            foreach (static::$modules[$event] as $id => $module) {
+                $items[] = [
+                    'id'     => 'mod_'.$id,
+                    'buffer' => Controller::getFrontendModule($module['id'], $module['column']),
+                ];
+            }
+        }
+
+        return new JsonResponse($items);
+    }
+
+    /**
+     * Update the frontend module buffer
+     *
+     * @param ModuleModel $model
+     * @param string      $buffer
+     *
+     * @return string
+     */
+    public static function updateFrontendModuleBuffer(ModuleModel $model, $buffer)
+    {
+        $events = [];
+
+        foreach (static::$modules as $event => $modules) {
+            foreach ($modules as $module) {
+                if ($module['id'] === (int)$model->id) {
+                    $events[] = $event;
+                }
+            }
+        }
+
+        if (count($events) > 0) {
+            $buffer = static::addDataAttributes($buffer, 'mod_'.$model->id, $events);
+        }
+
+        return $buffer;
+    }
+
+    /**
+     * Update the content element buffer
+     *
+     * @param ContentModel $model
+     * @param string       $buffer
+     *
+     * @return string
+     */
+    public static function updateContentElementBuffer(ContentModel $model, $buffer)
+    {
+        if ($model->type === 'module' && ($module = ModuleModel::findByPk($model->module)) !== null) {
+            return static::updateFrontendModuleBuffer($module, $buffer);
+        }
+
+        $events = [];
+
+        foreach (static::$elements as $event => $elements) {
+            foreach ($elements as $element) {
+                if ($element['id'] === (int)$model->id) {
+                    $events[] = $event;
+                }
+            }
+        }
+
+        if (count($events) > 0) {
+            $buffer = static::addDataAttributes($buffer, 'ce_'.$model->id, $events);
+        }
+
+        return $buffer;
+    }
+
+    /**
+     * Add the data attributes
+     *
+     * @param string $buffer
+     * @param string $id
+     * @param array  $events
+     *
+     * @return string
+     */
+    private static function addDataAttributes($buffer, $id, array $events)
+    {
+        $dom = new \DOMDocument();
+        $dom->loadHTML($buffer);
+
+        $node = $dom->getElementsByTagName('div')->item(0);
+
+        if ($node !== null) {
+            $attribute        = $dom->createAttribute('data-haste-ajax-id');
+            $attribute->value = $id;
+            $node->appendChild($attribute);
+
+            $attribute        = $dom->createAttribute('data-haste-ajax-listeners');
+            $attribute->value = implode(' ', $events);
+            $node->appendChild($attribute);
+        }
+
+        return $dom->saveHTML($node);
+    }
+}
