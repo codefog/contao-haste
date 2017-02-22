@@ -36,6 +36,10 @@ window.HasteAjax = {
             return;
         }
 
+        for (var key in els) {
+            els[key].className += ' haste-ajax-reloading';
+        }
+
         this.inProgress[event] = true;
 
         var url = window.location.href + (document.location.search ? '&' : '?') + '&haste_ajax_reload=' + event;
