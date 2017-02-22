@@ -21,7 +21,13 @@ class AjaxReloadListener
      */
     public function onGetContentElement(ContentModel $element, $buffer)
     {
-        return ReloadHelper::updateContentElementBuffer($element, $buffer);
+        $buffer = ReloadHelper::updateContentElementBuffer($element, $buffer);
+
+        if (($events = $this->getEvents()) !== null) {
+            ReloadHelper::storeContentElementResponse($events, $element, $buffer);
+        }
+
+        return $buffer;
     }
 
     /**
@@ -34,7 +40,13 @@ class AjaxReloadListener
      */
     public function onGetFrontendModule(ModuleModel $module, $buffer)
     {
-        return ReloadHelper::updateFrontendModuleBuffer($module, $buffer);
+        $buffer = ReloadHelper::updateFrontendModuleBuffer($module, $buffer);
+
+        if (($events = $this->getEvents()) !== null) {
+            ReloadHelper::storeFrontendModuleResponse($events, $module, $buffer);
+        }
+
+        return $buffer;
     }
 
     /**
@@ -42,14 +54,26 @@ class AjaxReloadListener
      */
     public function onGeneratePage()
     {
-        if (!ReloadHelper::hasListeners()) {
-            return;
+        if (($response = ReloadHelper::getResponse()) !== null) {
+            $response->send();
         }
 
-        $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/ajax-reload.min.js');
-
-        if (Environment::get('isAjaxRequest') && ($events = Input::get('haste_ajax_reload'))) {
-            ReloadHelper::dispatch(trimsplit(',', $events))->send();
+        if (ReloadHelper::hasListeners()) {
+            $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/ajax-reload.min.js');
         }
+    }
+
+    /**
+     * Get the events
+     *
+     * @return array|null
+     */
+    private function getEvents()
+    {
+        if (!Environment::get('isAjaxRequest') || !($events = Input::get('haste_ajax_reload'))) {
+            return null;
+        }
+
+        return trimsplit(',', $events);
     }
 }
