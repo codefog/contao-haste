@@ -24,6 +24,7 @@ Haste is a collection of tools and classes to ease working with Contao.
 
 ## Components ##
 
+- [Util/Ajax/ReloadHelper](docs/Ajax/ReloadHelper.md)
 - [Date](docs/Date/index.md)
 - [Dca](docs/Dca/index.md)
 - [Form](docs/Form/Form.md)
@@ -33,7 +34,6 @@ Haste is a collection of tools and classes to ease working with Contao.
 - [IO/Writer/CsvFileWriter](docs/IO/index.md)
 - [Model](docs/Model/index.md)
 - [Units/Mass](docs/Units/Mass.md)
-- [Util/AjaxReloadHelper](docs/Util/AjaxReloadHelper.md)
 - [Util/Debug](docs/Util/Debug.md)
 - [Util/Pagination](docs/Util/Pagination.md)
 - [Util/Undo](docs/Util/Undo.md)

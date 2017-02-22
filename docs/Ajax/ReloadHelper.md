@@ -1,4 +1,4 @@
-# Haste AjaxReloadHelper
+# Haste Ajax\ReloadHelper
 
 This utility class is designed to help handle the ajax reload of frontend modules and content elements.  
 
@@ -9,10 +9,10 @@ First of all you need to subscribe your frontend module or content element to th
 
 ```php
 // Content element
-\Haste\Util\AjaxReloadHelper::subscribeContentElement($this->id, ['foo-event', 'bar-event']);
+\Haste\Ajax\ReloadHelper::subscribeContentElement($this->id, ['foo-event', 'bar-event']);
 
 // Frontend module
-\Haste\Util\AjaxReloadHelper::subscribeFrontendModule($this->id, ['foo-event', 'bar-event']);
+\Haste\Ajax\ReloadHelper::subscribeFrontendModule($this->id, ['foo-event', 'bar-event']);
 ```
 
 Then in your markup you can refresh the subscribed modules by firing the specific event:
@@ -23,7 +23,7 @@ Then in your markup you can refresh the subscribed modules by firing the specifi
 <script>
 document.getElementById('refresh').addEventListener('click', function (e) {
     e.preventDefault();
-    HasteAjax.dispatchEvents('foo-event', 'bar-event');
+    HasteAjaxReload.dispatchEvents('foo-event', 'bar-event');
 });
 </script>
 ```

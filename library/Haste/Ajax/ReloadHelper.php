@@ -1,6 +1,6 @@
 <?php
 
-namespace Haste\Util;
+namespace Haste\Ajax;
 
 use Contao\ContentModel;
 use Contao\Controller;
@@ -8,7 +8,7 @@ use Contao\ModuleModel;
 use Haste\Http\Response\JsonResponse;
 use Haste\Http\Response\Response;
 
-class AjaxReloadHelper
+class ReloadHelper
 {
     /**
      * Content element listeners

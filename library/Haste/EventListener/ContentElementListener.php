@@ -3,7 +3,7 @@
 namespace Haste\EventListener;
 
 use Contao\ContentModel;
-use Haste\Util\AjaxReloadHelper;
+use Haste\Ajax\ReloadHelper;
 
 class ContentElementListener
 {
@@ -17,6 +17,6 @@ class ContentElementListener
      */
     public function onGet(ContentModel $element, $buffer)
     {
-        return AjaxReloadHelper::updateContentElementBuffer($element, $buffer);
+        return ReloadHelper::updateContentElementBuffer($element, $buffer);
     }
 }

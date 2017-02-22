@@ -3,7 +3,7 @@
 namespace Haste\EventListener;
 
 use Contao\ModuleModel;
-use Haste\Util\AjaxReloadHelper;
+use Haste\Ajax\ReloadHelper;
 
 class FrontendModuleListener
 {
@@ -17,6 +17,6 @@ class FrontendModuleListener
      */
     public function onGet(ModuleModel $module, $buffer)
     {
-        return AjaxReloadHelper::updateFrontendModuleBuffer($module, $buffer);
+        return ReloadHelper::updateFrontendModuleBuffer($module, $buffer);
     }
 }

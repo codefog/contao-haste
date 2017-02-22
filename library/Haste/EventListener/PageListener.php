@@ -4,7 +4,7 @@ namespace Haste\EventListener;
 
 use Contao\Environment;
 use Contao\Input;
-use Haste\Util\AjaxReloadHelper;
+use Haste\Ajax\ReloadHelper;
 use Haste\Util\Debug;
 
 class PageListener
@@ -14,14 +14,14 @@ class PageListener
      */
     public function onGenerate()
     {
-        if (!AjaxReloadHelper::hasListeners()) {
+        if (!ReloadHelper::hasListeners()) {
             return;
         }
 
         $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/ajax-reload.min.js');
 
         if (Environment::get('isAjaxRequest') && ($events = Input::get('haste_ajax_reload'))) {
-            AjaxReloadHelper::dispatch(trimsplit(',', $events))->send();
+            ReloadHelper::dispatch(trimsplit(',', $events))->send();
         }
     }
 }

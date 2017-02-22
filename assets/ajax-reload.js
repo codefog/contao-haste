@@ -1,4 +1,4 @@
-window.HasteAjax = {
+window.HasteAjaxReload = {
     elementsInProgress: {},
     eventsInProgress: {},
 
