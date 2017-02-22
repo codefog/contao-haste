@@ -17,7 +17,7 @@ class PageListener
             return;
         }
 
-        $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/haste/assets/ajax-reload.js';
+        $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/haste/assets/ajax-reload.min.js';
 
         if (Environment::get('isAjaxRequest') && ($event = Input::get('haste_ajax_reload'))) {
             AjaxReloadHelper::dispatch($event)->send();
