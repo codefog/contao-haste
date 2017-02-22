@@ -74,7 +74,7 @@ window.HasteAjaxReload = {
                     els[module.id].parentNode.replaceChild(tmp.childNodes[0], els[module.id]);
                 });
             } else {
-                console.error('The request for event "' + event + '" has failed');
+                console.error('The request for events "' + events.join(', ') + '" has failed');
                 console.error(xhr);
             }
 
