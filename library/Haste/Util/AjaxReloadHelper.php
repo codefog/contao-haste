@@ -174,9 +174,15 @@ class AjaxReloadHelper
     private static function addDataAttributes($buffer, $id, array $events)
     {
         $dom = new \DOMDocument();
-        $dom->loadHTML($buffer);
 
-        $node = $dom->getElementsByTagName('div')->item(0);
+        // Temporarily suppress the HTML5 tag errors (such as for <section>)
+        // @see http://stackoverflow.com/a/9149241/3628692
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($buffer);
+        libxml_use_internal_errors(false);
+
+        // Find the first tag
+        $node = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
 
         if ($node !== null) {
             $attribute        = $dom->createAttribute('data-haste-ajax-id');
