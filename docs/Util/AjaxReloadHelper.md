@@ -23,7 +23,7 @@ Then in your markup you can refresh the subscribed modules by firing the specifi
 <script>
 document.getElementById('refresh').addEventListener('click', function (e) {
     e.preventDefault();
-    HasteAjax.fireEvent('foo-event');
+    HasteAjax.dispatchEvents('foo-event', 'bar-event');
 });
 </script>
 ```

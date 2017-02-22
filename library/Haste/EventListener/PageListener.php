@@ -20,8 +20,8 @@ class PageListener
 
         $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/ajax-reload.min.js');
 
-        if (Environment::get('isAjaxRequest') && ($event = Input::get('haste_ajax_reload'))) {
-            AjaxReloadHelper::dispatch($event)->send();
+        if (Environment::get('isAjaxRequest') && ($events = Input::get('haste_ajax_reload'))) {
+            AjaxReloadHelper::dispatch(trimsplit(',', $events))->send();
         }
     }
 }

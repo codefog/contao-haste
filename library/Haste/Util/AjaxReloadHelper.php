@@ -69,39 +69,51 @@ class AjaxReloadHelper
     }
 
     /**
-     * Dispatch the event
+     * Dispatch the events
      *
-     * @param string $event
+     * @param array $events
      *
      * @return Response
      */
-    public static function dispatch($event)
+    public static function dispatch(array $events)
     {
-        if (!static::$modules[$event] && !static::$elements[$event]) {
-            return new Response('Bad Request', 400);
-        }
-
         $items = [];
 
-        if (static::$elements[$event]) {
-            foreach (static::$elements[$event] as $id => $element) {
-                $items[] = [
-                    'id'     => 'ce_'.$id,
-                    'buffer' => Controller::getContentElement($element['id'], $element['column']),
-                ];
+        foreach ($events as $event) {
+            if (!static::$modules[$event] && !static::$elements[$event]) {
+                return new Response(sprintf('The event "%s" is not in the registry', $event), 400);
+            }
+
+            // Generate content elements
+            if (static::$elements[$event]) {
+                foreach (static::$elements[$event] as $id => $element) {
+                    $key = 'ce_'.$id;
+
+                    if (!$items[$key]) {
+                        $items[$key] = [
+                            'id'     => $key,
+                            'buffer' => Controller::getContentElement($element['id'], $element['column']),
+                        ];
+                    }
+                }
+            }
+
+            // Generate frontend modules
+            if (static::$modules[$event]) {
+                foreach (static::$modules[$event] as $id => $module) {
+                    $key = 'mod_'.$id;
+
+                    if (!$items[$key]) {
+                        $items[$key] = [
+                            'id'     => 'mod_'.$id,
+                            'buffer' => Controller::getFrontendModule($module['id'], $module['column']),
+                        ];
+                    }
+                }
             }
         }
 
-        if (static::$modules[$event]) {
-            foreach (static::$modules[$event] as $id => $module) {
-                $items[] = [
-                    'id'     => 'mod_'.$id,
-                    'buffer' => Controller::getFrontendModule($module['id'], $module['column']),
-                ];
-            }
-        }
-
-        return new JsonResponse($items);
+        return new JsonResponse(array_values($items));
     }
 
     /**
