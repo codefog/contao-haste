@@ -2,7 +2,6 @@
 
 namespace Haste\Ajax;
 
-use Contao\ContentModel;
 use Haste\Http\Response\JsonResponse;
 
 class ReloadHelper
@@ -31,7 +30,7 @@ class ReloadHelper
      */
     public static function subscribe($type, $id, array $events)
     {
-        list($type, $id) = static::validateTypeAndId($type, $id);
+        $id = (int)$id;
 
         foreach ($events as $event) {
             if (!static::$listeners[$type][$event] || !in_array($id, static::$listeners[$type][$event], true)) {
@@ -50,7 +49,7 @@ class ReloadHelper
      */
     public static function storeResponse($type, $id, array $events, $buffer)
     {
-        list($type, $id) = static::validateTypeAndId($type, $id);
+        $id = (int)$id;
 
         foreach ($events as $event) {
             if (!static::$listeners[$type][$event]) {
@@ -83,12 +82,11 @@ class ReloadHelper
      */
     public static function updateBuffer($type, $id, $buffer)
     {
-        list($type, $id) = static::validateTypeAndId($type, $id);
-
         if (!static::$listeners[$type]) {
             return $buffer;
         }
 
+        $id     = (int)$id;
         $events = [];
 
         foreach (static::$listeners[$type] as $event => $entries) {
@@ -129,24 +127,56 @@ class ReloadHelper
     }
 
     /**
-     * Validate the type and ID
+     * Return true if the listener is registered
+     *
+     * @param string $type
+     * @param int    $id
+     *
+     * @return bool
+     */
+    public static function isRegistered($type, $id)
+    {
+        if (!static::$listeners[$type]) {
+            return false;
+        }
+
+        $id = (int)$id;
+
+        foreach (static::$listeners[$type] as $entries) {
+            if (in_array($id, $entries, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the events
      *
      * @param string $type
      * @param int    $id
      *
      * @return array
+     *
+     * @throws \InvalidArgumentException
      */
-    private static function validateTypeAndId($type, $id)
+    public static function getEvents($type, $id)
     {
-        if ($type === self::TYPE_CONTENT_ELEMENT
-            && ($element = ContentModel::findByPk($id)) !== null
-            && $element->type === 'module'
-        ) {
-            $type = self::TYPE_FRONTEND_MODULE;
-            $id   = (int)$element->module;
+        if (!static::$listeners[$type]) {
+            throw new \InvalidArgumentException(sprintf('The type "%s" is not subscribed', $type));
         }
 
-        return [$type, (int)$id];
+        $events = [];
+        $id     = (int)$id;
+
+        foreach (static::$listeners[$type] as $event => $entries) {
+            if (in_array($id, $entries, true)) {
+                $events[] = $event;
+            }
+        }
+
+        return array_unique($events);
     }
 
     /**
@@ -160,13 +190,22 @@ class ReloadHelper
      */
     private static function addDataAttributes($buffer, $id, array $events)
     {
+        // @todo – merge data attributes
+        // get events from the current buffer
+        // empty all data attributes from the current buffer
+        // add the extracted events to the future buffer
+
         // Remove the HTML comments which break the JS logic
         $buffer = preg_replace('/<!--(.*)-->/', '', $buffer);
 
         // Add the necessary attributes to the first wrapping element
         $buffer = preg_replace(
             '/<([^>!]+)>/',
-            sprintf('<$1 data-haste-ajax-id="%s" data-haste-ajax-listeners="%s">', $id, implode(' ', $events)),
+            sprintf(
+                '<$1 data-haste-ajax-id="%s" data-haste-ajax-listeners="%s">',
+                $id,
+                implode(' ', array_unique($events))
+            ),
             $buffer,
             1
         );

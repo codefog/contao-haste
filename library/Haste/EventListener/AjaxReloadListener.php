@@ -21,6 +21,22 @@ class AjaxReloadListener
      */
     public function onGetContentElement(ContentModel $model, $buffer)
     {
+        // Subscribe the content element if the included frontend module has subscribed itself
+        if ($model->type === 'module'
+            && ReloadHelper::isRegistered(ReloadHelper::TYPE_FRONTEND_MODULE, $model->module)
+        ) {
+            ReloadHelper::subscribe(
+                ReloadHelper::TYPE_CONTENT_ELEMENT,
+                $model->id,
+                ReloadHelper::getEvents(ReloadHelper::TYPE_FRONTEND_MODULE, $model->module)
+            );
+        }
+
+        //
+        if ($model->type === 'alias') {
+            // @todo
+        }
+
         $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $buffer);
 
         if (($events = $this->getEvents()) !== null) {
