@@ -32,9 +32,15 @@ class AjaxReloadListener
             );
         }
 
-        //
-        if ($model->type === 'alias') {
-            // @todo
+        // Subscribe the content element if the included content element has subscribed itself
+        if ($model->type === 'alias'
+            && ReloadHelper::isRegistered(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->cteAlias)
+        ) {
+            ReloadHelper::subscribe(
+                ReloadHelper::TYPE_CONTENT_ELEMENT,
+                $model->id,
+                ReloadHelper::getEvents(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->cteAlias)
+            );
         }
 
         $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $buffer);
