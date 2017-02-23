@@ -25,9 +25,7 @@ window.HasteAjaxReload = {
                 }
             });
 
-            if (!found) {
-                console.warn('There are no eligible elements for event "' + event + '"');
-            } else {
+            if (found) {
                 events.push(event);
             }
         });
