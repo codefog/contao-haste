@@ -180,28 +180,19 @@ class ReloadHelper
      */
     private static function addDataAttributes($buffer, $id, array $events)
     {
-        $dom = new \DOMDocument();
+        // Remove the HTML comments which break the JS logic
+        $buffer = preg_replace('/<!--(.*)-->/', '', $buffer);
 
-        // Temporarily suppress the HTML5 tag errors (such as for <section>)
-        // @see http://stackoverflow.com/a/9149241/3628692
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($buffer);
-        libxml_use_internal_errors(false);
+        // Add the necessary attributes to the first wrapping element
+        $buffer = preg_replace(
+            '/<([^>!]+)>/',
+            sprintf('<$1 data-haste-ajax-id="%s" data-haste-ajax-listeners="%s">', $id, implode(' ', $events)),
+            $buffer,
+            1
+        );
 
-        // Find the first tag
-        $node = $dom->getElementsByTagName('body')->item(0)->childNodes->item(0);
-
-        if ($node !== null) {
-            $attribute        = $dom->createAttribute('data-haste-ajax-id');
-            $attribute->value = $id;
-            $node->appendChild($attribute);
-
-            $attribute        = $dom->createAttribute('data-haste-ajax-listeners');
-            $attribute->value = implode(' ', $events);
-            $node->appendChild($attribute);
-        }
-
-        return $dom->saveHTML($node);
+        // Trim the buffer to avoid JS break
+        return trim($buffer);
     }
 
     /**
