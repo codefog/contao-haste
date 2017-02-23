@@ -3,23 +3,18 @@
 namespace Haste\Ajax;
 
 use Contao\ContentModel;
-use Contao\Model;
-use Contao\ModuleModel;
 use Haste\Http\Response\JsonResponse;
 
 class ReloadHelper
 {
-    /**
-     * Content element listeners
-     * @var array
-     */
-    private static $elements = [];
+    const TYPE_CONTENT_ELEMENT = 'ce';
+    const TYPE_FRONTEND_MODULE = 'fmd';
 
     /**
-     * Module listeners
+     * Listeners
      * @var array
      */
-    private static $modules = [];
+    private static $listeners = [];
 
     /**
      * Response
@@ -28,127 +23,82 @@ class ReloadHelper
     private static $response = [];
 
     /**
-     * Subscribe the content element
+     * Subscribe the listener
      *
-     * @param int   $id
-     * @param array $events
+     * @param string $type
+     * @param int    $id
+     * @param array  $events
      */
-    public static function subscribeContentElement($id, array $events)
+    public static function subscribe($type, $id, array $events)
     {
-        if (($element = ContentModel::findByPk($id)) !== null
-            && $element->type === 'module'
-            && ($module = ModuleModel::findByPk($element->module)) !== null
-        ) {
-            static::subscribeFrontendModule($module->id, $events);
-
-            return;
-        }
-
-        $id = (int)$id;
+        list($type, $id) = static::validateTypeAndId($type, $id);
 
         foreach ($events as $event) {
-            if (!static::$elements[$event] || !in_array($id, static::$elements[$event], true)) {
-                static::$elements[$event][] = $id;
+            if (!static::$listeners[$type][$event] || !in_array($id, static::$listeners[$type][$event], true)) {
+                static::$listeners[$type][$event][] = $id;
             }
         }
     }
 
     /**
-     * Store the content element in the response if applicable
+     * Store the response if applicable
      *
-     * @param array        $events
-     * @param ContentModel $element
-     * @param string       $buffer
+     * @param string $type
+     * @param int    $id
+     * @param array  $events
+     * @param string $buffer
      */
-    public static function storeContentElementResponse(array $events, ContentModel $element, $buffer)
+    public static function storeResponse($type, $id, array $events, $buffer)
     {
-        if ($element->type === 'module' && ($module = ModuleModel::findByPk($element->module)) !== null) {
-            static::storeFrontendModuleResponse($events, $module, $buffer);
+        list($type, $id) = static::validateTypeAndId($type, $id);
 
-            return;
+        foreach ($events as $event) {
+            if (!static::$listeners[$type][$event]) {
+                continue;
+            }
+
+            foreach (static::$listeners[$type][$event] as $v) {
+                $key = static::getKey($type, $id);
+
+                if ($v !== $id || static::$response[$key]) {
+                    continue;
+                }
+
+                static::$response[$key] = [
+                    'id'     => $key,
+                    'buffer' => $buffer,
+                ];
+            }
         }
-
-        static::storeResponse($events, static::$elements, $element, $buffer);
     }
 
     /**
-     * Update the content element buffer
+     * Update the buffer
      *
-     * @param ContentModel $model
-     * @param string       $buffer
+     * @param string $type
+     * @param int    $id
+     * @param string $buffer
      *
      * @return string
      */
-    public static function updateContentElementBuffer(ContentModel $model, $buffer)
+    public static function updateBuffer($type, $id, $buffer)
     {
-        if ($model->type === 'module' && ($module = ModuleModel::findByPk($model->module)) !== null) {
-            return static::updateFrontendModuleBuffer($module, $buffer);
+        list($type, $id) = static::validateTypeAndId($type, $id);
+
+        if (!static::$listeners[$type]) {
+            return $buffer;
         }
 
         $events = [];
 
-        foreach (static::$elements as $event => $elements) {
-            if (in_array((int)$model->id, $elements, true)) {
+        foreach (static::$listeners[$type] as $event => $entries) {
+            if (in_array((int)$id, $entries, true)) {
                 $events[] = $event;
             }
         }
 
         if (count($events) > 0) {
-            $buffer = static::addDataAttributes($buffer, static::getModelKey($model), $events);
-        }
-
-        return $buffer;
-    }
-
-    /**
-     * Subscribe the frontend module
-     *
-     * @param int   $id
-     * @param array $events
-     */
-    public static function subscribeFrontendModule($id, array $events)
-    {
-        $id = (int)$id;
-
-        foreach ($events as $event) {
-            if (!static::$modules[$event] || !in_array($id, static::$modules[$event], true)) {
-                static::$modules[$event][] = $id;
-            }
-        }
-    }
-
-    /**
-     * Store the frontend module in the response if applicable
-     *
-     * @param array       $events
-     * @param ModuleModel $module
-     * @param string      $buffer
-     */
-    public static function storeFrontendModuleResponse(array $events, ModuleModel $module, $buffer)
-    {
-        static::storeResponse($events, static::$modules, $module, $buffer);
-    }
-
-    /**
-     * Update the frontend module buffer
-     *
-     * @param ModuleModel $model
-     * @param string      $buffer
-     *
-     * @return string
-     */
-    public static function updateFrontendModuleBuffer(ModuleModel $model, $buffer)
-    {
-        $events = [];
-
-        foreach (static::$modules as $event => $modules) {
-            if (in_array((int)$model->id, $modules, true)) {
-                $events[] = $event;
-            }
-        }
-
-        if (count($events) > 0) {
-            $buffer = static::addDataAttributes($buffer, static::getModelKey($model), $events);
+            $buffer = static::addDataAttributes($buffer, static::getKey($type, $id), $events);
         }
 
         return $buffer;
@@ -161,7 +111,7 @@ class ReloadHelper
      */
     public static function hasListeners()
     {
-        return count(static::$modules) > 0 || count(static::$elements) > 0;
+        return count(static::$listeners) > 0;
     }
 
     /**
@@ -176,6 +126,27 @@ class ReloadHelper
         }
 
         return new JsonResponse(array_values(static::$response));
+    }
+
+    /**
+     * Validate the type and ID
+     *
+     * @param string $type
+     * @param int    $id
+     *
+     * @return array
+     */
+    private static function validateTypeAndId($type, $id)
+    {
+        if ($type === self::TYPE_CONTENT_ELEMENT
+            && ($element = ContentModel::findByPk($id)) !== null
+            && $element->type === 'module'
+        ) {
+            $type = self::TYPE_FRONTEND_MODULE;
+            $id   = (int)$element->module;
+        }
+
+        return [$type, (int)$id];
     }
 
     /**
@@ -205,59 +176,15 @@ class ReloadHelper
     }
 
     /**
-     * Store the response
+     * Get the key
      *
-     * @param array  $events
-     * @param array  $elements
-     * @param Model  $model
-     * @param string $buffer
-     */
-    private static function storeResponse(array $events, array $elements, Model $model, $buffer)
-    {
-        foreach ($events as $event) {
-            if (!$elements[$event]) {
-                continue;
-            }
-
-            foreach ($elements[$event] as $id) {
-                if ($id !== (int)$model->id) {
-                    continue;
-                }
-
-                $key = static::getModelKey($model);
-
-                if (static::$response[$key]) {
-                    continue;
-                }
-
-                static::$response[$key] = [
-                    'id'     => $key,
-                    'buffer' => $buffer,
-                ];
-            }
-        }
-    }
-
-    /**
-     * Get the model key
-     *
-     * @param Model $model
+     * @param string $type
+     * @param int    $id
      *
      * @return string
-     *
-     * @throws \InvalidArgumentException
      */
-    private static function getModelKey(Model $model)
+    private static function getKey($type, $id)
     {
-        switch (true) {
-            case $model instanceof ContentModel:
-                return 'ce_'.$model->id;
-
-            case $model instanceof ModuleModel:
-                return 'mod_'.$model->id;
-
-            default:
-                throw new \InvalidArgumentException(sprintf('The model "%s" is not supported', get_class($model)));
-        }
+        return $type.$id;
     }
 }

@@ -14,17 +14,17 @@ class AjaxReloadListener
     /**
      * On get the content element
      *
-     * @param ContentModel $element
+     * @param ContentModel $model
      * @param string       $buffer
      *
      * @return string
      */
-    public function onGetContentElement(ContentModel $element, $buffer)
+    public function onGetContentElement(ContentModel $model, $buffer)
     {
-        $buffer = ReloadHelper::updateContentElementBuffer($element, $buffer);
+        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $buffer);
 
         if (($events = $this->getEvents()) !== null) {
-            ReloadHelper::storeContentElementResponse($events, $element, $buffer);
+            ReloadHelper::storeResponse(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $events, $buffer);
         }
 
         return $buffer;
@@ -33,17 +33,17 @@ class AjaxReloadListener
     /**
      * On get the frontend module
      *
-     * @param ModuleModel $module
+     * @param ModuleModel $model
      * @param string      $buffer
      *
      * @return string
      */
-    public function onGetFrontendModule(ModuleModel $module, $buffer)
+    public function onGetFrontendModule(ModuleModel $model, $buffer)
     {
-        $buffer = ReloadHelper::updateFrontendModuleBuffer($module, $buffer);
+        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $buffer);
 
         if (($events = $this->getEvents()) !== null) {
-            ReloadHelper::storeFrontendModuleResponse($events, $module, $buffer);
+            ReloadHelper::storeResponse(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $events, $buffer);
         }
 
         return $buffer;
