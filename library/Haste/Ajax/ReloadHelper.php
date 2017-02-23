@@ -190,13 +190,16 @@ class ReloadHelper
      */
     private static function addDataAttributes($buffer, $id, array $events)
     {
-        $pattern = '/\s?data-haste-ajax-id="[^"]*" data-haste-ajax-listeners="([^"]*)"/';
-
         // Merge the data attributes if already present
-        if (preg_match($pattern, $buffer, $matches)) {
-            $events = array_merge($events, trimsplit(' ', $matches[1]));
-            $buffer = preg_replace($pattern, '', $buffer);
-        }
+        preg_replace_callback(
+            '/\s?data-haste-ajax-id="[^"]*" data-haste-ajax-listeners="([^"]*)"/',
+            function ($matches) use (&$events) {
+                $events = array_merge($events, trimsplit(' ', $matches[1]));
+
+                return '';
+            },
+            $buffer
+        );
 
         // Remove the HTML comments which break the JS logic
         $buffer = preg_replace('/<!--(.*)-->/', '', $buffer);
