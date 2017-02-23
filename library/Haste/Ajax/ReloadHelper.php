@@ -35,6 +35,15 @@ class ReloadHelper
      */
     public static function subscribeContentElement($id, array $events)
     {
+        if (($element = ContentModel::findByPk($id)) !== null
+            && $element->type === 'module'
+            && ($module = ModuleModel::findByPk($element->module)) !== null
+        ) {
+            static::subscribeFrontendModule($module->id, $events);
+
+            return;
+        }
+
         $id = (int)$id;
 
         foreach ($events as $event) {
