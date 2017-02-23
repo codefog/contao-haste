@@ -4,7 +4,6 @@ namespace Haste\EventListener;
 
 use Contao\ContentModel;
 use Contao\Environment;
-use Contao\Input;
 use Contao\ModuleModel;
 use Haste\Ajax\ReloadHelper;
 use Haste\Util\Debug;
@@ -92,7 +91,7 @@ class AjaxReloadListener
      */
     private function getEvents()
     {
-        if (!Environment::get('isAjaxRequest') || !($events = Input::get('haste_ajax_reload'))) {
+        if (!Environment::get('isAjaxRequest') || !($events = $_SERVER['HTTP_HASTE_AJAX_RELOAD'])) {
             return null;
         }
 

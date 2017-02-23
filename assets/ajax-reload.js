@@ -57,11 +57,11 @@
             els[key].className += ' haste-ajax-reloading';
         }
 
-        var url = window.location.href + (document.location.search ? '&' : '?') + 'haste_ajax_reload=' + events.join(',');
         var xhr = new XMLHttpRequest();
 
-        xhr.open('GET', encodeURI(url));
+        xhr.open('GET', encodeURI(window.location.href));
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Haste-Ajax-Reload', events);
 
         xhr.onload = function () {
             if (xhr.status === 200) {
