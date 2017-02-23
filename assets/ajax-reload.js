@@ -66,9 +66,11 @@
         xhr.onload = function () {
             if (xhr.status === 200) {
                 JSON.parse(xhr.responseText).forEach(function (module) {
-                    var tmp = document.createElement('div');
-                    tmp.innerHTML = module.buffer;
-                    els[module.id].parentNode.replaceChild(tmp.childNodes[0], els[module.id]);
+                    if (els[module.id]) {
+                        var tmp = document.createElement('div');
+                        tmp.innerHTML = module.buffer;
+                        els[module.id].parentNode.replaceChild(tmp.childNodes[0], els[module.id]);
+                    }
                 });
             } else {
                 console.error('The request for events "' + events.join(', ') + '" has failed');
