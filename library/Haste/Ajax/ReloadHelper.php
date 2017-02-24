@@ -30,7 +30,7 @@ class ReloadHelper
      */
     public static function subscribe($type, $id, array $events)
     {
-        $id = (int)$id;
+        $id = (int) $id;
 
         foreach ($events as $event) {
             if (!static::$listeners[$type][$event] || !in_array($id, static::$listeners[$type][$event], true)) {
@@ -49,7 +49,7 @@ class ReloadHelper
      */
     public static function storeResponse($type, $id, array $events, $buffer)
     {
-        $id = (int)$id;
+        $id = (int) $id;
 
         foreach ($events as $event) {
             if (!static::$listeners[$type][$event]) {
@@ -86,11 +86,11 @@ class ReloadHelper
             return $buffer;
         }
 
-        $id     = (int)$id;
+        $id     = (int) $id;
         $events = [];
 
         foreach (static::$listeners[$type] as $event => $entries) {
-            if (in_array((int)$id, $entries, true)) {
+            if (in_array((int) $id, $entries, true)) {
                 $events[] = $event;
             }
         }
@@ -140,7 +140,7 @@ class ReloadHelper
             return false;
         }
 
-        $id = (int)$id;
+        $id = (int) $id;
 
         foreach (static::$listeners[$type] as $entries) {
             if (in_array($id, $entries, true)) {
@@ -168,7 +168,7 @@ class ReloadHelper
         }
 
         $events = [];
-        $id     = (int)$id;
+        $id     = (int) $id;
 
         foreach (static::$listeners[$type] as $event => $entries) {
             if (in_array($id, $entries, true)) {
