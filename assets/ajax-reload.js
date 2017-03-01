@@ -71,7 +71,7 @@
                         var tmp = document.createElement('div');
                         tmp.innerHTML = module.buffer;
                         els[module.id].parentNode.replaceChild(tmp.childNodes[0], els[module.id]);
-                        console.log(event + ': ' + module.id);
+
                         // The element is no longer in progress
                         elementsInProgress[module.id] = null;
                     }
