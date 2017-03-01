@@ -8,27 +8,27 @@
  * @link       http://github.com/codefog/contao-haste/
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
-namespace Haste\Units\Dimension;
+namespace Haste\Units\Volume;
 
 /**
  * Class Dimension
  */
-class Dimension implements Measurable
+class Volume implements Measurable
 {
     /**
-     * Dimension amount
-     * @param   float
+     * Volume amount
+     * @param float
      */
     protected $fltValue;
 
     /**
-     * Dimension unit
-     * @param   string
+     * Volume unit
+     * @param string
      */
     protected $strUnit;
 
     /**
-     * Dimension constructor.
+     * Volume constructor.
      *
      * @param $fltValue
      * @param $strUnit
@@ -42,7 +42,7 @@ class Dimension implements Measurable
     /**
      * @return float
      */
-    public function getDimensionValue()
+    public function getVolumeValue()
     {
         return $this->fltValue;
     }
@@ -51,15 +51,15 @@ class Dimension implements Measurable
      * @param bool $ISO
      * @return string
      */
-    public function getDimensionUnit($ISO = false)
+    public function getVolumeUnit($ISO = false)
     {
         return $ISO ? Unit::$arrISO[$this->strUnit] : $this->strUnit;
     }
 
     /**
-     * Create dimension object from timePeriod widget value
-     * @param   mixed
-     * @return  Dimension|null
+     * Create volume object from timePeriod widget value
+     * @param mixed
+     * @return Volume|null
      */
     public static function createFromTimePeriod($arrData)
     {
