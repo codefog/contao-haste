@@ -44,30 +44,28 @@ class ReloadHelper
      *
      * @param string $type
      * @param int    $id
-     * @param array  $events
+     * @param string $event
      * @param string $buffer
      */
-    public static function storeResponse($type, $id, array $events, $buffer)
+    public static function storeResponse($type, $id, $event, $buffer)
     {
+        if (!static::$listeners[$type][$event]) {
+            return;
+        }
+
         $id = (int) $id;
 
-        foreach ($events as $event) {
-            if (!static::$listeners[$type][$event]) {
+        foreach (static::$listeners[$type][$event] as $v) {
+            $key = static::getKey($type, $id);
+
+            if ($v !== $id || static::$response[$key]) {
                 continue;
             }
 
-            foreach (static::$listeners[$type][$event] as $v) {
-                $key = static::getKey($type, $id);
-
-                if ($v !== $id || static::$response[$key]) {
-                    continue;
-                }
-
-                static::$response[$key] = [
-                    'id'     => $key,
-                    'buffer' => $buffer,
-                ];
-            }
+            static::$response[$key] = [
+                'id'     => $key,
+                'buffer' => $buffer,
+            ];
         }
     }
 
