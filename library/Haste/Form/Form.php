@@ -955,6 +955,19 @@ class Form extends \Controller
     }
 
     /**
+     * Get the helper object
+     *
+     * @return \stdClass
+     */
+    public function getHelperObject()
+    {
+        $helper = new \stdClass();
+        $this->addToObject($helper);
+
+        return $helper;
+    }
+
+    /**
      * Generate a form and return it as HTML string
      *
      * @param string|null $templateName The form wrapper template name or null to auto-select (based on Contao version).
