@@ -35,5 +35,5 @@ The utility comes with the library-agnostic JavaScript file that is added to the
 when there is at least one listener registered. 
 
 The frontend module and content element in its markup must have a single wrapper element
-which is usually the case with ```<div>``` container with ```ce_``` or ```mod_``` classes
-but it also works on other wrapping elements such as <section> etc.
+which is usually the case with `<div>` container with `ce_` or `mod_` classes
+but it also works on other wrapping elements such as `<section>` etc.
