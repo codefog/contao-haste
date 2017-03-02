@@ -62,10 +62,7 @@ class ReloadHelper
                 continue;
             }
 
-            static::$response[$key] = [
-                'id'     => $key,
-                'buffer' => $buffer,
-            ];
+            static::$response[$key] = $buffer;
         }
     }
 
@@ -122,7 +119,7 @@ class ReloadHelper
             return null;
         }
 
-        return new JsonResponse(array_values(static::$response));
+        return new JsonResponse(static::$response);
     }
 
     /**

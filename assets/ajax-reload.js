@@ -64,11 +64,13 @@
 
         xhr.onload = function () {
             if (xhr.status === 200) {
-                JSON.parse(xhr.responseText).forEach(function (entry) {
+                var entries = JSON.parse(xhr.responseText);
+
+                Object.keys(entries).forEach(function (id) {
                     // Replace the entry only if it's marked to be updated by this event
-                    if (els[entry.id] && elementsInProgress[entry.id] === event) {
-                        els[entry.id].outerHTML = entry.buffer;
-                        elementsInProgress[entry.id] = null;
+                    if (els[id] && elementsInProgress[id] === event) {
+                        els[id].outerHTML = entries[id];
+                        elementsInProgress[id] = null;
                     }
                 });
             } else {
