@@ -53,7 +53,7 @@
             elementsInProgress[key] = event;
 
             // Add the CSS class
-            els[key].className += ' haste-ajax-reloading';
+            els[key].classList.add('haste-ajax-reloading');
         }
 
         var xhr = new XMLHttpRequest();
