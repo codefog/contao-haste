@@ -64,16 +64,11 @@
 
         xhr.onload = function () {
             if (xhr.status === 200) {
-                JSON.parse(xhr.responseText).forEach(function (module) {
-                    // Replace the module only if it's marked to be updated by this event
-                    if (els[module.id] && elementsInProgress[module.id] === event) {
-                        // Update the DOM
-                        var tmp = document.createElement('div');
-                        tmp.innerHTML = module.buffer;
-                        els[module.id].parentNode.replaceChild(tmp.childNodes[0], els[module.id]);
-
-                        // The element is no longer in progress
-                        elementsInProgress[module.id] = null;
+                JSON.parse(xhr.responseText).forEach(function (entry) {
+                    // Replace the entry only if it's marked to be updated by this event
+                    if (els[entry.id] && elementsInProgress[entry.id] === event) {
+                        els[entry.id].outerHTML = entry.buffer;
+                        elementsInProgress[entry.id] = null;
                     }
                 });
             } else {

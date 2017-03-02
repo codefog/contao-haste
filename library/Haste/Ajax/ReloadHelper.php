@@ -75,10 +75,11 @@ class ReloadHelper
      * @param string $type
      * @param int    $id
      * @param string $buffer
+     * @param bool   $isAjax
      *
      * @return string
      */
-    public static function updateBuffer($type, $id, $buffer)
+    public static function updateBuffer($type, $id, $buffer, $isAjax = false)
     {
         if (!static::$listeners[$type]) {
             return $buffer;
@@ -94,7 +95,7 @@ class ReloadHelper
         }
 
         if (count($events) > 0) {
-            $buffer = static::addDataAttributes($buffer, static::getKey($type, $id), $events);
+            $buffer = static::addDataAttributes($buffer, static::getKey($type, $id), $events, $isAjax);
         }
 
         return $buffer;
@@ -183,10 +184,11 @@ class ReloadHelper
      * @param string $buffer
      * @param string $id
      * @param array  $events
+     * @param bool   $isAjax
      *
      * @return string
      */
-    private static function addDataAttributes($buffer, $id, array $events)
+    private static function addDataAttributes($buffer, $id, array $events, $isAjax = false)
     {
         // Merge the data attributes if already present
         preg_replace_callback(
@@ -199,8 +201,10 @@ class ReloadHelper
             $buffer
         );
 
-        // Remove the HTML comments which break the JS logic
-        $buffer = preg_replace('/<!--(.*)-->/', '', $buffer);
+        // Remove the HTML comments on AJAX request so they don't appear doubled in the DOM
+        if ($isAjax) {
+            $buffer = preg_replace('/<!--(.*)-->/', '', $buffer);
+        }
 
         // Add the necessary attributes to the first wrapping element
         $buffer = preg_replace(

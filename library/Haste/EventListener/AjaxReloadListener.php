@@ -42,9 +42,11 @@ class AjaxReloadListener
             );
         }
 
-        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $buffer);
+        $event  = $this->getEvent();
+        $isAjax = $event !== null;
+        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $buffer, $isAjax);
 
-        if (($event = $this->getEvents()) !== null) {
+        if ($isAjax) {
             ReloadHelper::storeResponse(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $event, $buffer);
         }
 
@@ -61,9 +63,11 @@ class AjaxReloadListener
      */
     public function onGetFrontendModule(ModuleModel $model, $buffer)
     {
-        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $buffer);
+        $event  = $this->getEvent();
+        $isAjax = $event !== null;
+        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $buffer, $isAjax);
 
-        if (($event = $this->getEvents()) !== null) {
+        if ($isAjax) {
             ReloadHelper::storeResponse(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $event, $buffer);
         }
 
@@ -89,7 +93,7 @@ class AjaxReloadListener
      *
      * @return string|null
      */
-    private function getEvents()
+    private function getEvent()
     {
         if (!Environment::get('isAjaxRequest') || !($event = $_SERVER['HTTP_HASTE_AJAX_RELOAD'])) {
             return null;
