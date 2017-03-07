@@ -9,10 +9,19 @@ First of all you need to subscribe your frontend module or content element to th
 
 ```php
 // Content element
-\Haste\Ajax\ReloadHelper::subscribe(\Haste\Ajax\ReloadHelper::TYPE_CONTENT_ELEMENT, $this->id, ['foo-event']);
+\Haste\Ajax\ReloadHelper::subscribe(
+    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_CONTENT_ELEMENT, $this->id),
+    ['foo-event']
+);
 
 // Frontend module
-\Haste\Ajax\ReloadHelper::subscribe(\Haste\Ajax\ReloadHelper::TYPE_FRONTEND_MODULE, $this->id, ['bar-event']);
+\Haste\Ajax\ReloadHelper::subscribe(
+    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_FRONTEND_MODULE, $this->id),
+    ['bar-event']
+);
+
+// Custom
+\Haste\Ajax\ReloadHelper::subscribe('my-unique-id', ['baz-event']);
 ```
 
 Then in your markup you can refresh the subscribed modules by firing the specific event:

@@ -22,32 +22,38 @@ class AjaxReloadListener
     {
         // Subscribe the content element if the included frontend module has subscribed itself
         if ($model->type === 'module'
-            && ReloadHelper::isRegistered(ReloadHelper::TYPE_FRONTEND_MODULE, $model->module)
+            && ReloadHelper::isRegistered(ReloadHelper::getUniqid(ReloadHelper::TYPE_FRONTEND_MODULE, $model->module))
         ) {
             ReloadHelper::subscribe(
-                ReloadHelper::TYPE_CONTENT_ELEMENT,
-                $model->id,
-                ReloadHelper::getEvents(ReloadHelper::TYPE_FRONTEND_MODULE, $model->module)
+                ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id),
+                ReloadHelper::getEvents(ReloadHelper::getUniqid(ReloadHelper::TYPE_FRONTEND_MODULE, $model->module))
             );
         }
 
         // Subscribe the content element if the included content element has subscribed itself
         if ($model->type === 'alias'
-            && ReloadHelper::isRegistered(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->cteAlias)
+            && ReloadHelper::isRegistered(ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->cteAlias))
         ) {
             ReloadHelper::subscribe(
-                ReloadHelper::TYPE_CONTENT_ELEMENT,
-                $model->id,
-                ReloadHelper::getEvents(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->cteAlias)
+                ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id),
+                ReloadHelper::getEvents(ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->cteAlias))
             );
         }
 
         $event  = $this->getEvent();
         $isAjax = $event !== null;
-        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $buffer, $isAjax);
+        $buffer = ReloadHelper::updateBuffer(
+            ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id),
+            $buffer,
+            $isAjax
+        );
 
         if ($isAjax) {
-            ReloadHelper::storeResponse(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id, $event, $buffer);
+            ReloadHelper::storeResponse(
+                ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT_ELEMENT, $model->id),
+                $event,
+                $buffer
+            );
         }
 
         return $buffer;
@@ -65,10 +71,18 @@ class AjaxReloadListener
     {
         $event  = $this->getEvent();
         $isAjax = $event !== null;
-        $buffer = ReloadHelper::updateBuffer(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $buffer, $isAjax);
+        $buffer = ReloadHelper::updateBuffer(
+            ReloadHelper::getUniqid(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id),
+            $buffer,
+            $isAjax
+        );
 
         if ($isAjax) {
-            ReloadHelper::storeResponse(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id, $event, $buffer);
+            ReloadHelper::storeResponse(
+                ReloadHelper::getUniqid(ReloadHelper::TYPE_FRONTEND_MODULE, $model->id),
+                $event,
+                $buffer
+            );
         }
 
         return $buffer;

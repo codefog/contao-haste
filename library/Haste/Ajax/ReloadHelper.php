@@ -24,17 +24,14 @@ class ReloadHelper
     /**
      * Subscribe the listener
      *
-     * @param string $type
-     * @param int    $id
+     * @param string $id
      * @param array  $events
      */
-    public static function subscribe($type, $id, array $events)
+    public static function subscribe($id, array $events)
     {
-        $id = (int) $id;
-
         foreach ($events as $event) {
-            if (!static::$listeners[$type][$event] || !in_array($id, static::$listeners[$type][$event], true)) {
-                static::$listeners[$type][$event][] = $id;
+            if (!static::$listeners[$event] || !in_array($id, static::$listeners[$event], true)) {
+                static::$listeners[$event][] = $id;
             }
         }
     }
@@ -42,57 +39,46 @@ class ReloadHelper
     /**
      * Store the response if applicable
      *
-     * @param string $type
-     * @param int    $id
+     * @param string $id
      * @param string $event
      * @param string $buffer
      */
-    public static function storeResponse($type, $id, $event, $buffer)
+    public static function storeResponse($id, $event, $buffer)
     {
-        if (!static::$listeners[$type][$event]) {
+        if (!static::$listeners[$event]) {
             return;
         }
 
-        $id = (int) $id;
-
-        foreach (static::$listeners[$type][$event] as $v) {
-            $key = static::getKey($type, $id);
-
-            if ($v !== $id || static::$response[$key]) {
+        foreach (static::$listeners[$event] as $v) {
+            if ($v !== $id || isset(static::$response[$id])) {
                 continue;
             }
 
-            static::$response[$key] = $buffer;
+            static::$response[$id] = $buffer;
         }
     }
 
     /**
      * Update the buffer
      *
-     * @param string $type
-     * @param int    $id
+     * @param string $id
      * @param string $buffer
      * @param bool   $isAjax
      *
      * @return string
      */
-    public static function updateBuffer($type, $id, $buffer, $isAjax = false)
+    public static function updateBuffer($id, $buffer, $isAjax = false)
     {
-        if (!static::$listeners[$type]) {
-            return $buffer;
-        }
-
-        $id     = (int) $id;
         $events = [];
 
-        foreach (static::$listeners[$type] as $event => $entries) {
-            if (in_array((int) $id, $entries, true)) {
+        foreach (static::$listeners as $event => $entries) {
+            if (in_array($id, $entries, true)) {
                 $events[] = $event;
             }
         }
 
         if (count($events) > 0) {
-            $buffer = static::addDataAttributes($buffer, static::getKey($type, $id), $events, $isAjax);
+            $buffer = static::addDataAttributes($buffer, $id, $events, $isAjax);
         }
 
         return $buffer;
@@ -125,20 +111,13 @@ class ReloadHelper
     /**
      * Return true if the listener is registered
      *
-     * @param string $type
-     * @param int    $id
+     * @param string $id
      *
      * @return bool
      */
-    public static function isRegistered($type, $id)
+    public static function isRegistered($id)
     {
-        if (!static::$listeners[$type]) {
-            return false;
-        }
-
-        $id = (int) $id;
-
-        foreach (static::$listeners[$type] as $entries) {
+        foreach (static::$listeners as $entries) {
             if (in_array($id, $entries, true)) {
                 return true;
             }
@@ -150,29 +129,38 @@ class ReloadHelper
     /**
      * Get the events
      *
-     * @param string $type
-     * @param int    $id
+     * @param string $id
      *
      * @return array
-     *
-     * @throws \InvalidArgumentException
      */
-    public static function getEvents($type, $id)
+    public static function getEvents($id)
     {
-        if (!static::$listeners[$type]) {
-            throw new \InvalidArgumentException(sprintf('The type "%s" is not subscribed', $type));
-        }
-
         $events = [];
-        $id     = (int) $id;
 
-        foreach (static::$listeners[$type] as $event => $entries) {
+        foreach (static::$listeners as $event => $entries) {
             if (in_array($id, $entries, true)) {
                 $events[] = $event;
             }
         }
 
         return array_unique($events);
+    }
+
+    /**
+     * Get the unique ID
+     *
+     * @param string $type
+     * @param int    $id
+     *
+     * @return string
+     */
+    public static function getUniqid($type, $id)
+    {
+        if (!in_array($type, [self::TYPE_CONTENT_ELEMENT, self::TYPE_FRONTEND_MODULE], true)) {
+            throw new \InvalidArgumentException(sprintf('The type "%s" is not supported', $type));
+        }
+
+        return $type.$id;
     }
 
     /**
@@ -217,18 +205,5 @@ class ReloadHelper
 
         // Trim the buffer to avoid JS break
         return trim($buffer);
-    }
-
-    /**
-     * Get the key
-     *
-     * @param string $type
-     * @param int    $id
-     *
-     * @return string
-     */
-    private static function getKey($type, $id)
-    {
-        return $type.$id;
     }
 }
