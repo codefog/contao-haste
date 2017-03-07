@@ -6,8 +6,8 @@ use Haste\Http\Response\JsonResponse;
 
 class ReloadHelper
 {
-    const TYPE_CONTENT_ELEMENT = 'ce';
-    const TYPE_FRONTEND_MODULE = 'fmd';
+    const TYPE_CONTENT = 'ce';
+    const TYPE_MODULE = 'fmd';
 
     /**
      * Listeners
@@ -156,7 +156,7 @@ class ReloadHelper
      */
     public static function getUniqid($type, $id)
     {
-        if (!in_array($type, [self::TYPE_CONTENT_ELEMENT, self::TYPE_FRONTEND_MODULE], true)) {
+        if (!in_array($type, [self::TYPE_CONTENT, self::TYPE_MODULE], true)) {
             throw new \InvalidArgumentException(sprintf('The type "%s" is not supported', $type));
         }
 

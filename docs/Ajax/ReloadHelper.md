@@ -10,13 +10,13 @@ First of all you need to subscribe your frontend module or content element to th
 ```php
 // Content element
 \Haste\Ajax\ReloadHelper::subscribe(
-    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_CONTENT_ELEMENT, $this->id),
+    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_CONTENT, $this->id),
     ['foo-event']
 );
 
 // Frontend module
 \Haste\Ajax\ReloadHelper::subscribe(
-    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_FRONTEND_MODULE, $this->id),
+    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_MODULE, $this->id),
     ['bar-event']
 );
 
