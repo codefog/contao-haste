@@ -95,7 +95,7 @@
                 });
 
                 // Dispatch a global custom event
-                document.dispatchEvent(new CustomEvent('haste-ajax-reload-complete', {
+                document.dispatchEvent(new CustomEvent('HasteAjaxReloadComplete', {
                     bubbles: false,
                     cancelable: false,
                     detail: {

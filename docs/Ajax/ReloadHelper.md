@@ -44,7 +44,7 @@ When the helper finishes reloading the elements it will dispatch the global even
 on the current document. You can listen to it like on the below example:  
 
 ```js
-document.addEventListener('haste-ajax-reload-complete', function (event) {
+document.addEventListener('HasteAjaxReloadComplete', function (event) {
     console.log(event.detail);
 });
 ```
