@@ -5,6 +5,7 @@ namespace Haste\EventListener;
 use Contao\ContentModel;
 use Contao\Environment;
 use Contao\ModuleModel;
+use Contao\Template;
 use Haste\Ajax\ReloadHelper;
 use Haste\Util\Debug;
 
@@ -89,16 +90,50 @@ class AjaxReloadListener
     }
 
     /**
-     * On generate the page
+     * On generate the page. Handle the request for entries included in a regular way,
+     * e.g. via page layout or content elements
      */
     public function onGeneratePage()
     {
-        if (($response = ReloadHelper::getResponse()) !== null) {
-            $response->send();
+        $this->sendAvailableResponse();
+    }
+
+    /**
+     * On modify the frontend page. Handle the request for entries included via insert tags,
+     * e.g. via page layout or content elements
+     *
+     * @param string $buffer
+     * @param string $template
+     *
+     * @return string
+     */
+    public function onModifyFrontendPage($buffer, $template)
+    {
+        if (stripos($template, 'fe_') === 0) {
+            $this->sendAvailableResponse();
+
+            if (ReloadHelper::hasListeners()) {
+                $buffer = str_replace(
+                    '</body>',
+                    sprintf(
+                        '<script src="%s"></script></body>',
+                        Debug::uncompressedFile('system/modules/haste/assets/ajax-reload.min.js')
+                    ),
+                    $buffer
+                );
+            }
         }
 
-        if (ReloadHelper::hasListeners()) {
-            $GLOBALS['TL_JAVASCRIPT'][] = Debug::uncompressedFile('system/modules/haste/assets/ajax-reload.min.js');
+        return $buffer;
+    }
+
+    /**
+     * Send the available response, if any
+     */
+    private function sendAvailableResponse()
+    {
+        if (($response = ReloadHelper::getResponse()) !== null) {
+            $response->send();
         }
     }
 

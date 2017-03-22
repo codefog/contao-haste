@@ -33,6 +33,7 @@ $GLOBALS['TL_HOOKS']['getFrontendModule'][]  = ['Haste\EventListener\AjaxReloadL
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Haste\Dca\DateRangeFilter', 'addCallbacks');
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Haste\Dca\AjaxOperations', 'modifyDca');
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Haste\Model\Relations', 'addRelationCallbacks');
+$GLOBALS['TL_HOOKS']['modifyFrontendPage'][] = ['Haste\EventListener\AjaxReloadListener', 'onModifyFrontendPage'];
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][]  = array('Haste\Util\InsertTag', 'replaceHasteInsertTags');
 $GLOBALS['TL_HOOKS']['reviseTable'][]        = array('Haste\Model\Relations', 'reviseRelatedRecords');
 $GLOBALS['TL_HOOKS']['sqlGetFromFile'][]     = array('Haste\Model\Relations', 'addRelationTables');
