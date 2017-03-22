@@ -1,3 +1,19 @@
+// CustomEvent polyfill, see https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
+(function () {
+    if (typeof window.CustomEvent === "function") return false;
+
+    function CustomEvent(event, params) {
+        params = params || {bubbles: false, cancelable: false, detail: undefined};
+        var evt = document.createEvent('CustomEvent');
+        evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+        return evt;
+    }
+
+    CustomEvent.prototype = window.Event.prototype;
+
+    window.CustomEvent = CustomEvent;
+})();
+
 (function () {
     var elementsInProgress = {};
     var eventsInProgress = {};
@@ -64,6 +80,7 @@
 
         xhr.onload = function () {
             if (xhr.status === 200) {
+                var newEls = {};
                 var entries = JSON.parse(xhr.responseText);
 
                 Object.keys(entries).forEach(function (id) {
@@ -71,8 +88,23 @@
                     if (els[id] && elementsInProgress[id] === event) {
                         els[id].outerHTML = entries[id];
                         elementsInProgress[id] = null;
+
+                        // Add new element
+                        newEls[id] = document.querySelector('[data-haste-ajax-id="' + id + '"]');
                     }
                 });
+
+                // Dispatch a global custom event
+                document.dispatchEvent(new CustomEvent('haste-ajax-reload-complete', {
+                    bubbles: false,
+                    cancelable: false,
+                    detail: {
+                        entries: entries,
+                        event: event,
+                        oldElements: els,
+                        newElements: newEls
+                    }
+                }));
             } else {
                 console.error('The request for event "' + event + '" has failed');
                 console.error(xhr);

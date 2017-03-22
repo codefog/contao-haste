@@ -38,6 +38,18 @@ document.getElementById('refresh').addEventListener('click', function (e) {
 ```
 
 
+### Global JavaScript event
+
+When the helper finishes reloading the elements it will dispatch the global event
+on the current document. You can listen to it like on the below example:  
+
+```js
+document.addEventListener('haste-ajax-reload-complete', function (event) {
+    console.log(event.detail);
+});
+```
+
+
 ## Notes
 
 The utility comes with the library-agnostic JavaScript file that is added to the page
