@@ -22,7 +22,7 @@ abstract class AbstractFrontendModule extends Module
      */
     private $wildcard = true;
 
-    public function __construct($objModule, $strColumn)
+    public function __construct($objModule, $strColumn = 'main')
     {
         parent::__construct($objModule, $strColumn);
 
