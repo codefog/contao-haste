@@ -27,7 +27,6 @@ $GLOBALS['BE_FFL']['numberField'] = 'Haste\Number\BackendWidget';
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['executePostActions'][] = array('Haste\Dca\AjaxOperations', 'executePostActions');
-$GLOBALS['TL_HOOKS']['generatePage'][]       = ['Haste\EventListener\AjaxReloadListener', 'onGeneratePage'];
 $GLOBALS['TL_HOOKS']['getContentElement'][]  = ['Haste\EventListener\AjaxReloadListener', 'onGetContentElement'];
 $GLOBALS['TL_HOOKS']['getFrontendModule'][]  = ['Haste\EventListener\AjaxReloadListener', 'onGetFrontendModule'];
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Haste\Dca\DateRangeFilter', 'addCallbacks');

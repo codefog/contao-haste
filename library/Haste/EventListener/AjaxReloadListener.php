@@ -90,15 +90,6 @@ class AjaxReloadListener
     }
 
     /**
-     * On generate the page. Handle the request for entries included in a regular way,
-     * e.g. via page layout or content elements
-     */
-    public function onGeneratePage()
-    {
-        $this->sendAvailableResponse();
-    }
-
-    /**
      * On modify the frontend page. Handle the request for entries included via insert tags,
      * e.g. via page layout or content elements
      *
@@ -110,7 +101,9 @@ class AjaxReloadListener
     public function onModifyFrontendPage($buffer, $template)
     {
         if (stripos($template, 'fe_') === 0) {
-            $this->sendAvailableResponse();
+            if (($response = ReloadHelper::getResponse()) !== null) {
+                $response->send();
+            }
 
             if (ReloadHelper::hasListeners()) {
                 $buffer = str_replace(
@@ -125,16 +118,6 @@ class AjaxReloadListener
         }
 
         return $buffer;
-    }
-
-    /**
-     * Send the available response, if any
-     */
-    private function sendAvailableResponse()
-    {
-        if (($response = ReloadHelper::getResponse()) !== null) {
-            $response->send();
-        }
     }
 
     /**
