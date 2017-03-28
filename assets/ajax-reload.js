@@ -91,6 +91,11 @@
 
                         // Add new element
                         newEls[id] = document.querySelector('[data-haste-ajax-id="' + id + '"]');
+
+                        // Execute the <script> tags inside the new element
+                        Array.from(newEls[id].getElementsByTagName('script')).forEach(function (script) {
+                            eval(script.innerHTML);
+                        });
                     }
                 });
 
