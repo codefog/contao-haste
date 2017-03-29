@@ -136,15 +136,15 @@ class Format
     {
         $varValue = deserialize($varValue);
 
-        if (is_array($arrField['options_callback'])) { // Options callback (array)
+        if (is_array($arrField['options_callback']) && $objDc !== null) { // Options callback (array)
 
             $arrCallback = $arrField['options_callback'];
             $arrField['options'] = \System::importStatic($arrCallback[0])->{$arrCallback[1]}($objDc);
 
-        } elseif (is_callable($arrField['options_callback'])) { // Options callback (callable)
+        } elseif (is_callable($arrField['options_callback']) && $objDc !== null) { // Options callback (callable)
             $arrField['options'] = $arrField['options_callback']($objDc);
 
-        } elseif (isset($arrField['foreignKey'])) { // foreignKey
+        } elseif (isset($arrField['foreignKey']) && $varValue) { // foreignKey
             $chunks = explode('.', $arrField['foreignKey'], 2);
             $objOptions = \Database::getInstance()->query("SELECT id, " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $varValue)) . ")");
             $arrField['options'] = array();
