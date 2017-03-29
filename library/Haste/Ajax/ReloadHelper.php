@@ -45,15 +45,10 @@ class ReloadHelper
      */
     public static function storeResponse($id, $event, $buffer)
     {
-        if (!static::$listeners[$event]) {
-            return;
-        }
-
-        foreach (static::$listeners[$event] as $v) {
-            if ($v !== $id || isset(static::$response[$id])) {
-                continue;
-            }
-
+        if (isset(static::$listeners[$event])
+            && !isset(static::$response[$id])
+            && in_array($id, static::$listeners[$event], true)
+        ) {
             static::$response[$id] = $buffer;
         }
     }
