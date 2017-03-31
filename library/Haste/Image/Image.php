@@ -202,4 +202,252 @@ class Image
         // Return the path to new image
         return $strCacheName;
     }
+
+    /**
+     * Gets a gallery string based on the typical Contao template.
+     *
+     * Possible options keys:
+     *
+     *  - template (default is gallery_default)
+     *
+     * See findImages() for more option keys.
+     *
+     * @param array $options
+     *
+     * @return string
+     */
+    public static function getGallery(array $options)
+    {
+        $images = static::findImages($options);
+
+        if (isset($options['sortBy'])) {
+            static::sortImages($images, $options['sortBy'], $options);
+        }
+
+        $body = [];
+
+        foreach ($images as $k => $image) {
+            $stdClass = $image['templateData'];
+            $stdClass->class = $k % 2 === 0 ? 'odd' : 'even';
+            $body['image'][] = $stdClass;
+        }
+
+        $template = new \FrontendTemplate($options['template'] ?: 'gallery_default');
+        $template->body = $body;
+        return $template->parse();
+    }
+
+    /**
+     * Prepares the data for a typical Contao gallery fetching image data, meta data,
+     * responsive images data etc. based on options.
+     *
+     * Possible options keys:
+     *
+     *  - multiSRC (mutliple UUIDS, either as a serialized string or already as array)
+     *  - singleSRC (one UUID)
+     *  - sortBy (a key specifying the sort options. See sortImages() for options and requirements (some sorting options require more info)
+     *
+     * See prepareImage() for more option keys.
+     *
+     * @param array $options
+     *
+     * return array
+     */
+    public static function findImages(array $options)
+    {
+        $images = [];
+
+        if (isset($options['multiSRC'])) {
+            $files = deserialize($options['multiSRC'], true);
+        } elseif (isset($options['singleSRC'])) {
+            $files = [$options['singleSRC']];
+        } else {
+            throw new \InvalidArgumentException('Need to provide either multiSRC or singleSRC.');
+        }
+
+        $fileModels = \FilesModel::findMultipleByUuids($files);
+
+        if (null === $fileModels) {
+            return [];
+        }
+
+        foreach ($fileModels as $fileModel) {
+            // Single files
+            if ('file' === $fileModel->type) {
+                $file = new \File($fileModel->path, true);
+
+                if (!$file->exists() || !$file->isImage) {
+                    continue;
+                }
+
+                $images[$fileModel->path] = static::prepareImage($fileModel, $options);
+            }
+            // Folders
+            else {
+                $subFileModels = \FilesModel::findByPid($fileModel->uuid);
+
+                if (null === $subFileModels) {
+                    continue;
+                }
+
+                foreach ($subFileModels as $subFileModel) {
+                    if ('file' === $subFileModel->type) {
+                        $file = new \File($subFileModel->path, true);
+
+                        if (!$file->exists() || !$file->isImage) {
+                            continue;
+                        }
+
+                        $images[$subFileModel->path] = static::prepareImage($subFileModel, $options);
+                    }
+                }
+            }
+        }
+
+        return $images;
+    }
+
+    /**
+     * Prepares one image for a typical Contao template.
+     *
+     * Possible option keys:
+     *
+     *  - language (language for meta data. If not specified, the language of the current page object is taken)
+     *  - size (either integer with responsive image configuration ID or an array of three keys whereas 0 = width, 1 = height, 2 = crop mode)
+     *  - fullsize (if provided, adds full size handling)
+     *
+     * @param \FilesModel $fileModel
+     * @param array $options
+     *
+     * return array
+     */
+    public static function prepareImage(\FilesModel $fileModel, array $options)
+    {
+        $file = new \File($fileModel->path, true);
+
+        if (!isset($options['language'])) {
+            global $objPage;
+            $options['language'] = $objPage->language;
+        }
+
+        $meta = \Frontend::getMetaData($fileModel->meta, $options['language']);
+
+        // Use the file name as title if none is given
+        if ('' === $meta['title']) {
+            $meta['title'] = specialchars($file->basename);
+        }
+
+        $image = [
+            'id'        => $fileModel->id,
+            'uuid'      => $fileModel->uuid,
+            'name'      => $file->basename,
+            'singleSRC' => $fileModel->path,
+            'alt'       => $meta['title'],
+            'imageUrl'  => $meta['link'],
+            'caption'   => $meta['caption'],
+            'mtime'     => $file->mtime
+        ];
+
+        foreach (['size', 'fullsize'] as $k) {
+            if (isset($options[$k])) {
+                $image[$k] = $options[$k];
+            }
+        }
+
+        $stdClass = new \stdClass();
+
+        \Controller::addImageToTemplate(
+            $stdClass,
+            $image,
+            isset($options['maxWidth']) ? $options['maxWidth'] : null,
+            isset($options['lightboxId']) ? $options['lightboxId'] : null
+        );
+
+        $image['templateData'] = $stdClass;
+
+        return $image;
+    }
+
+    /**
+     * Sort an array of images based on the "prepareImage" format.
+     *
+     * Available sorting options:
+     *
+     *  - name_asc (sort by name, ascending)
+     *  - name_desc (sort by name, descending)
+     *  - date_asc (sort by date, ascending | needs the mtimes options key)
+     *  - date_desc (sort by date, descending | needs the mtimes options key)
+     *  - custom (sort by custom order | needs the orderSRC options key)
+     *  - random (sort randomly)
+     *
+     * Possible options keys:
+     *
+     *  - orderSRC (mutliple UUIDS, either as a serialized string or already as array containing the UUIDs in correct order)
+     *
+     * @param array  $images Array of images to sort
+     * @param string $sortBy Sort by key
+     * @param array  $options
+     */
+    public static function sortImages(array &$images, $sortBy = 'name_asc', array $options = [])
+    {
+        switch ($sortBy) {
+            case 'name_asc':
+            case 'name_desc':
+                uksort($images, function($a, $b) use ($sortBy) {
+                    $cmp = strnatcasecmp(basename($a), basename($b));
+
+                    if ('name_desc' === $sortBy) {
+                        $cmp = $cmp * -1;
+                    }
+
+                    return $cmp;
+                });
+                break;
+
+            case 'date_asc':
+            case 'date_desc':
+                usort($images, function($a, $b) use ($sortBy) {
+                    $cmp = $a['mtime'] > $b['mtime'];
+
+                    if ('date_desc' === $sortBy) {
+                        $cmp = $cmp * -1;
+                    }
+
+                    return $cmp;
+                });
+                break;
+
+            case 'custom':
+                if (!isset($options['orderSRC'])) {
+                    throw new \InvalidArgumentException('When sorting by custom order, you need to provide the "orderSRC" array option containing the UUIDs in correct order.');
+                }
+
+                $order = deserialize($options['orderSRC'], true);
+
+                // Remove all values
+                $order = array_map(function () {}, array_flip($order));
+
+                // Move the matching elements to their position in $arrOrder
+                foreach ($images as $k=>$v) {
+                    if (array_key_exists($v['uuid'], $order)) {
+                        $order[$v['uuid']] = $v;
+                        unset($images[$k]);
+                    }
+                }
+
+                // Append the left-over images at the end
+                if (0 !== count($images)) {
+                    $order = array_merge($order, array_values($images));
+                }
+
+                // Remove empty (unreplaced) entries
+                $images = array_values(array_filter($order));
+                unset($order);
+                break;
+
+            case 'random':
+                shuffle($images);
+                break;
+        }
+    }
 }
