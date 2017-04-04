@@ -21,7 +21,7 @@
     },
     "require-dev": {
         "terminal42/contao-namespace-class-loader": "~1.0",
-        "phpunit/phpunit": "^4.8@dev"
+        "phpunit/phpunit": "4.8.*"
     },
     "replace": {
         "contao-legacy/haste": "self.version"
@@ -37,9 +37,6 @@
         }
     },
     "extra": {
-        "branch-alias": {
-            "dev-develop": "4.15.x-dev"
-        },
         "contao": {
             "sources": {
                 "": "system/modules/haste"
