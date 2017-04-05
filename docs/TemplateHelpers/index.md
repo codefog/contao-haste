@@ -2,9 +2,9 @@
 
 Haste provides helpers for common stuff that needs to be done in templates.
 All of Haste's template helpers can be accessed in **every** template via
-the `$this->hasteTemplateHelpers` helper object so they are grouped.
+the `$this->haste` helper object so they are grouped.
 We'll document the methods in the following section, each of the methods can thus
-be called by using `$this->hasteTemplateHelpers-><method>(<arguments ...>)`.
+be called by using `$this->haste-><method>(<arguments ...>)`.
 
 ## Image handling
 
@@ -93,7 +93,7 @@ in correct order. Your template is now nice an short because it contains only th
 
 ```
 <div class="my-gallery">
-<?= $this->hasteTemplateHelpers->getGallery([
+<?= $this->haste->getGallery([
  	'multiSRC' => $this->gallery,
  	'sortBy' => 'custom',
  	'orderSRC' => $this->gallery_order,

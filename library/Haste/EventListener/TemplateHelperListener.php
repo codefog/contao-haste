@@ -19,6 +19,6 @@ class TemplateHelperListener
      */
     public function onParseTemplate(\Template $template)
     {
-        $template->hasteTemplateHelpers = new TemplateHelpers();
+        $template->haste = new TemplateHelpers();
     }
 }
