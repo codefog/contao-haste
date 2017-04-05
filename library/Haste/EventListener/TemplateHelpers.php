@@ -20,12 +20,12 @@ class TemplateHelpers
      * Magic __call method. Only here because stdClass supports direct __call()
      * only as of PHP7.
      *
-     * @param $method
-     * @param $args
+     * @param string $method
+     * @param array $args
      *
      * @return mixed
      */
-    public function __call($method, $args)
+    public function __call($method, array $args)
     {
         switch ($method) {
             case 'getGallery':
