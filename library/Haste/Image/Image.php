@@ -14,6 +14,12 @@ namespace Haste\Image;
 
 class Image
 {
+    const SORT_NAME_ASC = 'name_asc';
+    const SORT_NAME_DESC = 'name_desc';
+    const SORT_DATE_ASC = 'date_asc';
+    const SORT_DATE_DESC = 'date_desc';
+    const SORT_CUSTOM = 'custom';
+    const SORT_RANDOM = 'random';
 
     /**
      * Apply a watermark to an image
@@ -204,21 +210,16 @@ class Image
     }
 
     /**
-     * Gets a gallery string based on the typical Contao template.
+     * Gets an array for a Contao gallery in the "gallery_default" style.
      *
-     * Possible options keys:
+     * @param array|string $uuids Either an array of UUIDs or a serialized array of UUIDs
+     * @param array $options      Options for the prepareImage() and sortImages() methods
      *
-     *  - template (default is gallery_default)
-     *
-     * See findImages() for more option keys.
-     *
-     * @param array $options
-     *
-     * @return string
+     * @return array
      */
-    public static function getGallery(array $options)
+    public static function getForGalleryTemplate($uuids, array $options)
     {
-        $images = static::findImages($options);
+        $images = static::findImages($uuids, $options);
 
         if (isset($options['sortBy'])) {
             static::sortImages($images, $options['sortBy'], $options);
@@ -232,38 +233,25 @@ class Image
             $body['image'][] = $stdClass;
         }
 
-        $template = new \FrontendTemplate($options['template'] ?: 'gallery_default');
-        $template->body = $body;
-        return $template->parse();
+        return [
+            'body' => $body,
+        ];
     }
 
     /**
      * Prepares the data for a typical Contao gallery fetching image data, meta data,
      * responsive images data etc. based on options.
      *
-     * Possible options keys:
-     *
-     *  - multiSRC (mutliple UUIDS, either as a serialized string or already as array)
-     *  - singleSRC (one UUID)
-     *  - sortBy (a key specifying the sort options. See sortImages() for options and requirements (some sorting options require more info)
-     *
-     * See prepareImage() for more option keys.
-     *
-     * @param array $options
+     * @param array|string $uuids Either an array of UUIDs or a serialized array of UUIDs
+     * @param array $options      Options for the prepareImage() method
      *
      * return array
      */
-    public static function findImages(array $options)
+    public static function findImages($uuids, array $options)
     {
         $images = [];
 
-        if (isset($options['multiSRC'])) {
-            $files = deserialize($options['multiSRC'], true);
-        } elseif (isset($options['singleSRC'])) {
-            $files = [$options['singleSRC']];
-        } else {
-            throw new \InvalidArgumentException('Need to provide either multiSRC or singleSRC.');
-        }
+        $files = deserialize($uuids, true);
 
         $fileModels = \FilesModel::findMultipleByUuids($files);
 
@@ -371,32 +359,32 @@ class Image
     /**
      * Sort an array of images based on the "prepareImage" format.
      *
-     * Available sorting options:
+     * Available sorting options (use the class constants!):
      *
-     *  - name_asc (sort by name, ascending)
-     *  - name_desc (sort by name, descending)
-     *  - date_asc (sort by date, ascending | needs the mtimes options key)
-     *  - date_desc (sort by date, descending | needs the mtimes options key)
-     *  - custom (sort by custom order | needs the orderSRC options key)
-     *  - random (sort randomly)
+     *  - \Haste\Image\Image::SORT_NAME_ASC (sort by name, ascending)
+     *  - \Haste\Image\Image::SORT_NAME_DESC (sort by name, descending)
+     *  - \Haste\Image\Image::SORT_DATE_ASC (sort by date, ascending)
+     *  - \Haste\Image\Image::SORT_DATE_DESC (sort by date, descending)
+     *  - \Haste\Image\Image::SORT_CUSTOM | needs the orderSRC options key)
+     *  - \Haste\Image\Image::SORT_RANDOM (sort randomly)
      *
      * Possible options keys:
      *
-     *  - orderSRC (mutliple UUIDS, either as a serialized string or already as array containing the UUIDs in correct order)
+     *  - orderSRC (multiple UUIDS, either as a serialized string or already as array containing the UUIDs in correct order)
      *
      * @param array  $images Array of images to sort
      * @param string $sortBy Sort by key
      * @param array  $options
      */
-    public static function sortImages(array &$images, $sortBy = 'name_asc', array $options = [])
+    public static function sortImages(array &$images, $sortBy = self::SORT_NAME_ASC, array $options = [])
     {
         switch ($sortBy) {
-            case 'name_asc':
-            case 'name_desc':
+            case static::SORT_NAME_ASC:
+            case static::SORT_NAME_DESC:
                 uksort($images, function($a, $b) use ($sortBy) {
                     $cmp = strnatcasecmp(basename($a), basename($b));
 
-                    if ('name_desc' === $sortBy) {
+                    if (static::SORT_NAME_DESC === $sortBy) {
                         $cmp = $cmp * -1;
                     }
 
@@ -404,12 +392,12 @@ class Image
                 });
                 break;
 
-            case 'date_asc':
-            case 'date_desc':
+            case static::SORT_DATE_ASC:
+            case static::SORT_DATE_DESC:
                 usort($images, function($a, $b) use ($sortBy) {
                     $cmp = $a['mtime'] > $b['mtime'];
 
-                    if ('date_desc' === $sortBy) {
+                    if (static::SORT_DATE_DESC === $sortBy) {
                         $cmp = $cmp * -1;
                     }
 
@@ -417,7 +405,7 @@ class Image
                 });
                 break;
 
-            case 'custom':
+            case static::SORT_CUSTOM:
                 if (!isset($options['orderSRC'])) {
                     throw new \InvalidArgumentException('When sorting by custom order, you need to provide the "orderSRC" array option containing the UUIDs in correct order.');
                 }
@@ -445,7 +433,7 @@ class Image
                 unset($order);
                 break;
 
-            case 'random':
+            case static::SORT_RANDOM:
                 shuffle($images);
                 break;
         }
