@@ -12,6 +12,13 @@
 
 namespace Haste\Image;
 
+use Contao\Controller;
+use Contao\File;
+use Contao\Files;
+use Contao\FilesModel;
+use Contao\Frontend;
+use Contao\System;
+
 class Image
 {
     const SORT_NAME_ASC = 'name_asc';
@@ -36,7 +43,7 @@ class Image
             return $image;
         }
 
-        $objFile = new \File($image);
+        $objFile = new File($image);
         $strCacheName = 'assets/images/' . substr($objFile->filename, -1) . '/' . $objFile->filename . '-' . substr(md5($watermark . '-' . $position . '-' . $objFile->mtime), 0, 8) . '.' . $objFile->extension;
 
         // Return the path of the new image if it exists already
@@ -47,7 +54,7 @@ class Image
         // !HOOK: override image watermark routine
         if (isset($GLOBALS['TL_HOOKS']['watermarkImage']) && is_array($GLOBALS['TL_HOOKS']['watermarkImage'])) {
             foreach ($GLOBALS['TL_HOOKS']['watermarkImage'] as $callback) {
-                $objCallback = \System::importStatic($callback[0]);
+                $objCallback = System::importStatic($callback[0]);
                 $return = $objCallback->{$callback[1]}($image, $watermark, $position, $target);
 
                 if (is_string($return)) {
@@ -86,7 +93,7 @@ class Image
             return $image;
         }
 
-        $objWatermark = new \File($watermark);
+        $objWatermark = new File($watermark);
         $resWatermark = null;
 
         // Load watermark
@@ -193,7 +200,7 @@ class Image
 
         // Resize the original image
         if ($target) {
-            $objFiles = \Files::getInstance();
+            $objFiles = Files::getInstance();
             $objFiles->copy($strCacheName, $target);
 
             return $target;
@@ -201,7 +208,7 @@ class Image
 
         // Set the file permissions when the Safe Mode Hack is used
         if ($GLOBALS['TL_CONFIG']['useFTP']) {
-            $objFiles = \Files::getInstance();
+            $objFiles = Files::getInstance();
             $objFiles->chmod($strCacheName, 0644);
         }
 
@@ -253,7 +260,7 @@ class Image
 
         $files = deserialize($uuids, true);
 
-        $fileModels = \FilesModel::findMultipleByUuids($files);
+        $fileModels = FilesModel::findMultipleByUuids($files);
 
         if (null === $fileModels) {
             return [];
@@ -262,7 +269,7 @@ class Image
         foreach ($fileModels as $fileModel) {
             // Single files
             if ('file' === $fileModel->type) {
-                $file = new \File($fileModel->path, true);
+                $file = new File($fileModel->path, true);
 
                 if (!$file->exists() || !$file->isImage) {
                     continue;
@@ -272,7 +279,7 @@ class Image
             }
             // Folders
             else {
-                $subFileModels = \FilesModel::findByPid($fileModel->uuid);
+                $subFileModels = FilesModel::findByPid($fileModel->uuid);
 
                 if (null === $subFileModels) {
                     continue;
@@ -280,7 +287,7 @@ class Image
 
                 foreach ($subFileModels as $subFileModel) {
                     if ('file' === $subFileModel->type) {
-                        $file = new \File($subFileModel->path, true);
+                        $file = new File($subFileModel->path, true);
 
                         if (!$file->exists() || !$file->isImage) {
                             continue;
@@ -304,20 +311,20 @@ class Image
      *  - size (either integer with responsive image configuration ID or an array of three keys whereas 0 = width, 1 = height, 2 = crop mode)
      *  - fullsize (if provided, adds full size handling)
      *
-     * @param \FilesModel $fileModel
+     * @param FilesModel $fileModel
      * @param array $options
      *
      * return array
      */
-    public static function prepareImage(\FilesModel $fileModel, array $options)
+    public static function prepareImage(FilesModel $fileModel, array $options)
     {
-        $file = new \File($fileModel->path, true);
+        $file = new File($fileModel->path, true);
 
         if (!isset($options['language'])) {
             $options['language'] = $GLOBALS['objPage']->language;
         }
 
-        $meta = \Frontend::getMetaData($fileModel->meta, $options['language']);
+        $meta = Frontend::getMetaData($fileModel->meta, $options['language']);
 
         // Use the file name as title if none is given
         if ('' === $meta['title']) {
@@ -343,7 +350,7 @@ class Image
 
         $stdClass = new \stdClass();
 
-        \Controller::addImageToTemplate(
+        Controller::addImageToTemplate(
             $stdClass,
             $image,
             isset($options['maxWidth']) ? $options['maxWidth'] : null,
