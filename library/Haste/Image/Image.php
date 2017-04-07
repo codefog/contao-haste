@@ -314,8 +314,7 @@ class Image
         $file = new \File($fileModel->path, true);
 
         if (!isset($options['language'])) {
-            global $objPage;
-            $options['language'] = $objPage->language;
+            $options['language'] = $GLOBALS['objPage']->language;
         }
 
         $meta = \Frontend::getMetaData($fileModel->meta, $options['language']);
