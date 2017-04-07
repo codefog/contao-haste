@@ -30,6 +30,7 @@ Haste is a collection of tools and classes to ease working with Contao.
 - [Form](docs/Form/Form.md)
 - [Frontend](docs/Frontend/index.md)
 - [Http](docs/Http/index.md)
+- [Image](docs/Image/index.md)
 - [Input](docs/Input/index.md)
 - [IO/Writer/CsvFileWriter](docs/IO/index.md)
 - [Model](docs/Model/index.md)
