@@ -31,6 +31,11 @@ class Relations
      */
     private static $arrFilterableFields = array();
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * Purge cache
      *
