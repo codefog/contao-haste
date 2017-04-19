@@ -37,6 +37,21 @@ document.getElementById('refresh').addEventListener('click', function (e) {
 </script>
 ```
 
+### Custom request headers
+
+To attach your custom headers to the request you may want to provide the event as a plain data object:
+
+```js
+HasteAjaxReload.dispatchEvents(
+    {
+        name: 'foo-event', 
+        headers: {
+            'Content-Type': 'application/json',
+            'X-My-Custom-Header': 'my-custom-value'
+        }
+    }
+);
+```
 
 ### Global JavaScript event
 

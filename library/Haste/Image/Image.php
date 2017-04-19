@@ -348,6 +348,14 @@ class Image
             }
         }
 
+        // If fullsize was activated but no lightbox id provided, we have
+        // to set one because Controller::addImageToTemplate() would generate
+        // one by calling $template->getName() which does not exist on our
+        // stdClass object
+        if ($image['fullsize'] && !isset($options['lightboxId'])) {
+            $options['lightboxId'] = 'lightbox';
+        }
+
         $stdClass = new \stdClass();
 
         Controller::addImageToTemplate(
