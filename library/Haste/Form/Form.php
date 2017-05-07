@@ -820,6 +820,8 @@ class Form extends \Controller
                 $this->blnHasUploads = true;
             }
 
+            $objWidget->class = 'field-'. $strName;
+
             $this->arrWidgets[$strName] = $objWidget;
             $i++;
         }
