@@ -159,7 +159,7 @@ if (!Array.from) {
 
         var xhr = new XMLHttpRequest();
 
-        xhr.open('GET', encodeURI(window.location.href));
+        xhr.open('GET', window.location.href);
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.setRequestHeader('Haste-Ajax-Reload', event.name);
 
