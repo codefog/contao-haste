@@ -352,8 +352,12 @@ class Image
         // to set one because Controller::addImageToTemplate() would generate
         // one by calling $template->getName() which does not exist on our
         // stdClass object
-        if ($image['fullsize'] && !isset($options['lightboxId'])) {
-            $options['lightboxId'] = 'lightbox';
+        if ($image['fullsize']) {
+            if (!isset($options['lightboxId'])) {
+                $options['lightboxId'] = 'lightbox';
+            } else {
+                $options['lightboxId'] = 'lightbox[' . $options['lightboxId'] . ']';
+            }
         }
 
         $stdClass = new \stdClass();
