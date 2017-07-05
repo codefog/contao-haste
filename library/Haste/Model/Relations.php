@@ -640,9 +640,7 @@ class Relations
      */
     public static function getRelation($strTable, $strField)
     {
-        if (!isset($GLOBALS['TL_DCA'][$strTable])) {
-            \Controller::loadDataContainer($strTable);
-        }
+        \Controller::loadDataContainer($strTable);
 
         $strCacheKey = $strTable . '_' . $strField;
 
