@@ -247,8 +247,13 @@ class DateRangeFilter
      */
     private function createDatepickerInputField($name, $value, $rgxp)
     {
-        $datepickerVersion = version_compare(VERSION, '3.3', '<') ? DATEPICKER : $GLOBALS['TL_ASSETS']['DATEPICKER'];
+        $icon = 'assets/datepicker/images/icon.svg';
         $format = \Date::formatToJs($GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+
+        if (version_compare(VERSION, '4.2', '<')) {
+            $icon = sprintf('assets/mootools/datepicker/%s/icon.gif', $GLOBALS['TL_ASSETS']['DATEPICKER']);
+        }
+
         switch ($rgxp) {
             case 'datim':
                 $time = ",\n      timePicker:true";
@@ -264,7 +269,7 @@ class DateRangeFilter
         }
 
         return sprintf('<input id="ctrl_%s" name="%s" class="tl_text%s" value="%s" type="text">
-            <img src="assets/mootools/datepicker/%s/icon.gif" width="20" height="20" alt="" title="%s" id="toggle_%s" style="vertical-align:-6px;cursor:pointer">
+            <img src="%s" width="20" height="20" alt="" title="%s" id="toggle_%s" style="vertical-align:-6px;cursor:pointer">
             <script>
             window.addEvent("domready", function() {
               new Picker.Date($("ctrl_%s"), {
@@ -283,7 +288,7 @@ class DateRangeFilter
             $name,
             ($value) ? ' active' : '',
             $value,
-            $datepickerVersion,
+            $icon,
             specialchars($GLOBALS['TL_LANG']['MSC']['datepicker']),
             $name,
             $name,
