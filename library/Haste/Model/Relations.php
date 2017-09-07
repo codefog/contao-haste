@@ -13,7 +13,6 @@
 namespace Haste\Model;
 
 use Contao\DataContainer;
-use Haste\Haste;
 use Haste\Util\Undo;
 
 class Relations
@@ -23,13 +22,13 @@ class Relations
      * Relations cache
      * @var array
      */
-    private static $arrRelationsCache = array();
+    private static $arrRelationsCache = [];
 
     /**
      * Filterable fields
      * @var array
      */
-    private static $arrFilterableFields = array();
+    private static $arrFilterableFields = [];
 
     /**
      * Purge cache
@@ -41,7 +40,7 @@ class Relations
      *
      * @var array
      */
-    private static $arrPurgeCache = array();
+    private static $arrPurgeCache = [];
 
     /**
      * Cache for "override all" mode
@@ -51,10 +50,11 @@ class Relations
      *
      * @var array
      */
-    private static $overrideAllCache = array();
+    private static $overrideAllCache = [];
 
     /**
      * Add the relation callbacks to DCA
+     *
      * @param string
      */
     public function addRelationCallbacks($strTable)
@@ -76,8 +76,8 @@ class Relations
 
             // Update the field configuration
             $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['doNotSaveEmpty'] = true;
-            $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['load_callback'][] = array('Haste\Model\Relations', 'getRelatedRecords');
-            $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['save_callback'][] = array('Haste\Model\Relations', 'updateRelatedRecords');
+            $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['load_callback'][] = ['Haste\Model\Relations', 'getRelatedRecords'];
+            $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['save_callback'][] = ['Haste\Model\Relations', 'updateRelatedRecords'];
 
             // Use custom filtering
             if ($arrField['filter']) {
@@ -88,17 +88,17 @@ class Relations
 
         // Add global callbacks
         if ($blnCallbacks) {
-            $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'deleteRelatedRecords');
-            $GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'][] = array('Haste\Model\Relations', 'copyRelatedRecords');
+            $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = ['Haste\Model\Relations', 'deleteRelatedRecords'];
+            $GLOBALS['TL_DCA'][$strTable]['config']['oncopy_callback'][] = ['Haste\Model\Relations', 'copyRelatedRecords'];
         }
 
-        $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = array('Haste\Model\Relations', 'cleanRelatedRecords');
+        $GLOBALS['TL_DCA'][$strTable]['config']['ondelete_callback'][] = ['Haste\Model\Relations', 'cleanRelatedRecords'];
 
         // Add filter callbacks
-        if (!empty(static::$arrFilterableFields) && TL_MODE == 'BE') {
-            $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Haste\Model\Relations', 'filterByRelations');
+        if (!empty(static::$arrFilterableFields) && 'BE' === TL_MODE) {
+            $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterByRelations'];
             $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = str_replace('filter', 'haste_filter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout']);
-            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = array('Haste\Model\Relations', 'addRelationFilters');
+            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = ['Haste\Model\Relations', 'addRelationFilters'];
         }
     }
 
@@ -135,7 +135,7 @@ class Relations
             $saveRecords = true;
 
             // Do not save the record again in "override all" mode if it has been saved already
-            if (\Input::get('act') == 'overrideAll') {
+            if ('overrideAll' === \Input::get('act')) {
                 if (in_array($cacheKey, static::$overrideAllCache)) {
                     $saveRecords = false;
                 }
@@ -146,24 +146,28 @@ class Relations
             // Save the records in a relation table
             if ($saveRecords) {
                 foreach ($arrValues as $value) {
-                    $arrSet = array(
+                    $arrSet = [
                         $arrRelation['reference_field'] => $dc->activeRecord->{$arrRelation['reference']},
                         $arrRelation['related_field']   => $value,
-                    );
+                    ];
 
-                    \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                    \Database::getInstance()
+                        ->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                         ->set($arrSet)
-                        ->execute();
+                        ->execute()
+                    ;
 
                     if ($arrRelation['bidirectional']) {
-                        $arrSet = array(
+                        $arrSet = [
                             $arrRelation['reference_field'] => $value,
                             $arrRelation['related_field']   => $dc->activeRecord->{$arrRelation['reference']},
-                        );
+                        ];
 
-                        \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                        \Database::getInstance()
+                            ->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                             ->set($arrSet)
-                            ->execute();
+                            ->execute()
+                        ;
                     }
                 }
             }
@@ -185,7 +189,7 @@ class Relations
     public function deleteRelatedRecords($dc, $intUndoId)
     {
         $this->loadDataContainers();
-        $arrUndo = array();
+        $arrUndo = [];
 
         foreach ($GLOBALS['TL_DCA'] as $strTable => $arrTable) {
             foreach ($arrTable['fields'] as $strField => $arrField) {
@@ -196,26 +200,24 @@ class Relations
                 }
 
                 // Store the related values for further save in tl_undo table
-                if ($arrRelation['reference_table'] == $dc->table) {
-                    $arrUndo[] = array
-                    (
+                if ($arrRelation['reference_table'] === $dc->table) {
+                    $arrUndo[] = [
                         'table' => $dc->table,
                         'relationTable' => $strTable,
                         'relationField' => $strField,
                         'reference' => $dc->{$arrRelation['reference']},
                         'values' => Model::getRelatedValues($strTable, $strField, $dc->{$arrRelation['reference']})
-                    );
+                    ];
 
                     $this->purgeRelatedRecords($arrRelation, $dc->{$arrRelation['reference']});
                 } else {
-                    $arrUndo[] = array
-                    (
+                    $arrUndo[] = [
                         'table' => $dc->table,
                         'relationTable' => $strTable,
                         'relationField' => $strField,
                         'reference' => $dc->{$arrRelation['field']},
                         'values' => Model::getReferenceValues($strTable, $strField, $dc->{$arrRelation['field']})
-                    );
+                    ];
 
                     $this->purgeRelatedRecords($arrRelation, $dc->{$arrRelation['field']});
                 }
@@ -256,14 +258,16 @@ class Relations
             }
 
             foreach ($relation['values'] as $value) {
-                $arrSet = array(
+                $arrSet = [
                     $arrRelation['reference_field'] => $blnTableReference ? $intId : $value,
                     $arrRelation['related_field'] => $blnTableReference ? $value : $intId,
-                );
+                ];
 
-                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
-                                        ->set($arrSet)
-                                        ->execute();
+                \Database::getInstance()
+                    ->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+                    ->set($arrSet)
+                    ->execute()
+                ;
             }
         }
     }
@@ -281,7 +285,7 @@ class Relations
             }
 
             foreach (scan(TL_ROOT . '/' . $strDir) as $strFile) {
-                if (substr($strFile, -4) != '.php') {
+                if ('.php' !== substr($strFile, -4)) {
                     continue;
                 }
 
@@ -312,26 +316,34 @@ class Relations
             $varReference = $intId;
 
             // Get the reference value (if not an ID)
-            if ($arrRelation['reference'] != 'id') {
-                $objReference = \Database::getInstance()->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
+            if ('id' !== $arrRelation['reference']) {
+                $objReference = \Database::getInstance()
+                    ->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
                     ->limit(1)
-                    ->execute($intId);
+                    ->execute($intId)
+                ;
 
                 if ($objReference->numRows) {
                     $varReference = $objReference->{$arrRelation['reference']};
                 }
             }
 
-            $objValues = \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                ->execute($dc->{$arrRelation['reference']});
+            $objValues = \Database::getInstance()
+                ->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                ->execute($dc->{$arrRelation['reference']})
+            ;
 
             while ($objValues->next()) {
-                \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
-                    ->execute($varReference, $objValues->{$arrRelation['related_field']});
+                \Database::getInstance()
+                    ->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
+                    ->execute($varReference, $objValues->{$arrRelation['related_field']})
+                ;
 
                 if ($arrRelation['bidirectional']) {
-                    \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['related_field'] . "`, `" . $arrRelation['reference_field'] . "`) VALUES (?, ?)")
-                        ->execute($varReference, $objValues->{$arrRelation['related_field']});
+                    \Database::getInstance()
+                        ->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['related_field'] . "`, `" . $arrRelation['reference_field'] . "`) VALUES (?, ?)")
+                        ->execute($varReference, $objValues->{$arrRelation['related_field']})
+                    ;
                 }
             }
         }
@@ -373,12 +385,16 @@ class Relations
                     continue;
                 }
 
-                \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
-                    ->execute($dc->{$arrRelation['field']});
+                \Database::getInstance()
+                    ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
+                    ->execute($dc->{$arrRelation['field']})
+                ;
 
                 if ($arrRelation['bidirectional']) {
-                    \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                        ->execute($dc->{$arrRelation['field']});
+                    \Database::getInstance()
+                        ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+                        ->execute($dc->{$arrRelation['field']})
+                    ;
                 }
             }
         }
@@ -403,7 +419,11 @@ class Relations
                 continue;
             }
 
-            $objDelete = \Database::getInstance()->execute("SELECT " . $arrRelation['reference'] . " FROM " . $strTable . " WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0");
+            $objDelete = \Database::getInstance()->execute(
+                "SELECT " . $arrRelation['reference'] . " 
+                FROM " . $strTable . " 
+                WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0"
+            );
 
             while ($objDelete->next()) {
                 $this->purgeRelatedRecords($arrRelation, $objDelete->{$arrRelation['reference']});
@@ -439,12 +459,16 @@ class Relations
      */
     protected function purgeRelatedRecords($arrRelation, $varId)
     {
-        \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-            ->execute($varId);
+        \Database::getInstance()
+            ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+            ->execute($varId)
+        ;
 
         if ($arrRelation['bidirectional']) {
-            \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
-                ->execute($varId);
+            \Database::getInstance()
+                ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
+                ->execute($varId)
+            ;
         }
     }
 
@@ -491,7 +515,7 @@ class Relations
             return;
         }
 
-        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : array();
+        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
         $blnFilter = false;
         $session = \Session::getInstance()->getData();
 
@@ -504,7 +528,7 @@ class Relations
         }
 
         if ($blnFilter) {
-            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = empty($arrIds) ? array(0) : array_unique($arrIds);
+            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = empty($arrIds) ? [0] : array_unique($arrIds);
         }
     }
 
@@ -523,7 +547,7 @@ class Relations
         $session = \Session::getInstance()->getData();
 
         // Set filter from user input
-        if (\Input::post('FORM_SUBMIT') == 'tl_filters') {
+        if ('tl_filters' === \Input::post('FORM_SUBMIT')) {
             foreach (array_keys(static::$arrFilterableFields) as $field) {
                 if (\Input::post($field, true) != 'tl_' . $field) {
                     $session['filter'][$filter][$field] = \Input::post($field, true);
@@ -558,7 +582,7 @@ class Relations
             }
 
             $options = array_unique($arrIds);
-            $options_callback = array();
+            $options_callback = [];
 
             // Store the field name to be used e.g. in the options_callback
             $this->field = $field;
@@ -579,7 +603,7 @@ class Relations
                 $options = array_intersect(array_keys($options_callback), $options);
             }
 
-            $options_sorter = array();
+            $options_sorter = [];
 
             // Options
             foreach ($options as $kk=>$vv) {
@@ -646,34 +670,38 @@ class Relations
 
         if (!isset(static::$arrRelationsCache[$strCacheKey])) {
             $varRelation = false;
-            $arrField    = &$GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
 
-            if (is_array($arrField) && isset($arrField['table']) && $arrField['type'] == 'haste-ManyToMany') {
-                $varRelation = array();
+            if (isset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'])) {
+                $arrField = &$GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['relation'];
 
-                // The relations table
-                $varRelation['table'] = isset($arrField['relationTable']) ? $arrField['relationTable'] : static::getTableName($strTable, $arrField['table']);
+                if (is_array($arrField) && isset($arrField['table']) && 'haste-ManyToMany' === $arrField['type']) {
+                    $varRelation = [];
 
-                // The related field
-                $varRelation['reference'] = isset($arrField['reference']) ? $arrField['reference'] : 'id';
-                $varRelation['field'] = isset($arrField['field']) ? $arrField['field'] : 'id';
+                    // The relations table
+                    $varRelation['table'] = isset($arrField['relationTable']) ? $arrField['relationTable'] : static::getTableName($strTable, $arrField['table']);
 
-                // Current table data
-                $varRelation['reference_table'] = $strTable;
-                $varRelation['reference_field'] = isset($arrField['referenceColumn']) ? $arrField['referenceColumn'] : (str_replace('tl_', '', $strTable) . '_' . $varRelation['reference']);
-                $varRelation['reference_sql'] = isset($arrField['referenceSql']) ? $arrField['referenceSql'] : "int(10) unsigned NOT NULL default '0'";
+                    // The related field
+                    $varRelation['reference'] = isset($arrField['reference']) ? $arrField['reference'] : 'id';
+                    $varRelation['field'] = isset($arrField['field']) ? $arrField['field'] : 'id';
 
-                // Related table data
-                $varRelation['related_table'] = $arrField['table'];
-                $varRelation['related_field'] = isset($arrField['fieldColumn']) ? $arrField['fieldColumn'] : (str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field']);
-                $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
+                    // Current table data
+                    $varRelation['reference_table'] = $strTable;
+                    $varRelation['reference_field'] = isset($arrField['referenceColumn']) ? $arrField['referenceColumn'] : (str_replace('tl_', '', $strTable) . '_' . $varRelation['reference']);
+                    $varRelation['reference_sql'] = isset($arrField['referenceSql']) ? $arrField['referenceSql'] : "int(10) unsigned NOT NULL default '0'";
 
-                // Force save
-                $varRelation['forceSave'] = $arrField['forceSave'];
+                    // Related table data
+                    $varRelation['related_table'] = $arrField['table'];
+                    $varRelation['related_field'] = isset($arrField['fieldColumn']) ? $arrField['fieldColumn'] : (str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field']);
+                    $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
 
-                // Bidirectional
-                $varRelation['bidirectional'] = $arrField['bidirectional'];
+                    // Force save
+                    $varRelation['forceSave'] = $arrField['forceSave'];
+
+                    // Bidirectional
+                    $varRelation['bidirectional'] = $arrField['bidirectional'];
+                }
             }
+
 
             static::$arrRelationsCache[$strCacheKey] = $varRelation;
         }
@@ -693,7 +721,7 @@ class Relations
      */
     public static function getTableName($tableOne, $tableTwo)
     {
-        $tables = array($tableOne, $tableTwo);
+        $tables = [$tableOne, $tableTwo];
         natcasesort($tables);
         $tables = array_values($tables);
 

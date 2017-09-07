@@ -1,14 +1,9 @@
-.haste_dateRangeFilter {
-    text-align: left;
-}
-.haste_dateRangeFilter > strong {
-    display:block;
-    margin: 0px 0px 5px 20px;
-}
-.haste_dateRangeFilter {
-    text-align: right;
-
+.haste_dateRangeFilter strong {
+    padding-right: 4px;
 }
 .haste_dateRangeFilter .tl_text {
-    width: 60px;
+    width: auto;
+}
+.haste_dateRangeFilter img {
+    padding: 0 10px 0 5px;
 }

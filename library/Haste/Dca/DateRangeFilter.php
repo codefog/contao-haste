@@ -28,6 +28,7 @@ class DateRangeFilter
 
     /**
      * Add the callbacks to DCA
+     *
      * @param string
      */
     public function addCallbacks($strTable)
@@ -55,7 +56,9 @@ class DateRangeFilter
 
     /**
      * Adds the filters to the panel
+     *
      * @param \DataContainer $dc
+     *
      * @return string
      */
     public function addFiltersToPanel($dc)
@@ -70,7 +73,7 @@ class DateRangeFilter
         $session = \Session::getInstance()->getData();
 
         // Set filter from user input
-        if (\Input::post('FORM_SUBMIT') == 'tl_filters') {
+        if ('tl_filters' === \Input::post('FORM_SUBMIT')) {
             foreach ($this->arrFieldsToFilter as $field) {
 
                 $key = 'haste_dateRangeFilter_' . $field;
@@ -121,6 +124,7 @@ class DateRangeFilter
 
     /**
      * Filters the records by setting sorting->root if filters are set
+     *
      * @param \DataContainer $dc
      */
     public function filterRecords($dc)
@@ -154,10 +158,10 @@ class DateRangeFilter
 
             if ($from === null && $to === null) {
                 continue;
-            } else {
-                $blnDoFilter = true;
-                $root = array_merge($root, $this->fetchValidRecordIds($dc, $field, $from, $to));
             }
+
+            $blnDoFilter = true;
+            $root = array_merge($root, $this->fetchValidRecordIds($dc, $field, $from, $to));
         }
 
         if ($blnDoFilter) {
@@ -167,6 +171,7 @@ class DateRangeFilter
 
     /**
      * Instantiate the object
+     *
      * @return DateRangeFilter
      */
     public static function getInstance()
@@ -180,16 +185,17 @@ class DateRangeFilter
 
     /**
      * Fetch valid records within from->to range
+     *
      * @param \DataContainer $dc
-     * @param string $field
-     * @param int $from
-     * @param int $to
+     * @param string         $field
+     * @param int            $from
+     * @param int            $to
+     *
      * @return array
      */
     private function fetchValidRecordIds($dc, $field, $from, $to)
     {
-        $sql = 'SELECT id FROM ' . $dc->table . ' WHERE ';
-        $where = array();
+        $where = [];
 
         if ($from) {
             $where[]  = $field . '>=' . $from;
@@ -199,16 +205,26 @@ class DateRangeFilter
             $where[]  = $field . '<=' . $to;
         }
 
-        $sql .= implode(' AND ', $where);
+        if (empty($where)) {
+            return [];
+        }
+
+        $sql = sprintf(
+            'SELECT id FROM %s WHERE %s',
+            $dc->table,
+            implode(' AND ', $where)
+        );
 
         return \Database::getInstance()->query($sql)->fetchEach('id');
     }
 
     /**
      * Validates user input and turns it into a tstamp if it's valid
+     *
      * @param string $value User input
      * @param string $rgxp
-     * @param bool $from True if beginning of the day, false if end of the day
+     * @param bool   $from  True if beginning of the day, false if end of the day
+     *
      * @return null|integer
      */
     private function validateAndGetTstamp($value, $rgxp, $from = true)
@@ -240,16 +256,22 @@ class DateRangeFilter
 
     /**
      * Creates a datepicker input field
+     *
      * @param string $name
      * @param string $value
      * @param string $rgxp
+     *
      * @return string
      */
     private function createDatepickerInputField($name, $value, $rgxp)
     {
-        $datepickerVersion = version_compare(VERSION, '3.3', '<') ? DATEPICKER : $GLOBALS['TL_ASSETS']['DATEPICKER'];
-        $datepickerClass = version_compare(VERSION, '3.3', '<') ? 'datepicker_dashboard' : 'datepicker_bootstrap';
+        $icon = 'assets/datepicker/images/icon.svg';
         $format = \Date::formatToJs($GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+
+        if (version_compare(VERSION, '4.2', '<')) {
+            $icon = sprintf('assets/mootools/datepicker/%s/icon.gif', $GLOBALS['TL_ASSETS']['DATEPICKER']);
+        }
+
         switch ($rgxp) {
             case 'datim':
                 $time = ",\n      timePicker:true";
@@ -265,7 +287,7 @@ class DateRangeFilter
         }
 
         return sprintf('<input id="ctrl_%s" name="%s" class="tl_text%s" value="%s" type="text">
-            <img src="assets/mootools/datepicker/%s/icon.gif" width="20" height="20" alt="" title="%s" id="toggle_%s" style="vertical-align:-6px;cursor:pointer">
+            <img src="%s" width="20" height="20" alt="" title="%s" id="toggle_%s" style="vertical-align:-6px;cursor:pointer">
             <script>
             window.addEvent("domready", function() {
               new Picker.Date($("ctrl_%s"), {
@@ -273,7 +295,7 @@ class DateRangeFilter
                 toggle: $("toggle_%s"),
                 format: "%s",
                 positionOffset: {x:-211,y:-209}%s,
-                pickerClass: "%s",
+                pickerClass: "datepicker_bootstrap",
                 useFadeInOut: !Browser.ie,
                 startDay: %s,
                 titleFormat: "%s"
@@ -284,14 +306,13 @@ class DateRangeFilter
             $name,
             ($value) ? ' active' : '',
             $value,
-            $datepickerVersion,
+            $icon,
             specialchars($GLOBALS['TL_LANG']['MSC']['datepicker']),
             $name,
             $name,
             $name,
             $format,
             $time,
-            $datepickerClass,
             $GLOBALS['TL_LANG']['MSC']['weekOffset'],
             $GLOBALS['TL_LANG']['MSC']['titleFormat']
         );
