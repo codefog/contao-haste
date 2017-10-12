@@ -585,7 +585,7 @@ class Relations
             $options_callback = [];
 
             // Store the field name to be used e.g. in the options_callback
-            $this->field = $field;
+            $dc->field = $field;
 
             // Call the options_callback
             if ((is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']) || is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) && !$GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference']) {
@@ -594,9 +594,9 @@ class Relations
                     $strMethod = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][1];
 
                     $objClass = \System::importStatic($strClass);
-                    $options_callback = $objClass->$strMethod($this);
+                    $options_callback = $objClass->$strMethod($dc);
                 } elseif (is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) {
-                    $options_callback = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']($this);
+                    $options_callback = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']($dc);
                 }
 
                 // Sort options according to the keys of the callback array
