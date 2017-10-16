@@ -473,13 +473,20 @@ class Relations
     }
 
     /**
-     * Add the relation tables
-     * @param array
+     * Add the relation tables.
+     *
+     * @param array $arrDefinitions
+     *
      * @return array
      */
-    public function addRelationTables($arrTables)
+    public function addRelationTables($arrDefinitions)
     {
-        foreach ($GLOBALS['TL_DCA'] as $strTable => $arrDca) {
+        $arrTables = preg_grep('/^tl_/', \Database::getInstance()->listTables(null, true));
+
+        foreach ($arrTables as $strTable) {
+            $objDcaLoader = new \DcaLoader($strTable);
+            $objDcaLoader->load();
+
             if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
                 continue;
             }
@@ -491,18 +498,18 @@ class Relations
                     continue;
                 }
 
-                $arrTables[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['reference_field']] = "`" . $arrRelation['reference_field'] . "` " . $arrRelation['reference_sql'];
-                $arrTables[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['related_field']] = "`" . $arrRelation['related_field'] . "` " . $arrRelation['related_sql'];
-                $arrTables[$arrRelation['table']]['TABLE_OPTIONS'] = ' ENGINE=MyISAM  DEFAULT CHARSET=utf8';
+                $arrDefinitions[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['reference_field']] = "`" . $arrRelation['reference_field'] . "` " . $arrRelation['reference_sql'];
+                $arrDefinitions[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['related_field']] = "`" . $arrRelation['related_field'] . "` " . $arrRelation['related_sql'];
+                $arrDefinitions[$arrRelation['table']]['TABLE_OPTIONS'] = ' ENGINE=MyISAM  DEFAULT CHARSET=utf8';
 
                 // Add the index only if there is no other (avoid duplicate keys)
-                if (empty($arrTables[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'])) {
-                    $arrTables[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'][$arrRelation['reference_field'] . "_" . $arrRelation['related_field']] = "UNIQUE KEY `" . $arrRelation['reference_field'] . "_" . $arrRelation['related_field'] . "` (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`)";
+                if (empty($arrDefinitions[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'])) {
+                    $arrDefinitions[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'][$arrRelation['reference_field'] . "_" . $arrRelation['related_field']] = "UNIQUE KEY `" . $arrRelation['reference_field'] . "_" . $arrRelation['related_field'] . "` (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`)";
                 }
             }
         }
 
-        return $arrTables;
+        return $arrDefinitions;
     }
 
     /**
