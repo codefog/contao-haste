@@ -40,7 +40,7 @@ class Url
 
         if (!empty($queries)) {
             parse_str($strQuery, $new);
-            $href = '?' . http_build_query(array_merge($queries, $new));
+            $href = '?' . http_build_query(array_merge($queries, $new), '', '&');
         } elseif (!empty($strQuery)) {
             $href = '?' . $strQuery;
         }
@@ -74,7 +74,7 @@ class Url
         $href = '';
 
         if (!empty($queries)) {
-            $href .= '?' . http_build_query($queries);
+            $href .= '?' . http_build_query($queries, '', '&');
         }
 
         return $strScript . $href;
@@ -106,7 +106,7 @@ class Url
         $href = '';
 
         if (!empty($queries)) {
-            $href .= '?' . http_build_query($queries);
+            $href .= '?' . http_build_query($queries, '', '&');
         }
 
         return $strScript . $href;
