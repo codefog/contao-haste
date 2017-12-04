@@ -307,6 +307,10 @@ class Relations
         }
 
         foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
+            if ($arrField['eval']['doNotCopy']) {
+                continue;
+            }
+
             $arrRelation = static::getRelation($dc->table, $strField);
 
             if ($arrRelation === false) {
