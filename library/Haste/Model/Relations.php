@@ -549,11 +549,12 @@ class Relations
         $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
         $blnFilter = false;
         $session = \Session::getInstance()->getData();
+        $filterId = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
 
         foreach (array_keys(static::$arrFilterableFields) as $field) {
-            if (isset($session['filter'][$dc->table][$field])) {
+            if (isset($session['filter'][$filterId][$field])) {
                 $blnFilter = true;
-                $ids = Model::getReferenceValues($dc->table, $field, $session['filter'][$dc->table][$field]);
+                $ids = Model::getReferenceValues($dc->table, $field, $session['filter'][$filterId][$field]);
                 $arrIds = empty($arrIds) ? $ids : array_intersect($arrIds, $ids);
             }
         }
