@@ -504,7 +504,6 @@ class Relations
 
                 $arrDefinitions[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['reference_field']] = "`" . $arrRelation['reference_field'] . "` " . $arrRelation['reference_sql'];
                 $arrDefinitions[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['related_field']] = "`" . $arrRelation['related_field'] . "` " . $arrRelation['related_sql'];
-                $arrDefinitions[$arrRelation['table']]['TABLE_OPTIONS'] = ' ENGINE=MyISAM  DEFAULT CHARSET=utf8';
 
                 // Add the index only if there is no other (avoid duplicate keys)
                 if (empty($arrDefinitions[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'])) {
