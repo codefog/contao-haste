@@ -14,7 +14,6 @@ namespace Haste\Model;
 
 use Contao\DataContainer;
 use Haste\Util\Undo;
-use Patchwork\Utf8;
 
 class Relations
 {
@@ -805,7 +804,7 @@ class Relations
             $options_sorter = [];
             foreach ($relatedSearchFields as $relatedSearchField) {
                 $option_label = $GLOBALS['TL_DCA'][$relTable]['fields'][$relatedSearchField]['label'][0] ?: (\is_array($GLOBALS['TL_LANG']['MSC'][$relatedSearchField]) ? $GLOBALS['TL_LANG']['MSC'][$relatedSearchField][0] : $GLOBALS['TL_LANG']['MSC'][$relatedSearchField]);
-                $options_sorter[Utf8::toAscii($option_label).'_'.$relatedSearchField] = '  <option value="'.\StringUtil::specialchars($relatedSearchField).'"'.(($relatedSearchField == $sessionValues[$dc->table]['searchField'] && $sessionValues[$dc->table]['table'] == $relTable) ? ' selected="selected"' : '').'>'.$option_label.'</option>';
+                $options_sorter[utf8_romanize($option_label).'_'.$relatedSearchField] = '  <option value="'.specialchars($relatedSearchField).'"'.(($relatedSearchField == $sessionValues[$dc->table]['searchField'] && $sessionValues[$dc->table]['table'] == $relTable) ? ' selected="selected"' : '').'>'.$option_label.'</option>';
             }
 
             // Sort by option values
@@ -816,7 +815,7 @@ class Relations
             '.implode("\n", $options_sorter).'
             </select>
             <span>=</span>
-            <input type="search" name="tl_value_' . $field . '" class="tl_text' . ($active ? ' active' : '') . '" value="'.\StringUtil::specialchars($sessionValues[$dc->table]['searchValue']).'"></div>';
+            <input type="search" name="tl_value_' . $field . '" class="tl_text' . ($active ? ' active' : '') . '" value="'.specialchars($sessionValues[$dc->table]['searchValue']).'"></div>';
         }
 
         return $return . '</div>';
