@@ -769,6 +769,10 @@ class Relations
                 }
             }
 
+            if (0 === count($relatedSearchFields)) {
+                continue;
+            }
+
             // Store search value in the current session
             if (\Input::post('FORM_SUBMIT') == 'tl_filters') {
                 $strField = \Input::post('tl_field_' . $field, true);
