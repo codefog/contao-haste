@@ -7,6 +7,8 @@ Important notes:
 - Please update the database after defining the new relation.
 - The relation table name consists of the original table name and related table name unless specified differently, e.g. tl_table_one_table_two.
 - If you delete a record in the related table then the relation tables are automatically updated.
+- Automatically adds a filter in the back end if you set `'filter' => true,` like for any other field (note that `filter` has to be in your `panelLayout`)
+- Automatically adds a search box in the back end if you set `'search' => true,` like for any other field  (note that `search` has to be in your `panelLayout`). It lists all the fields that are searchable in the related table.
 
 
 ## Examples ##

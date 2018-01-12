@@ -14,6 +14,7 @@ namespace Haste\Model;
 
 use Contao\DataContainer;
 use Haste\Util\Undo;
+use Patchwork\Utf8;
 
 class Relations
 {
@@ -29,6 +30,12 @@ class Relations
      * @var array
      */
     private static $arrFilterableFields = [];
+
+    /**
+     * Searchable fields
+     * @var array
+     */
+    private static $arrSearchableFields = [];
 
     /**
      * Purge cache
@@ -84,6 +91,12 @@ class Relations
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['filter'] = false;
                 static::$arrFilterableFields[$strField] = $arrRelation;
             }
+
+            // Use custom serach filtering
+            if ($arrField['search']) {
+                $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['search'] = false;
+                static::$arrSearchableFields[$strField] = $arrRelation;
+            }
         }
 
         // Add global callbacks
@@ -99,6 +112,12 @@ class Relations
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterByRelations'];
             $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = str_replace('filter', 'haste_filter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout']);
             $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = ['Haste\Model\Relations', 'addRelationFilters'];
+        }
+
+        if (!empty(static::$arrSearchableFields) && 'BE' === TL_MODE) {
+            $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterBySearch'];
+            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = str_replace('search', 'haste_search;search', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout']);
+            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_search'] = ['Haste\Model\Relations', 'addRelationSearch'];
         }
     }
 
@@ -544,6 +563,59 @@ class Relations
     }
 
     /**
+     * Filter records by relation search
+     * @param \DataContainer $dc
+     */
+    public function filterBySearch($dc)
+    {
+        if (empty(static::$arrSearchableFields)) {
+            return;
+        }
+
+        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
+        $blnFilter = false;
+        $session = \Session::getInstance()->getData();
+
+        foreach (static::$arrSearchableFields as $field => $arrRelation) {
+            $relTable = $arrRelation['related_table'];
+            \Controller::loadDataContainer($relTable);
+            if (isset($session['haste_search'][$dc->table]) && $relTable == $session['haste_search'][$dc->table]['table'] && $field == $session['haste_search'][$dc->table]['field']) {
+                $blnFilter = true;
+                $query = 'SELECT id FROM ' . $relTable;
+                $procedure = [];
+                $values = [];
+
+                $strPattern = "CAST(%s AS CHAR) REGEXP ?";
+
+                if (substr(\Config::get('dbCollation'), -3) == '_ci') {
+                    $strPattern = "LOWER(CAST(%s AS CHAR)) REGEXP LOWER(?)";
+                }
+
+                $fld = $session['haste_search'][$dc->table]['searchField'];
+
+                if (isset($GLOBALS['TL_DCA'][$relTable]['fields'][$fld]['foreignKey'])) {
+                    list($t, $f) = explode('.', $GLOBALS['TL_DCA'][$relTable]['fields'][$fld]['foreignKey']);
+                    $procedure[] = "(" . sprintf($strPattern, $fld) . " OR " . sprintf($strPattern, "(SELECT $f FROM $t WHERE $t.id={$relTable}.$fld)") . ")";
+                    $values[] = $session['haste_search'][$dc->table]['searchValue'];
+                } else {
+                    $procedure[] = sprintf($strPattern, $fld);
+                }
+
+                $values[] = $session['haste_search'][$dc->table]['searchValue'];
+
+                $query .= ' WHERE ' . implode(' AND ', $procedure);
+
+                $ids = \Database::getInstance()->prepare($query)->execute($values)->fetchEach('id');
+                $arrIds = empty($arrIds) ? $ids : array_intersect($arrIds, $ids);
+            }
+        }
+
+        if ($blnFilter) {
+            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = empty($arrIds) ? [0] : array_unique($arrIds);
+        }
+    }
+
+    /**
      * Add the relation filters
      * @param \DataContainer $dc in BE
      * @return string
@@ -661,6 +733,90 @@ class Relations
             if ((++$count % 5) == 0) {
                 $return .= '<br>';
             }
+        }
+
+        return $return . '</div>';
+    }
+
+    /**
+     * Adds search fields for relations.
+     *
+     * @param $dc
+     *
+     * @return string
+     */
+    public function addRelationSearch($dc)
+    {
+        if (empty(static::$arrSearchableFields)) {
+            return '';
+        }
+
+        $return = '<div class="tl_filter tl_subpanel">';
+        $session = \Session::getInstance();
+        $sessionValues = $session->get('haste_search');
+
+        // Search field per relation
+        foreach (static::$arrSearchableFields as $field => $arrRelation) {
+
+            // Get searchable fields from related table
+            $relatedSearchFields = [];
+            $relTable = $arrRelation['related_table'];
+
+            \Controller::loadDataContainer($relTable);
+            foreach ((array) $GLOBALS['TL_DCA'][$relTable]['fields'] as $relatedField => $dca) {
+                if (isset($dca['search']) && true === $dca['search']) {
+                    $relatedSearchFields[] = $relatedField;
+                }
+            }
+
+            // Store search value in the current session
+            if (\Input::post('FORM_SUBMIT') == 'tl_filters') {
+                $strField = \Input::post('tl_field_' . $field, true);
+                $strKeyword = ltrim(\Input::postRaw('tl_value_' . $field), '*');
+
+                if ($strField && !\in_array($strField, $relatedSearchFields, true)) {
+                    $strField = '';
+                    $strKeyword = '';
+                }
+
+                // Make sure the regular expression is valid
+                if ($strField && $strKeyword) {
+                    try {
+                        \Database::getInstance()->prepare("SELECT * FROM " . $relTable . " WHERE " . $strField . " REGEXP ?")
+                            ->limit(1)
+                            ->execute($strKeyword);
+                    }
+                    catch (\Exception $e) {
+                        $strKeyword = '';
+                    }
+                }
+
+                $session->set('haste_search', [$dc->table => [
+                    'field' => $field,
+                    'table' => $relTable,
+                    'searchField' => $strField,
+                    'searchValue' => $strKeyword,
+                ]]);
+            }
+
+            $return .= '<div class="tl_search tl_subpanel">';
+            $return .= sprintf('<strong>Search in "%s":</strong> ', $field);
+
+            $options_sorter = [];
+            foreach ($relatedSearchFields as $relatedSearchField) {
+                $option_label = $GLOBALS['TL_DCA'][$relTable]['fields'][$relatedSearchField]['label'][0] ?: (\is_array($GLOBALS['TL_LANG']['MSC'][$relatedSearchField]) ? $GLOBALS['TL_LANG']['MSC'][$relatedSearchField][0] : $GLOBALS['TL_LANG']['MSC'][$relatedSearchField]);
+                $options_sorter[Utf8::toAscii($option_label).'_'.$relatedSearchField] = '  <option value="'.\StringUtil::specialchars($relatedSearchField).'"'.(($relatedSearchField == $sessionValues[$dc->table]['searchField'] && $sessionValues[$dc->table]['table'] == $relTable) ? ' selected="selected"' : '').'>'.$option_label.'</option>';
+            }
+
+            // Sort by option values
+            $options_sorter = natcaseksort($options_sorter);
+            $active = ($sessionValues[$dc->table]['searchValue'] != '' && $sessionValues[$dc->table]['table'] == $relTable) ? true : false;
+
+            $return .= '<select name="tl_field_' . $field . '" class="tl_select' . ($active ? ' active' : '') . '">
+            '.implode("\n", $options_sorter).'
+            </select>
+            <span>=</span>
+            <input type="search" name="tl_value_' . $field . '" class="tl_text' . ($active ? ' active' : '') . '" value="'.\StringUtil::specialchars($sessionValues[$dc->table]['searchValue']).'"></div>';
         }
 
         return $return . '</div>';
