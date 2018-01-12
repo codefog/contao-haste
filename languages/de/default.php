@@ -27,6 +27,7 @@ $GLOBALS['TL_LANG']['ERR']['numberInputNotAllowed'] = 'Bitte geben Sie eine vali
  * Miscellaneous
  */
 $GLOBALS['TL_LANG']['HST']['advanced_filter']   = 'Erweiterte Filter:';
+$GLOBALS['TL_LANG']['HST']['advanced_search']   = 'Suche in "%s":';
 
 /**
  * Weight Units

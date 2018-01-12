@@ -13,6 +13,7 @@
 namespace Haste\Model;
 
 use Contao\DataContainer;
+use Haste\Util\Format;
 use Haste\Util\Undo;
 
 class Relations
@@ -799,7 +800,7 @@ class Relations
             }
 
             $return .= '<div class="tl_search tl_subpanel">';
-            $return .= sprintf('<strong>Search in "%s":</strong> ', $field);
+            $return .= '<strong>'.sprintf($GLOBALS['TL_LANG']['HST']['advanced_search'], Format::dcaLabel($dc->table, $field)).'</strong> ';
 
             $options_sorter = [];
             foreach ($relatedSearchFields as $relatedSearchField) {
