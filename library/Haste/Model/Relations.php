@@ -504,7 +504,9 @@ class Relations
 
                 $arrDefinitions[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['reference_field']] = "`" . $arrRelation['reference_field'] . "` " . $arrRelation['reference_sql'];
                 $arrDefinitions[$arrRelation['table']]['TABLE_FIELDS'][$arrRelation['related_field']] = "`" . $arrRelation['related_field'] . "` " . $arrRelation['related_sql'];
-
+                if ($arrRelation['related_tableSql']) {
+                    $arrDefinitions[$arrRelation['table']]['TABLE_OPTIONS'] = $arrRelation['related_tableSql'];
+                }
                 // Add the index only if there is no other (avoid duplicate keys)
                 if (empty($arrDefinitions[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'])) {
                     $arrDefinitions[$arrRelation['table']]['TABLE_CREATE_DEFINITIONS'][$arrRelation['reference_field'] . "_" . $arrRelation['related_field']] = "UNIQUE KEY `" . $arrRelation['reference_field'] . "_" . $arrRelation['related_field'] . "` (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`)";
@@ -701,6 +703,7 @@ class Relations
 
                     // Related table data
                     $varRelation['related_table'] = $arrField['table'];
+                    $varRelation['related_tableSql'] = $arrField['tableSql'];
                     $varRelation['related_field'] = isset($arrField['fieldColumn']) ? $arrField['fieldColumn'] : (str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field']);
                     $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
 
