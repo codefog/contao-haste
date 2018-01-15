@@ -581,8 +581,9 @@ class Relations
             \Controller::loadDataContainer($relTable);
             if (isset($session['haste_search'][$dc->table]) && $relTable == $session['haste_search'][$dc->table]['table'] && $field == $session['haste_search'][$dc->table]['field']) {
                 $blnFilter = true;
-                $query = sprintf('SELECT %s.id AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
+                $query = sprintf('SELECT %s.%s AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
                     $dc->table,
+                    $arrRelation['reference'],
                     $dc->table,
                     $arrRelation['table'],
                     $dc->table,
