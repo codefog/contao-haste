@@ -581,7 +581,21 @@ class Relations
             \Controller::loadDataContainer($relTable);
             if (isset($session['haste_search'][$dc->table]) && $relTable == $session['haste_search'][$dc->table]['table'] && $field == $session['haste_search'][$dc->table]['field']) {
                 $blnFilter = true;
-                $query = 'SELECT id FROM ' . $relTable;
+                $query = sprintf('SELECT %s.id AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
+                    $dc->table,
+                    $dc->table,
+                    $arrRelation['table'],
+                    $dc->table,
+                    $arrRelation['reference'],
+                    $arrRelation['table'],
+                    $arrRelation['reference_field'],
+                    $arrRelation['related_table'],
+                    $arrRelation['related_table'],
+                    $arrRelation['field'],
+                    $arrRelation['table'],
+                    $arrRelation['related_field']
+                );
+
                 $procedure = [];
                 $values = [];
 
@@ -591,7 +605,7 @@ class Relations
                     $strPattern = "LOWER(CAST(%s AS CHAR)) REGEXP LOWER(?)";
                 }
 
-                $fld = $session['haste_search'][$dc->table]['searchField'];
+                $fld = $arrRelation['related_table'] . '.' . $session['haste_search'][$dc->table]['searchField'];
 
                 if (isset($GLOBALS['TL_DCA'][$relTable]['fields'][$fld]['foreignKey'])) {
                     list($t, $f) = explode('.', $GLOBALS['TL_DCA'][$relTable]['fields'][$fld]['foreignKey']);
@@ -605,7 +619,7 @@ class Relations
 
                 $query .= ' WHERE ' . implode(' AND ', $procedure);
 
-                $ids = \Database::getInstance()->prepare($query)->execute($values)->fetchEach('id');
+                $ids = \Database::getInstance()->prepare($query)->execute($values)->fetchEach('sourceId');
                 $arrIds = empty($arrIds) ? $ids : array_intersect($arrIds, $ids);
             }
         }
