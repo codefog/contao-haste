@@ -29,6 +29,7 @@ $GLOBALS['TL_LANG']['ERR']['maxFileSize'] = 'The maximum size for file uploads i
  * Miscellaneous
  */
 $GLOBALS['TL_LANG']['HST']['advanced_filter']   = 'Advanced filter:';
+$GLOBALS['TL_LANG']['HST']['advanced_search']   = 'Search in "%s":';
 
 /**
  * Weight Units
