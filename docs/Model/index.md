@@ -22,7 +22,8 @@ $GLOBALS['TL_DCA']['tl_table_one']['fields']['my_field']['relation'] = array
 (
     'type' => 'haste-ManyToMany',
     'load' => 'lazy',
-    'table' => 'tl_table_two', // the related table
+    'table' => 'tl_table_two', // the related table,
+    'tableSql' => 'DEFAULT CHARSET=big5 COLLATE big5_chinese_ci ENGINE=MyISAM' // related table options (optional)
     'reference' => 'id', // current table field (optional)
     'referenceSql' => "int(10) unsigned NOT NULL default '0'", // current table field sql definition (optional)
     'referenceColumn' => 'my_reference_field', // a custom column name in relation table (optional)
