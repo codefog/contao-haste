@@ -92,7 +92,7 @@ class Relations
                 static::$arrFilterableFields[$strField] = $arrRelation;
             }
 
-            // Use custom serach filtering
+            // Use custom search filtering
             if ($arrField['search']) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['search'] = false;
                 static::$arrSearchableFields[$strField] = $arrRelation;
