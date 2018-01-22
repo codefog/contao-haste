@@ -3,8 +3,11 @@
 /**
  * Haste utilities for Contao Open Source CMS
  *
- * Copyright (C) 2012-2013 Codefog & terminal42 gmbh
+ * Copyright (C) 2012-2018 Codefog & terminal42 gmbh
  *
+ * @author     Codefog
+ * @author     terminal42 gmbh
+ * @author     Ingolf Steinhardt <info@e-spin.de>
  * @package    Haste
  * @link       http://github.com/codefog/contao-haste/
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
@@ -447,7 +450,13 @@ class Form extends \Controller
             );
         }
 
-        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
+        $arrKeepDca = $arrDca;
+        $arrDca     = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
+
+        // Preserve HTML widget data.
+        if ('html' === $arrKeepDca['inputType']) {
+            $arrDca['html'] = $arrKeepDca['html'];
+        }
 
         // Convert optgroups so they work with FormSelectMenu
         if (is_array($arrDca['options']) && array_is_assoc($arrDca['options'])) {
