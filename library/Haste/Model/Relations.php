@@ -176,7 +176,9 @@ class Relations
                         ->execute()
                     ;
 
-                    if ($arrRelation['bidirectional']) {
+                    // Save the record if the relation is bidirectional and only if the values are not the same
+                    // (to prevent duplicate values error caused by unique index)
+                    if ($arrRelation['bidirectional'] && $value != $dc->activeRecord->{$arrRelation['reference']}) {
                         $arrSet = [
                             $arrRelation['reference_field'] => $value,
                             $arrRelation['related_field']   => $dc->activeRecord->{$arrRelation['reference']},
@@ -362,7 +364,9 @@ class Relations
                     ->execute($varReference, $objValues->{$arrRelation['related_field']})
                 ;
 
-                if ($arrRelation['bidirectional']) {
+                // Save the record if the relation is bidirectional and only if the values are not the same
+                // (to prevent duplicate values error caused by unique index)
+                if ($arrRelation['bidirectional'] && $varReference != $objValues->{$arrRelation['related_field']}) {
                     \Database::getInstance()
                         ->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['related_field'] . "`, `" . $arrRelation['reference_field'] . "`) VALUES (?, ?)")
                         ->execute($varReference, $objValues->{$arrRelation['related_field']})
