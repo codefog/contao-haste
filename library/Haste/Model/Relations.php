@@ -585,7 +585,11 @@ class Relations
         foreach (static::$arrSearchableFields as $field => $arrRelation) {
             $relTable = $arrRelation['related_table'];
             \Controller::loadDataContainer($relTable);
-            if (isset($session['haste_search'][$dc->table]) && $relTable == $session['haste_search'][$dc->table]['table'] && $field == $session['haste_search'][$dc->table]['field']) {
+            if (isset($session['haste_search'][$dc->table])
+                && '' !== $session['haste_search'][$dc->table]['searchValue']
+                && $relTable == $session['haste_search'][$dc->table]['table']
+                && $field == $session['haste_search'][$dc->table]['field']
+            ) {
                 $blnFilter = true;
                 $query = sprintf('SELECT %s.%s AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
                     $dc->table,
