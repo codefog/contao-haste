@@ -110,6 +110,12 @@ class Form extends \Controller
     protected $blnValid = true;
 
     /**
+     * Input callback
+     * @var callable
+     */
+    protected $inputCallback;
+
+    /**
      * Initialize the form
      *
      * @param string   $strId          The ID of the form
@@ -297,6 +303,17 @@ class Form extends \Controller
         return $this;
     }
 
+    /**
+     * @param bool $blnSubmitted
+     *
+     * @return Form
+     */
+    public function setSubmitted($blnSubmitted)
+    {
+        $this->blnSubmitted = (bool) $blnSubmitted;
+
+        return $this;
+    }
 
     /**
      * Check if the form has been submitted
@@ -349,6 +366,20 @@ class Form extends \Controller
     public function hasFields()
     {
         return !empty($this->arrFormFields);
+    }
+
+    /**
+     * Set a callback to fetch the widget input instead of using getPost()
+     *
+     * @param callable|null $callback The callback
+     *
+     * @return $this The widget object
+     */
+    public function setInputCallback(callable $callback = null)
+    {
+        $this->inputCallback = $callback;
+
+        return $this;
     }
 
     /**
@@ -856,6 +887,11 @@ class Form extends \Controller
         $this->blnValid = true;
 
         foreach ($this->arrWidgets as $strName => $objWidget) {
+
+            if (null !== $this->inputCallback && method_exists($objWidget, 'setInputCallback')) {
+                $objWidget->setInputCallback($this->inputCallback);
+            }
+
             $objWidget->validate();
 
             if ($objWidget->hasErrors()) {
