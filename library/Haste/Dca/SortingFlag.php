@@ -10,7 +10,7 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
-namespace Haste\Util;
+namespace Haste\Dca;
 
 /**
  * Class SortingFlag for sorting flags in DCA files
