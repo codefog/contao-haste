@@ -36,7 +36,7 @@ class ModelData
         }
 
         $strTable = $objModel->getTable();
-        $objDca = new \DcaExtractor($strTable);
+        $objDca = \DcaExtractor::getInstance($strTable);
         $arrRelations = $objDca->getRelations();
         $arrData = array();
 
