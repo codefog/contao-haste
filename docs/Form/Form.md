@@ -188,3 +188,31 @@ whatever you like.
         $objModel->save();
     }
 ```
+
+### Add field validation
+You can add your own field validation per `addValidator` or directly in your field using `save_callback`.
+
+```php
+<?php
+    // use addValidator
+    $objForm->addValidator('email', function($varValue, \Widget $objWidget, Form $objForm){
+        if ($varValue !== 'xxx@yyy.zz') {
+            throw new \Exception('Wrong email address!');
+        }
+    
+        return $varValue;
+    });
+    
+    // or directly in your field
+    $objForm->addFormField('email', [
+        'save_callback' => [
+            function($value) {
+                if ($value !== 'xxx@yyy.zz') {
+                    throw new \Exception('Wrong email address!');
+                }
+     
+                return $value;
+            }
+        ]
+    ]); 
+```
