@@ -521,7 +521,7 @@ class Relations
             foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
                 $arrRelation = static::getRelation($strTable, $strField);
 
-                if ($arrRelation === false) {
+                if ($arrRelation === false || $arrRelation['skipInstall']) {
                     continue;
                 }
 
@@ -896,6 +896,9 @@ class Relations
 
                     // Bidirectional
                     $varRelation['bidirectional'] = $arrField['bidirectional'];
+
+                    // Do not add table in install tool
+                    $varRelation['skipInstall'] = (bool) $arrField['skipInstall'];
                 }
             }
 
