@@ -9,7 +9,7 @@ Important notes:
 - If you delete a record in the related table then the relation tables are automatically updated.
 - Automatically adds a filter in the back end if you set `'filter' => true,` like for any other field (note that `filter` has to be in your `panelLayout`)
 - Automatically adds a search box in the back end if you set `'search' => true,` like for any other field  (note that `search` has to be in your `panelLayout`). It lists all the fields that are searchable in the related table.
-
+- Relations are always bidirectional. If you want to have unidirectional ones, you need to have separate relation tables.
 
 ## Examples ##
 
@@ -32,7 +32,6 @@ $GLOBALS['TL_DCA']['tl_table_one']['fields']['my_field']['relation'] = array
     'fieldColumn' => 'my_related_field', // a custom column name in relation table (optional)
     'relationTable' => '', // custom relation table name (optional)
     'forceSave' => true, // false by default. If set to true it does not only store the values in the relation tables but also the "my_relation" field
-    'bidirectional' => true, // false by default. If set to true relations are handled bidirectional (e.g. project A is related to project B but project B is also related to project A)
     'skipInstall' => true, // false by default. Do not add relation table. Useful if you use Doctrine relations on the same tables.
 );
 ```

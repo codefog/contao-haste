@@ -175,21 +175,6 @@ class Relations
                         ->set($arrSet)
                         ->execute()
                     ;
-
-                    // Save the record if the relation is bidirectional and only if the values are not the same
-                    // (to prevent duplicate values error caused by unique index)
-                    if ($arrRelation['bidirectional'] && $value != $dc->activeRecord->{$arrRelation['reference']}) {
-                        $arrSet = [
-                            $arrRelation['reference_field'] => $value,
-                            $arrRelation['related_field']   => $dc->activeRecord->{$arrRelation['reference']},
-                        ];
-
-                        \Database::getInstance()
-                            ->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
-                            ->set($arrSet)
-                            ->execute()
-                        ;
-                    }
                 }
             }
 
@@ -363,15 +348,6 @@ class Relations
                     ->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
                     ->execute($varReference, $objValues->{$arrRelation['related_field']})
                 ;
-
-                // Save the record if the relation is bidirectional and only if the values are not the same
-                // (to prevent duplicate values error caused by unique index)
-                if ($arrRelation['bidirectional'] && $varReference != $objValues->{$arrRelation['related_field']}) {
-                    \Database::getInstance()
-                        ->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['related_field'] . "`, `" . $arrRelation['reference_field'] . "`) VALUES (?, ?)")
-                        ->execute($varReference, $objValues->{$arrRelation['related_field']})
-                    ;
-                }
             }
         }
     }
@@ -416,13 +392,6 @@ class Relations
                     ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
                     ->execute($dc->{$arrRelation['field']})
                 ;
-
-                if ($arrRelation['bidirectional']) {
-                    \Database::getInstance()
-                        ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
-                        ->execute($dc->{$arrRelation['field']})
-                    ;
-                }
             }
         }
     }
@@ -490,13 +459,6 @@ class Relations
             ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
             ->execute($varId)
         ;
-
-        if ($arrRelation['bidirectional']) {
-            \Database::getInstance()
-                ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
-                ->execute($varId)
-            ;
-        }
     }
 
     /**
@@ -895,7 +857,7 @@ class Relations
                     $varRelation['forceSave'] = $arrField['forceSave'];
 
                     // Bidirectional
-                    $varRelation['bidirectional'] = $arrField['bidirectional'];
+                    $varRelation['bidirectional'] = true; // I'm here for BC only
 
                     // Do not add table in install tool
                     $varRelation['skipInstall'] = (bool) $arrField['skipInstall'];
