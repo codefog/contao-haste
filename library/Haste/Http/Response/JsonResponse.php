@@ -12,6 +12,8 @@
 
 namespace Haste\Http\Response;
 
+use Haste\Util\InsertTag;
+
 class JsonResponse extends Response
 {
     /**
@@ -38,13 +40,17 @@ class JsonResponse extends Response
      */
     public function setContent($varContent, $intOptions = 0, $intDepth = 512)
     {
+        // Replace insert tags
+        $varContent = InsertTag::replaceRecursively($varContent);
+
         // Depth parameter is only supported from PHP 5.5
         if (version_compare(PHP_VERSION, '5.5', '>=')) {
-            $strContent = json_encode($varContent, $intOptions, $intDepth);
+            $this->strContent = json_encode($varContent, $intOptions, $intDepth);
         } else {
-            $strContent = json_encode($varContent, $intOptions);
+            $this->strContent = json_encode($varContent, $intOptions);
         }
 
-        parent::setContent($strContent);
+        // Content-Length
+        $this->setHeader('Content-Length', strlen($this->strContent));
     }
 }
