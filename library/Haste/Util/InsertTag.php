@@ -51,6 +51,10 @@ class InsertTag
     {
         $arrTag = trimsplit('::', $strTag);
 
+        if ($arrTag[0] == 'convert_dateformat') {
+            return $this->replaceConvertedDateFormat($arrTag);
+        }
+
         if ($arrTag[0] == 'formatted_datetime') {
             return $this->replaceFormattedDateTime($arrTag);
         }
@@ -76,6 +80,63 @@ class InsertTag
         }
 
         return false;
+    }
+
+
+    /**
+     * Replace {{convert_dateformat::*}} insert tag
+     *
+     * Format:
+     *
+     * {{convert_dateformat::<value>::<source_format>::<target_format>}}
+     *
+     * Description:
+     *
+     * The source_format and target_format can be any format from php date()
+     * or "date", "datim" or "time" to take the the format from the root page settings
+     * (or system settings, in case not defined).
+     *
+     * Possible use cases:
+     *
+     * {{convert_dateformat::2018-11-21 10:00::datim::date}} –> outputs 2018-11-21
+     * {{convert_dateformat::21.11.2018::d.m.Y::j. F Y}}     –> outputs 21. November 2018
+     *
+     * @param array $chunks
+     *
+     * @return string|boolean
+     */
+    private function replaceConvertedDateFormat($chunks)
+    {
+        if (4 !== \count($chunks)) {
+            return false;
+        }
+
+        try {
+            $date = new \Date($chunks[1], $this->determineFormat($chunks[2]));
+        } catch (\OutOfBoundsException $e) {
+            return false;
+        }
+
+        return \Date::parse($this->determineFormat($chunks[3]), $date->tstamp);
+    }
+
+
+    /**
+     * Determine the date format
+     *
+     * @param string $format
+     *
+     * @return string
+     */
+    private function determineFormat($format)
+    {
+        if (\in_array($format, ['datim', 'date', 'time'], true)) {
+            $key = $format.'Format';
+
+            return isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->{$key} : \Config::get($key);
+        }
+
+        return $format;
     }
 
 

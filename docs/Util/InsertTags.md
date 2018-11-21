@@ -1,6 +1,6 @@
 # Haste InsertTags
 
-Haste provides several insert tags for every-day use. 
+Haste provides several insert tags for every-day use.
 They are not related to Haste functionality, but just for
 general use in a Contao environment.
 
@@ -16,8 +16,9 @@ the insert tag flags.
 
 See the [Contao documentation][flags] for available flags.
 
+## Date / Time
 
-### Date / Time formatting
+### Date and time formatting
 
 The `formatted_datetime` insert tag allows to format a timestamp
 using either the internal date/time formatting settings or a custom
@@ -25,21 +26,41 @@ format.
 
 ##### Examples:
 
- 1. `{{formatted_datetime::1234::d.m.Y}}`  
+ 1. `{{formatted_datetime::1234::d.m.Y}}`
  	Formats the timestamp `1234` to Day.Month.Year.
  	Available formatting options can be found in the [PHP `date` method][date].
- 	
- 2. `{{formatted_datetime::1234::date}}`  
+
+ 2. `{{formatted_datetime::1234::date}}`
  	Formats the timestamp `1234` to the system's date format.
- 	
- 3. `{{formatted_datetime::1234::time}}`  
+
+ 3. `{{formatted_datetime::1234::time}}`
  	Formats the timestamp `1234` to the system's time format.
- 	
- 4. `{{formatted_datetime::1234::datim}}`  
+
+ 4. `{{formatted_datetime::1234::datim}}`
  	Formats the timestamp `1234` to the system's date + time format.
 
 
+### Date and time converting
 
+The `convert_dateformat` insert tag allows to convert the provided
+date/time from one format to another. It takes the following format:
+
+`{{convert_dateformat::<value>::<source_format>::<target_format>}}`
+
+The `source_format` and `target_format` can be any format from [PHP `date` method][date]
+or `date` / `datim` / `time` to take the the format from the root page settings
+(or system settings, in case not defined).
+
+##### Examples:
+
+ 1. `{{convert_dateformat::2018-11-21 10:00::datim::date}}`
+ 	Converts the provided date and time to date only `2018-11-21`.
+
+ 2. `{{convert_dateformat::21.11.2018::d.m.Y::j. F Y}}`
+ 	Converts the provided date to another format `21. November 2018`.
+
+
+## Forms
 
 ### Get form generator option label from value
 
@@ -93,13 +114,13 @@ The following checks are performed:
 
 ### Generate random number
 
-1. **Simple version:** `{{rand}}`  
+1. **Simple version:** `{{rand}}`
     Generates a random number using PHP's `mt_rand` method.
-	
-2. **Extended version:** `{{rand::1::100}}`  
+
+2. **Extended version:** `{{rand::1::100}}`
 	If you pass two arguments to the insert tag, you can define
 	the minimum and maximum value (see `mt_rand` documentation).
-	
+
 
 [flags]: https://docs.contao.org/books/manual/current/en/04-managing-content/insert-tags.html#insert-tag-flags
 [date]: http://php.net/date
