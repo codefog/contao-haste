@@ -8,6 +8,7 @@ php:
 sudo: false
 
 before_script:
+    - phpenv config-add travis.php.ini
     - travis_wait composer install --no-interaction
 
 script: php vendor/bin/phpunit
