@@ -99,7 +99,7 @@ class InsertTag
      * Possible use cases:
      *
      * {{convert_dateformat::2018-11-21 10:00::datim::date}} –> outputs 2018-11-21
-     * {{convert_dateformat::21.11.2018::d.m.Y::j. F Y}}     –> outputs 21. November 2018
+     * {{convert_dateformat::21.03.2018::d.m.Y::j. F Y}}     –> outputs 21. März 2018
      *
      * @param array $chunks
      *

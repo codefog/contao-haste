@@ -56,8 +56,9 @@ or `date` / `datim` / `time` to take the the format from the root page settings
  1. `{{convert_dateformat::2018-11-21 10:00::datim::date}}`
  	Converts the provided date and time to date only `2018-11-21`.
 
- 2. `{{convert_dateformat::21.11.2018::d.m.Y::j. F Y}}`
- 	Converts the provided date to another format `21. November 2018`.
+ 2. `{{convert_dateformat::21.03.2018::d.m.Y::j. F Y}}`
+ 	Converts the provided date to another format `21. März 2018`.
+ 	Multilingual formats are supported thanks to `Contao\Date` class.
 
 
 ## Forms
