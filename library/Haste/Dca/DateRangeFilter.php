@@ -48,7 +48,7 @@ class DateRangeFilter
         }
 
         if (!empty($this->arrFieldsToFilter)) {
-            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = str_replace('filter', 'haste_dateRangeFilter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout']);
+            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_dateRangeFilter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
             $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_dateRangeFilter'] = array('Haste\Dca\DateRangeFilter', 'addFiltersToPanel');
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = array('Haste\Dca\DateRangeFilter', 'filterRecords');
         }
