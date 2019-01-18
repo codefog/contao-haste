@@ -48,7 +48,7 @@ class HasteUpdater
                 $newTable = $relation['table'];
 
                 // Rename the table
-                if (\Database::getInstance()->tableExists($oldTable, null, true) && $oldTable != $newTable) {
+                if ($oldTable !== $newTable && \Database::getInstance()->tableExists($oldTable, null, true)) {
                     if (\Database::getInstance()->tableExists($newTable, null, true)) {
                         \System::log("Haste updater: Could not rename $oldTable to $newTable automatically because $newTable already exists! You have to migrate the data manually!", __METHOD__, TL_ERROR);
                     } else {
@@ -65,20 +65,40 @@ class HasteUpdater
      */
     protected function loadDataContainers()
     {
-        foreach (\ModuleLoader::getActive() as $module) {
-            $dir = 'system/modules/' . $module . '/dca';
+        $tables = [];
 
-            if (!is_dir(TL_ROOT . '/' . $dir)) {
-                continue;
-            }
+        if (!method_exists(\System::class, 'getContainer')) {
+            foreach (\ModuleLoader::getActive() as $module) {
+                $dir = TL_ROOT.'/system/modules/'.$module.'/dca';
 
-            foreach (scan(TL_ROOT . '/' . $dir) as $file) {
-                if (substr($file, -4) != '.php') {
+                if (!is_dir($dir)) {
                     continue;
                 }
 
-                \Controller::loadDataContainer(substr($file, 0, -4));
+                foreach (scan($dir) as $file) {
+                    if ('.php' !== substr($file, -4)) {
+                        continue;
+                    }
+
+                    $tables[] = substr($file, 0, -4);
+                }
             }
+        } else {
+            $files = System::getContainer()
+                ->get('contao.resource_finder')
+                ->findIn('dca')
+                ->depth(0)
+                ->files()
+                ->name('*.php')
+            ;
+
+            foreach ($files as $file) {
+                $tables[] = $file->getBasename('.php');
+            }
+        }
+
+        foreach (array_unique($tables) as $table) {
+            \Controller::loadDataContainer($table);
         }
     }
 }
