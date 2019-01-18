@@ -42,7 +42,7 @@
                 "": "system/modules/haste"
             },
             "runonce": [
-                "system/modules/haste/config/upgrade.php"
+                "config/upgrade.php"
             ]
         }
     }

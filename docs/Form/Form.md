@@ -161,6 +161,28 @@ and validate the user inputs etc.
     });
 ```
 
+### Add form fields at specific positions
+
+By passing an `\Haste\Util\ArrayPosition` instance as the third parameter you can
+insert the field at a certain position. Available positions are:
+```php
+ArrayPosition::FIRST
+ArrayPosition::LAST
+ArrayPosition::BEFORE
+ArrayPosition::AFTER
+```
+`FIRST` and `LAST` do not require the second parameter of the constructor.
+```php
+<?php
+    // this example adds an explanation form field before the existing submit 
+    // form field
+    $objForm->addFormField('mandatory', array(
+        'inputType' => 'explanation',
+        'eval' => array('text' => '<p>Mandatory</p>', 'class' => 'mandatory-label')
+    ), new \Haste\Util\ArrayPosition(\Haste\Util\ArrayPosition::BEFORE, 'submit'));
+```
+
+
 ### Removing fields on a form instance
 
 ```php
