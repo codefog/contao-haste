@@ -240,7 +240,7 @@ class Form extends \Controller
 
     /**
      * Gets the encoding type
-     * 
+     *
      * @return  string
      */
     public function getEnctype()
@@ -250,7 +250,7 @@ class Form extends \Controller
 
     /**
      * Get novalidate flag
-     * 
+     *
      * @return bool
      */
     public function isNoValidate()
@@ -260,7 +260,7 @@ class Form extends \Controller
 
     /**
      * Generate the novalidate attribute
-     * 
+     *
      * @return string
      */
     public function generateNoValidate()
@@ -1054,7 +1054,14 @@ class Form extends \Controller
             throw new \InvalidArgumentException('The widget with name "' . $strName . '" does not exist.');
         }
 
-        return $this->arrWidgets[$strName]->value;
+        $objWidget = $this->arrWidgets[$strName];
+
+        if (!$objWidget->submitInput()) {
+            // Do not throw exception here for BC
+            return null;
+        }
+
+        return $objWidget->value;
     }
 
     /**
@@ -1069,10 +1076,16 @@ class Form extends \Controller
         $arrData = array();
 
         foreach ($this->arrWidgets as $strName => $objWidget) {
+            // Do not check $objWidget->submitInput() here because the callback could handle it differently
+
             if (is_callable($varCallback)) {
-                $arrData[$strName] = call_user_func($varCallback, $strName, $objWidget);
+                $varValue = call_user_func($varCallback, $strName, $objWidget);
             } else {
-                $arrData[$strName] = $this->fetch($strName);
+                $varValue = $this->fetch($strName);
+            }
+
+            if (null !== $varValue) {
+                $arrData[$strName] = $varValue;
             }
         }
 
