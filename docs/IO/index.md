@@ -28,7 +28,7 @@ The Haste IO component is designed for mass data transfer between different stor
 ### Writer classes ###
 
 - `CsvFileWriter` – Write values into a CSV file (with configurable delimiter/enclosure)
-- `ExcelFileWriter` – Write values into Excel file (requires *php-excel* Contao extension)
+- `ExcelFileWriter` – Write values into Excel file (requires `phpoffice/phpspreadsheet` package, or the deprecated `phpoffice/phpexcel`)
 - `ModelWriter` – Write values into Contao models (performs `save` on the model)
 
 
