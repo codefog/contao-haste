@@ -24,8 +24,14 @@ class ExcelFileWriter extends AbstractFileWriter
     /**
      * PHPExcel instance
      * @var \PHPExcel
+     * @deprecated
      */
     protected $objPHPExcel;
+
+    /**
+     * @var \PhpOffice\PhpSpreadsheet\Spreadsheet
+     */
+    protected $spreadsheet;
 
     /**
      * Current row in excel sheet
@@ -41,13 +47,20 @@ class ExcelFileWriter extends AbstractFileWriter
 
     /**
      * Construct csv writer
-     * @param   string
-     * @param   string
+     *
+     * @param string $strFile
+     * @param string $strExtension
+     *
+     * @throws \LogicException
      */
     public function __construct($strFile = '', $strExtension = '.xlsx')
     {
-        if (!class_exists('PHPExcel')) {
-            throw new \LogicException('Please install "php_excel" extension before using '.__CLASS__);
+        if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            if (!class_exists('PHPExcel')) {
+                throw new \LogicException('Please install the "phpoffice/phpspreadsheet" package before using '.__CLASS__);
+            } else {
+                @trigger_error('Relying on the "phpoffice/phpexcel" package has been deprecated. Install the "phpoffice/phpspreadsheet" package instead.', E_USER_DEPRECATED);
+            }
         }
 
         parent::__construct($strFile, $strExtension);
@@ -90,10 +103,17 @@ class ExcelFileWriter extends AbstractFileWriter
         }
 
         $this->currentRow = 0;
-        $this->objPHPExcel = new \PHPExcel();
 
-        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $this->objPHPExcel->setActiveSheetIndex(0);
+        // New way
+        if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            $this->spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        } else {
+            // Legacy way
+            $this->objPHPExcel = new \PHPExcel();
+
+            // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+            $this->objPHPExcel->setActiveSheetIndex(0);
+        }
 
         return true;
     }
@@ -110,15 +130,26 @@ class ExcelFileWriter extends AbstractFileWriter
         }
 
         $this->currentRow += 1;
-        $currentColumn = 0;
+        $currentColumn = ($this->spreadsheet !== null) ? 1 : 0;
 
         foreach ($arrData as $varValue) {
-            $this->objPHPExcel->getActiveSheet()->setCellValueExplicitByColumnAndRow(
-                $currentColumn++,
-                $this->currentRow,
-                (string) $varValue,
-                \PHPExcel_Cell_DataType::TYPE_STRING2
-            );
+            // New way
+            if ($this->spreadsheet !== null) {
+                $this->spreadsheet->getActiveSheet()->setCellValueExplicitByColumnAndRow(
+                    $currentColumn++,
+                    $this->currentRow,
+                    (string)$varValue,
+                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING2
+                );
+            } else {
+                // Legacy way
+                $this->objPHPExcel->getActiveSheet()->setCellValueExplicitByColumnAndRow(
+                    $currentColumn++,
+                    $this->currentRow,
+                    (string)$varValue,
+                    \PHPExcel_Cell_DataType::TYPE_STRING2
+                );
+            }
         }
 
         return true;
@@ -129,7 +160,19 @@ class ExcelFileWriter extends AbstractFileWriter
      */
     protected function finish()
     {
-        $objWriter = \PHPExcel_IOFactory::createWriter($this->objPHPExcel, $this->strFormat);
-        $objWriter->save(TL_ROOT . '/' . $this->strFile);
+        // New way
+        if ($this->spreadsheet !== null) {
+            if ($this->strFormat === 'Excel5') {
+                $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($this->spreadsheet);
+            } else {
+                $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($this->spreadsheet);
+            }
+
+            $writer->save(TL_ROOT . '/' . $this->strFile);
+        } else {
+            // Legacy way
+            $objWriter = \PHPExcel_IOFactory::createWriter($this->objPHPExcel, $this->strFormat);
+            $objWriter->save(TL_ROOT . '/' . $this->strFile);
+        }
     }
 }
