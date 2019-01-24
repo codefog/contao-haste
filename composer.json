@@ -28,8 +28,7 @@
         "contao-legacy/haste": "self.version"
     },
     "suggest": {
-        "phpoffice/phpspreadsheet": "Required for the Haste\\IO\\ExcelFileWriter component.",
-        "phpoffice/phpexcel": "Required for the Haste\\IO\\ExcelFileWriter component (deprecated)."
+        "phpoffice/phpspreadsheet": "Required for the Haste\\IO\\ExcelFileWriter component."
     },
     "autoload": {
         "psr-0": {

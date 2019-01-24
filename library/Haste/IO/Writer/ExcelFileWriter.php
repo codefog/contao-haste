@@ -24,6 +24,7 @@ class ExcelFileWriter extends AbstractFileWriter
     /**
      * PHPExcel instance
      * @var \PHPExcel
+     * @deprecated
      */
     protected $objPHPExcel;
 
@@ -46,13 +47,20 @@ class ExcelFileWriter extends AbstractFileWriter
 
     /**
      * Construct csv writer
-     * @param   string
-     * @param   string
+     *
+     * @param string $strFile
+     * @param string $strExtension
+     *
+     * @throws \LogicException
      */
     public function __construct($strFile = '', $strExtension = '.xlsx')
     {
-        if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet') && !class_exists('PHPExcel')) {
-            throw new \LogicException('Please install "phpoffice/phpspreadsheet" package (or deprecated "phpoffice/phpexcel") before using '.__CLASS__);
+        if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            if (!class_exists('PHPExcel')) {
+                throw new \LogicException('Please install "phpoffice/phpspreadsheet" package before using '.__CLASS__);
+            } else {
+                @trigger_error('Relying on the "phpoffice/phpexcel" package has been deprecated. Install the "phpoffice/phpspreadsheet" package instead.', E_USER_DEPRECATED);
+            }
         }
 
         parent::__construct($strFile, $strExtension);
@@ -122,11 +130,11 @@ class ExcelFileWriter extends AbstractFileWriter
         }
 
         $this->currentRow += 1;
-        $currentColumn = class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet') ? 1 : 0;
+        $currentColumn = ($this->spreadsheet !== null) ? 1 : 0;
 
         foreach ($arrData as $varValue) {
             // New way
-            if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+            if ($this->spreadsheet !== null) {
                 $this->spreadsheet->getActiveSheet()->setCellValueExplicitByColumnAndRow(
                     $currentColumn++,
                     $this->currentRow,
@@ -153,7 +161,7 @@ class ExcelFileWriter extends AbstractFileWriter
     protected function finish()
     {
         // New way
-        if (class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+        if ($this->spreadsheet !== null) {
             if ($this->strFormat === 'Excel5') {
                 $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($this->spreadsheet);
             } else {
