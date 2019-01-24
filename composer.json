@@ -21,13 +21,14 @@
     },
     "require-dev": {
         "terminal42/contao-namespace-class-loader": "~1.0",
-        "phpunit/phpunit": "4.8.*"
+        "phpunit/phpunit": "4.8.*",
+        "phpoffice/phpspreadsheet": "^1.6"
     },
     "replace": {
         "contao-legacy/haste": "self.version"
     },
     "suggest": {
-        "phpoffice/phpexcel": "Required for the Haste\\IO\\ExcelFileWriter component."
+        "phpoffice/phpspreadsheet": "Required for the Haste\\IO\\ExcelFileWriter component."
     },
     "autoload": {
         "psr-0": {
