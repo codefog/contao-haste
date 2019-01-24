@@ -57,7 +57,7 @@ class ExcelFileWriter extends AbstractFileWriter
     {
         if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
             if (!class_exists('PHPExcel')) {
-                throw new \LogicException('Please install "phpoffice/phpspreadsheet" package before using '.__CLASS__);
+                throw new \LogicException('Please install the "phpoffice/phpspreadsheet" package before using '.__CLASS__);
             } else {
                 @trigger_error('Relying on the "phpoffice/phpexcel" package has been deprecated. Install the "phpoffice/phpspreadsheet" package instead.', E_USER_DEPRECATED);
             }
