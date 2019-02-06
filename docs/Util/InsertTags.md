@@ -20,7 +20,8 @@ See the [Contao documentation][flags] for available flags.
 
 ### Date and time formatting
 
-The `formatted_datetime` insert tag allows to format a timestamp
+The `formatted_datetime` insert tag allows to format a timestamp or a
+PHP date/time format (see http://php.net/manual/en/function.strtotime.php)
 using either the internal date/time formatting settings or a custom
 format.
 
@@ -38,6 +39,14 @@ format.
 
  4. `{{formatted_datetime::1234::datim}}`
  	Formats the timestamp `1234` to the system's date + time format.
+
+ 5. `{{formatted_datetime::+1 day::datim}}`
+ 	Formats the timestamp of `now +1 day` to the system's date + time format.
+
+ 6. `{{formatted_datetime::+1 week 2 days 4 hours 2 seconds::d.m.Y}}`
+ 	Formats the timestamp  of `now +1 week 2 days 4 hours 2 seconds` to Day.Month.Year.
+  	Available formatting options can be found in the [PHP `date` method][date].
+
 
 
 ### Date and time converting
