@@ -114,6 +114,9 @@ class AjaxReloadListener
                     ),
                     $buffer
                 );
+
+                // Make sure the request is not cached by the browser alongside with the initial request
+                header('Vary: Haste-Ajax-Reload');
             }
         }
 
