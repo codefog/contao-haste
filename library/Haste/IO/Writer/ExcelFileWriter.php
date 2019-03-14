@@ -135,19 +135,17 @@ class ExcelFileWriter extends AbstractFileWriter
         foreach ($arrData as $varValue) {
             // New way
             if ($this->spreadsheet !== null) {
-                $this->spreadsheet->getActiveSheet()->setCellValueExplicitByColumnAndRow(
+                $this->spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(
                     $currentColumn++,
                     $this->currentRow,
-                    (string)$varValue,
-                    \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING2
+                    (string) $varValue
                 );
             } else {
                 // Legacy way
-                $this->objPHPExcel->getActiveSheet()->setCellValueExplicitByColumnAndRow(
+                $this->objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(
                     $currentColumn++,
                     $this->currentRow,
-                    (string)$varValue,
-                    \PHPExcel_Cell_DataType::TYPE_STRING2
+                    (string) $varValue
                 );
             }
         }
