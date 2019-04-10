@@ -513,6 +513,12 @@ class Relations
         }
 
         $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
+
+        // Include the child records in tree view
+        if ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 5 && count($arrIds) > 0) {
+            $arrIds = \Database::getInstance()->getChildRecords($arrIds, $dc->table, false, $arrIds);
+        }
+
         $blnFilter = false;
         $session = \Session::getInstance()->getData();
         $filterId = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
