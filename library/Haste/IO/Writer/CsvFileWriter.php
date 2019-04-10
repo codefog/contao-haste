@@ -25,7 +25,7 @@ class CsvFileWriter extends AbstractFileWriter
      * Delimiter character
      * @var string
      */
-    protected $strDelimiter = ',';
+    protected $strDelimiter = ';';
 
     /**
      * Enclosure character
@@ -109,7 +109,9 @@ class CsvFileWriter extends AbstractFileWriter
         if (!is_array($arrData)) {
             return false;
         }
-
+        
+        fprintf($this->resFile, chr(0xEF).chr(0xBB).chr(0xBF));
+        
         return (bool) fputcsv($this->resFile, $arrData, $this->strDelimiter, $this->strEnclosure);
     }
 
