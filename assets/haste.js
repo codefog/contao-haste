@@ -11,14 +11,24 @@ var Haste = Haste || {};
 Haste.toggleAjaxOperation = function(el, id) {
     el.blur();
 
+    function getUrlParameter(name, href) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(href);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
     var image = $(el).getFirst('img'),
         operation = el.getAttribute('data-haste-ajax-operation-name'),
-        value = el.getAttribute('data-haste-ajax-operation-value');
+        value = el.getAttribute('data-haste-ajax-operation-value'),
+        buttonHref = el.getAttribute('href'),
+        urlTable = getUrlParameter('table', buttonHref),
+        urlAppend = (urlTable ? ('&table=' + urlTable) : '');
 
     // Send the request
     new Request.JSON({
         followRedirects: true,
-        url: window.location.href,
+        url: window.location.href + urlAppend,
         onComplete: function(json) {
 
             // Support Contao redirects
