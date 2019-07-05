@@ -34,7 +34,7 @@ if (null === $objItem) {
 }
 
 // Validate the news title in the URL
-\Haste\Input\UrlId::validateName('items', $objItem->title);
+\Haste\Input\UrlId::validate('items', $intId, $objItem->title);
 ```
 
 If the given name is not correct, (e.g. it would be "the-news-title"), the
