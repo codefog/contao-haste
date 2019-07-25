@@ -36,7 +36,7 @@ $GLOBALS['TL_HOOKS']['modifyFrontendPage'][] = ['Haste\EventListener\AjaxReloadL
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][]  = array('Haste\Util\InsertTag', 'replaceHasteInsertTags');
 $GLOBALS['TL_HOOKS']['reviseTable'][]        = array('Haste\Model\Relations', 'reviseRelatedRecords');
 
-if (TL_MODE === 'BE') {
+if (TL_MODE !== 'FE') {
     $GLOBALS['TL_HOOKS']['sqlGetFromFile'][] = ['Haste\Model\Relations', 'addRelationTables'];
 }
 
