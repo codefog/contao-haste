@@ -478,7 +478,17 @@ class Form extends \Controller
             );
         }
 
-        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value']);
+        $objDca = null;
+        $strTable = '';
+
+        if (null !== ($objModel = $this->getBoundModel())) {
+            $objDca = new \Contao\DC_Table($objModel->getTable());
+            $objDca->id = $objModel->id;
+            $objDca->activeRecord = $objModel;
+            $strTable = $objModel->getTable();
+        }
+
+        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $strTable, $objDca);
 
         // Convert optgroups so they work with FormSelectMenu
         if (is_array($arrDca['options']) && array_is_assoc($arrDca['options'])) {
