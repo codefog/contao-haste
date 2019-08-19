@@ -485,7 +485,7 @@ class Form extends \Controller
             $strTable = $objModel->getTable();
             \Contao\Controller::loadDataContainer($strTable);
             $dataContainer = '\Contao\DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
-            $objDca = new $dataContainer($objModel->getTable());
+            $objDca = new $dataContainer($strTable);
             $objDca->id = $objModel->id;
             $objDca->activeRecord = $objModel;
         }
