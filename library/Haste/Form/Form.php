@@ -482,10 +482,12 @@ class Form extends \Controller
         $strTable = '';
 
         if (null !== ($objModel = $this->getBoundModel())) {
-            $objDca = new \Contao\DC_Table($objModel->getTable());
+            $strTable = $objModel->getTable();
+            \Contao\Controller::loadDataContainer($strTable);
+            $dataContainer = '\Contao\DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+            $objDca = new $dataContainer($objModel->getTable());
             $objDca->id = $objModel->id;
             $objDca->activeRecord = $objModel;
-            $strTable = $objModel->getTable();
         }
 
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $strTable, $objDca);
