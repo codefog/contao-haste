@@ -486,7 +486,7 @@ class Form extends \Controller
             \Contao\Controller::loadDataContainer($strTable);
 
             if (isset($GLOBALS['TL_DCA'][$strTable]) && isset($GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'])) {
-                $dataContainer = '\Contao\DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
+                $dataContainer = '\DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
                 $objDca = new $dataContainer($strTable);
                 $objDca->id = $objModel->id;
                 $objDca->activeRecord = $objModel;
