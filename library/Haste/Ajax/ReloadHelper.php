@@ -100,7 +100,10 @@ class ReloadHelper
             return null;
         }
 
-        return new JsonResponse(static::$response);
+        $response = new JsonResponse(static::$response);
+        $response->setHeader('Vary', 'Accept');
+
+        return $response;
     }
 
     /**
