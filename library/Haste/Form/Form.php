@@ -493,7 +493,15 @@ class Form extends \Controller
             }
         }
 
+        // Preserve the label
+        $strLabel = $arrDca['label'];
+
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $strTable, $objDca);
+
+        // Remove the label if it was not sent – Contao will set it to field name if it's not present
+        if (!isset($strLabel) || !$strLabel) {
+            $arrDca['label'] = '';
+        }
 
         // Convert optgroups so they work with FormSelectMenu
         if (is_array($arrDca['options']) && array_is_assoc($arrDca['options'])) {
