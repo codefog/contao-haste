@@ -447,17 +447,10 @@ class Form extends \Controller
             $this->addValidator(
                 $strName,
                 function($varValue, \Widget $objWidget, Form $objForm) use ($arrDca, $strName) {
-                    $intId = 0;
-                    $strTable = '';
-
-                    if (($objModel = $objForm->getBoundModel()) !== null) {
-                        $intId = $objModel->id;
-                        $strTable = $objModel->getTable();
-                    }
-
+                    $objModel = $objForm->getBoundModel();
                     $dc = (object) array(
-                        'id'            => $intId,
-                        'table'         => $strTable,
+                        'id'            => $objModel ? $objModel->id : 0,
+                        'table'         => $objModel ? $objModel::getTable() : '',
                         'value'         => $varValue,
                         'field'         => $strName,
                         'inputName'     => $objWidget->name,
@@ -478,25 +471,20 @@ class Form extends \Controller
             );
         }
 
-        $objDca = null;
-        $strTable = '';
-
-        if (null !== ($objModel = $this->getBoundModel())) {
-            $strTable = $objModel->getTable();
-            \Contao\Controller::loadDataContainer($strTable);
-
-            if (isset($GLOBALS['TL_DCA'][$strTable]) && isset($GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'])) {
-                $dataContainer = '\DC_' . $GLOBALS['TL_DCA'][$strTable]['config']['dataContainer'];
-                $objDca = new $dataContainer($strTable);
-                $objDca->id = $objModel->id;
-                $objDca->activeRecord = $objModel;
-            }
-        }
+        $objModel = $this->getBoundModel();
+        $dc = (object) array(
+            'id'            => $objModel ? $objModel->id : 0,
+            'table'         => $objModel ? $objModel::getTable() : '',
+            'value'         => $arrDca['value'],
+            'field'         => $strName,
+            'inputName'     => $arrDca['name'],
+            'activeRecord'  => $objModel
+        );
 
         // Preserve the label
         $strLabel = $arrDca['label'];
 
-        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $strTable, $objDca);
+        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $dc->table, $dc);
 
         // Remove the label if it was not set – Contao will set it to field name if it's not present
         if (!isset($strLabel) || !$strLabel) {
