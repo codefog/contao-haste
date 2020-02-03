@@ -146,6 +146,11 @@ class PageModel extends Model
         $objModel->jumpTo = 11;
         return $objModel;
     }
+
+    public static function getTable()
+    {
+        return 'tl_table';
+    }
 }
 
 $GLOBALS['objPage'] = new Database_Result();
