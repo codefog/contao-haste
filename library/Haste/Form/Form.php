@@ -12,6 +12,7 @@
 
 namespace Haste\Form;
 
+use Contao\FrontendTemplate;
 use Haste\Form\Validator\ValidatorInterface;
 use Haste\Generator\RowClass;
 use Haste\Util\ArrayPosition;
@@ -949,11 +950,11 @@ class Form extends \Controller
     /**
      * Add form to a template
      *
-     * @param \FrontendTemplate $objTemplate
+     * @param FrontendTemplate $objTemplate
      *
      * @return $this
      */
-    public function addToTemplate(\FrontendTemplate $objTemplate)
+    public function addToTemplate(FrontendTemplate $objTemplate)
     {
         return $this->addToObject($objTemplate);
     }
