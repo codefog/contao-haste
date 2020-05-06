@@ -365,6 +365,6 @@ class FileUpload extends \FileUpload
             }
         }
 
-        return str_replace($name, $name . '__' . ++$offset, $strFile);
+        return str_replace($name . '.', $name . '__' . ++$offset . '.', $strFile);
     }
 }
