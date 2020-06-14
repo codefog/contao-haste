@@ -12,6 +12,7 @@
 
 
 namespace Haste\Dca;
+use Contao\Environment;
 use Haste\Http\Response\JsonResponse;
 use Haste\Util\Debug;
 
@@ -64,6 +65,7 @@ class AjaxOperations
         // Initialize versioning
         $versions = new \Versions($dc->table, $id);
         $versions->initialize();
+        $versions->setEditUrl($this->getVerionEditUrl((int)$id, (string)$operation));
 
         // Determine next value and icon
         $options = $this->getOptions($hasteAjaxOperationSettings);
@@ -302,5 +304,17 @@ class AjaxOperations
     private function getOptions(array $hasteAjaxOperationSettings)
     {
         return (array) $hasteAjaxOperationSettings['options'];
+    }
+
+    private function getVerionEditUrl(int $id, string $operation)
+    {
+        if ($operation !== 'toggle') {
+            return null;
+        }
+
+        $url = Environment::get('request');
+        $url = preg_replace('/&(amp;)?id=[^&]+/', '', $url);
+        $url .= sprintf('&act=edit&id=%s', $id);
+        return $url;
     }
 }
