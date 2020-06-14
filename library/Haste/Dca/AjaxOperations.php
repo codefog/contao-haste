@@ -64,8 +64,8 @@ class AjaxOperations
 
         // Initialize versioning
         $versions = new \Versions($dc->table, $id);
-        $versions->initialize();
         $versions->setEditUrl($this->getVerionEditUrl((int)$id, (string)$operation));
+        $versions->initialize();
 
         // Determine next value and icon
         $options = $this->getOptions($hasteAjaxOperationSettings);
@@ -100,7 +100,7 @@ class AjaxOperations
                 TL_GENERAL
             );
         }
-        
+
         $response = array(
             'nextValue' => $options[$nextIndex]['value'],
             'nextIcon'  => $options[$nextIndex]['icon']
