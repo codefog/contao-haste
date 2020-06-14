@@ -64,7 +64,7 @@ class AjaxOperations
 
         // Initialize versioning
         $versions = new \Versions($dc->table, $id);
-        $versions->setEditUrl($this->getVerionEditUrl((int)$id, (string)$operation));
+        $versions->setEditUrl($this->getVersionEditUrl((int)$id, (string)$operation));
         $versions->initialize();
 
         // Determine next value and icon
@@ -306,7 +306,7 @@ class AjaxOperations
         return (array) $hasteAjaxOperationSettings['options'];
     }
 
-    private function getVerionEditUrl(int $id, string $operation)
+    private function getVersionEditUrl(int $id, string $operation)
     {
         if ($operation !== 'toggle') {
             return null;
