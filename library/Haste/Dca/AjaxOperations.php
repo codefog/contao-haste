@@ -306,7 +306,13 @@ class AjaxOperations
         return (array) $hasteAjaxOperationSettings['options'];
     }
 
-    private function getVersionEditUrl(int $id, string $operation)
+    /**
+     * @param int    $id
+     * @param string $operation
+     *
+     * @return string|null
+     */
+    private function getVersionEditUrl($id, $operation)
     {
         if ($operation !== 'toggle') {
             return null;
