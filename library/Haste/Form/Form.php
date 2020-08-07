@@ -407,8 +407,8 @@ class Form extends \Controller
 
         // Support default values
         if (!$this->isSubmitted()) {
-            if (isset($arrDca['default']) && !isset($arrDca['value'])) {
-                $arrDca['value'] = $arrDca['default'];
+            if (isset($arrDca['eval']['default']) && !isset($arrDca['value'])) {
+                $arrDca['value'] = $arrDca['eval']['default'];
             }
 
             // Try to load the default value from bound Model
