@@ -45,26 +45,14 @@ class StringUtil
         // Must decode, tokens could be encoded
         $strText = \StringUtil::decodeEntities($strText);
 
-        // Replace all opening and closing tags with a hash so they don't get stripped
-        // by parseSimpleTokens() - this is useful e.g. for XML content
-        $strHash                = md5($strText);
-        $strTagOpenReplacement  = 'HASTE-TAG-OPEN-' . $strHash;
-        $strTagCloseReplacement = 'HASTE-TAG-CLOSE-' . $strHash;
-        $arrOriginal            = array('<', '>');
-        $arrReplacement         = array($strTagOpenReplacement, $strTagCloseReplacement);
-
-        $strBuffer = str_replace($arrOriginal, $arrReplacement, $strText);
-
         // first parse the tokens as they might have if-else clauses
-        $strBuffer = \StringUtil::parseSimpleTokens($strBuffer, $arrTokens);
-
-        $strBuffer = str_replace($arrReplacement, $arrOriginal, $strBuffer);
+        $strBuffer = \StringUtil::parseSimpleTokens($strText, $arrTokens);
 
         // then replace the insert tags
         $strBuffer = \Controller::replaceInsertTags($strBuffer, false);
 
-        // check if the inserttags have returned a simple token or an insert tag to parse
-        if ((strpos($strBuffer, '##') !== false || strpos($strBuffer, '{{') !== false) && $strBuffer != $strText) {
+        // check if the insert tags have returned a simple token
+        if (strpos($strBuffer, '##') !== false && $strBuffer != $strText) {
             $strBuffer = static::recursiveReplaceTokensAndTags($strBuffer, $arrTokens, $intTextFlags);
         }
 
