@@ -20,7 +20,6 @@
         "contao-community-alliance/composer-plugin": "~2.4 || ~3.0"
     },
     "require-dev": {
-        "terminal42/contao-namespace-class-loader": "~1.0",
         "phpunit/phpunit": "4.8.*",
         "phpoffice/phpexcel": "^1.6",
         "phpoffice/phpspreadsheet": "^1.6"
