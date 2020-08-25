@@ -1127,7 +1127,7 @@ class Form extends \Controller
             throw new \InvalidArgumentException('You cannot use a numeric form field name.');
         }
 
-        if (in_array($strName, $this->arrFormFields, true)) {
+        if (in_array($strName, array_keys($this->arrFormFields), true)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
         }
     }
