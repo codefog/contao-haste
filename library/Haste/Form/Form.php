@@ -487,6 +487,9 @@ class Form extends \Controller
 
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $dc->table, $dc);
 
+        // Reset the ID to the field name
+        $arrDca['id'] = $strName;
+
         // Remove the label if it was not set – Contao will set it to field name if it's not present
         if (!isset($strLabel) || !$strLabel) {
             $arrDca['label'] = '';
@@ -1127,7 +1130,7 @@ class Form extends \Controller
             throw new \InvalidArgumentException('You cannot use a numeric form field name.');
         }
 
-        if (in_array($strName, $this->arrFormFields, true)) {
+        if (in_array($strName, array_keys($this->arrFormFields), true)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $strName));
         }
     }
