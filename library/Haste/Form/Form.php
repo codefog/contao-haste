@@ -487,6 +487,9 @@ class Form extends \Controller
 
         $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $dc->table, $dc);
 
+        // Reset the ID to the field name
+        $arrDca['id'] = $strName;
+
         // Remove the label if it was not set – Contao will set it to field name if it's not present
         if (!isset($strLabel) || !$strLabel) {
             $arrDca['label'] = '';
