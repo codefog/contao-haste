@@ -201,9 +201,6 @@ class Response
     {
         // Replace insert tags
         $this->strContent = InsertTag::replaceRecursively($strContent);
-
-        // Content-Length
-        $this->setHeader('Content-Length', strlen($this->strContent));
     }
 
     /**

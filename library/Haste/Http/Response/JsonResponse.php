@@ -49,8 +49,5 @@ class JsonResponse extends Response
         } else {
             $this->strContent = json_encode($varContent, $intOptions);
         }
-
-        // Content-Length
-        $this->setHeader('Content-Length', strlen($this->strContent));
     }
 }
