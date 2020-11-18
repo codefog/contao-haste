@@ -47,7 +47,7 @@ class Undo
      * @param integer
      * @return boolean
      */
-    public static function undo($intUndoId)
+    public static function undo($intUndoId, \DataContainer $dc = null)
     {
         if (!is_array($GLOBALS['HASTE_HOOKS']['undoData']) || empty($GLOBALS['HASTE_HOOKS']['undoData']) || !static::hasData($intUndoId)) {
             return false;
@@ -92,12 +92,22 @@ class Undo
                     continue;
                 }
 
+                // Trigger the undo_callback
+                if (is_array($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'])) {
+                    foreach ($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] as $callback) {
+                        if (is_array($callback)) {
+                            \System::importStatic($callback[0])->{$callback[1]}($table, $row, $dc);
+                        } elseif (is_callable($callback)) {
+                            $callback($table, $row, $dc);
+                        }
+                    }
+                }
+
                 $insertId = $objInsertStmt->insertId;
 
-                foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
+                foreach (array_merge($GLOBALS['HASTE_HOOKS']['undoData'] ?: [], $GLOBALS['TL_HOOKS']['hasteUndoData'] ?: []) as $callback) {
                     if (is_array($callback)) {
-                        $objClass = new $callback[0]();
-                        $objClass->{$callback[1]}($hasteData, $insertId, $table, $row);
+                        \System::importStatic($callback[0])->{$callback[1]}($hasteData, $insertId, $table, $row);
                     } elseif (is_callable($callback)) {
                         $callback($hasteData, $insertId, $table, $row);
                     }
@@ -143,7 +153,7 @@ class Undo
      */
     public function callback(\DataContainer $dc)
     {
-        static::undo($dc->id);
+        static::undo($dc->id, $dc);
         \System::redirect(\System::getReferer());
     }
 
