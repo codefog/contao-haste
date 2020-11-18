@@ -94,7 +94,7 @@ class Undo
 
                 $insertId = $objInsertStmt->insertId;
 
-                foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
+                foreach (array_merge($GLOBALS['HASTE_HOOKS']['undoData'] ?: [], $GLOBALS['TL_HOOKS']['hasteUndoData'] ?: []) as $callback) {
                     if (is_array($callback)) {
                         \System::importStatic($callback[0])->{$callback[1]}($hasteData, $insertId, $table, $row);
                     } elseif (is_callable($callback)) {
