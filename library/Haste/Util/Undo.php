@@ -49,7 +49,16 @@ class Undo
      */
     public static function undo($intUndoId, \DataContainer $dc = null)
     {
-        if (!is_array($GLOBALS['HASTE_HOOKS']['undoData']) || empty($GLOBALS['HASTE_HOOKS']['undoData']) || !static::hasData($intUndoId)) {
+        if (!isset($GLOBALS['HASTE_HOOKS']['undoData']) || !is_array($GLOBALS['HASTE_HOOKS']['undoData'])) {
+            $GLOBALS['HASTE_HOOKS']['undoData'] = [];
+        }
+
+        // Get the hooks from the TL_HOOKS array
+        if (isset($GLOBALS['TL_HOOKS']['hasteUndoData']) && is_array($GLOBALS['TL_HOOKS']['hasteUndoData'])) {
+            $GLOBALS['HASTE_HOOKS']['undoData'] = array_merge($GLOBALS['HASTE_HOOKS']['undoData'], $GLOBALS['TL_HOOKS']['hasteUndoData']);
+        }
+
+        if (empty($GLOBALS['HASTE_HOOKS']['undoData']) || !static::hasData($intUndoId)) {
             return false;
         }
 
@@ -105,7 +114,7 @@ class Undo
 
                 $insertId = $objInsertStmt->insertId;
 
-                foreach (array_merge($GLOBALS['HASTE_HOOKS']['undoData'] ?: [], $GLOBALS['TL_HOOKS']['hasteUndoData'] ?: []) as $callback) {
+                foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
                     if (is_array($callback)) {
                         \System::importStatic($callback[0])->{$callback[1]}($hasteData, $insertId, $table, $row);
                     } elseif (is_callable($callback)) {
