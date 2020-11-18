@@ -28,7 +28,7 @@ class Undo
                                               ->limit(1)
                                               ->execute($intUndoId);
 
-        if (!$objRecords->numRows) {undoData
+        if (!$objRecords->numRows) {
             return false;
         }
 
