@@ -28,7 +28,7 @@ class Undo
                                               ->limit(1)
                                               ->execute($intUndoId);
 
-        if (!$objRecords->numRows) {
+        if (!$objRecords->numRows) {undoData
             return false;
         }
 
@@ -96,8 +96,7 @@ class Undo
 
                 foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
                     if (is_array($callback)) {
-                        $objClass = new $callback[0]();
-                        $objClass->{$callback[1]}($hasteData, $insertId, $table, $row);
+                        \System::importStatic($callback[0])->{$callback[1]}($hasteData, $insertId, $table, $row);
                     } elseif (is_callable($callback)) {
                         $callback($hasteData, $insertId, $table, $row);
                     }
