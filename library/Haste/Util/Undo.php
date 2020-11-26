@@ -102,6 +102,7 @@ class Undo
                 }
 
                 // Trigger the undo_callback
+                \Controller::loadDataContainer($table);
                 if (is_array($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'])) {
                     foreach ($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] as $callback) {
                         if (is_array($callback)) {
