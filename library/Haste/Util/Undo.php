@@ -109,6 +109,10 @@ class Undo
                     }
                 }
 
+                if (empty($GLOBALS['HASTE_HOOKS']['undoData']) || empty($hasteData)) {
+                    continue;
+                }
+
                 $insertId = $objInsertStmt->insertId;
 
                 foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
