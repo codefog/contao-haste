@@ -58,10 +58,6 @@ class Undo
             $GLOBALS['HASTE_HOOKS']['undoData'] = array_merge($GLOBALS['HASTE_HOOKS']['undoData'], $GLOBALS['TL_HOOKS']['hasteUndoData']);
         }
 
-        if (empty($GLOBALS['HASTE_HOOKS']['undoData']) || !static::hasData($intUndoId)) {
-            return false;
-        }
-
         $objRecords = \Database::getInstance()->prepare("SELECT * FROM tl_undo WHERE id=?")
                                               ->limit(1)
                                               ->execute($intUndoId);
