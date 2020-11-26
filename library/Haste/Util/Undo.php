@@ -58,10 +58,6 @@ class Undo
             $GLOBALS['HASTE_HOOKS']['undoData'] = array_merge($GLOBALS['HASTE_HOOKS']['undoData'], $GLOBALS['TL_HOOKS']['hasteUndoData']);
         }
 
-        if (empty($GLOBALS['HASTE_HOOKS']['undoData']) || !static::hasData($intUndoId)) {
-            return false;
-        }
-
         $objRecords = \Database::getInstance()->prepare("SELECT * FROM tl_undo WHERE id=?")
                                               ->limit(1)
                                               ->execute($intUndoId);
@@ -102,6 +98,7 @@ class Undo
                 }
 
                 // Trigger the undo_callback
+                \Controller::loadDataContainer($table);
                 if (is_array($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'])) {
                     foreach ($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] as $callback) {
                         if (is_array($callback)) {
@@ -110,6 +107,10 @@ class Undo
                             $callback($table, $row, $dc);
                         }
                     }
+                }
+
+                if (empty($GLOBALS['HASTE_HOOKS']['undoData']) || empty($hasteData)) {
+                    continue;
                 }
 
                 $insertId = $objInsertStmt->insertId;
