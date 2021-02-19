@@ -18,16 +18,17 @@ include_once __DIR__ . '/../../../../../library/Haste/IO/Writer/CsvFileWriter.ph
 
 use Haste\IO\Reader\ArrayReader;
 use Haste\IO\Writer\CsvFileWriter;
+use PHPUnit\Framework\TestCase;
 
-class CsvFileWriterTest extends \PHPUnit_Framework_TestCase
+class CsvFileWriterTest extends TestCase
 {
     protected $tempFile;
 
-    public function setUp()
+    public function setUp(): void
     {
         $file = tempnam(sys_get_temp_dir(), '');
 
-        define(TL_ROOT, dirname($file));
+        define('TL_ROOT', dirname($file));
         $this->tempFile = basename($file);
     }
 

@@ -6,8 +6,9 @@ namespace Haste\Test\Number;
 include_once __DIR__ . '/../../../../../library/Haste/Number/BackendWidget.php';
 
 use Haste\Number\BackendWidget;
+use PHPUnit\Framework\TestCase;
 
-class BackendWidgetTest extends \PHPUnit_Framework_TestCase
+class BackendWidgetTest extends TestCase
 {
     public function testInstance()
     {
@@ -18,10 +19,10 @@ class BackendWidgetTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider inputProvider
      */
-    public function testInput($input, $output, $exception=null)
+    public function testInput($input, $output, $expectException = false)
     {
-        if ($exception) {
-            $this->setExpectedException($exception);
+        if ($expectException) {
+            $this->expectException(\InvalidArgumentException::class);
         }
 
         \Input::setPost('test_number_field', $input);
@@ -38,8 +39,8 @@ class BackendWidgetTest extends \PHPUnit_Framework_TestCase
             array('0', 0),
             array('150', 1500000),
             array('-1', -10000),
-            array('foobar.00', 0, 'InvalidArgumentException'),
-            array('test', 0, 'InvalidArgumentException'),
+            array('foobar.00', 0, true),
+            array('test', 0, true),
         );
     }
 }

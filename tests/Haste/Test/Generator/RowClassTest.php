@@ -12,8 +12,9 @@ namespace Haste\Test\Generator;
 include_once __DIR__ . '/../../../../../library/Haste/Generator/RowClass.php';
 
 use Haste\Generator\RowClass;
+use PHPUnit\Framework\TestCase;
 
-class RowClassTest extends \PHPUnit_Framework_TestCase
+class RowClassTest extends TestCase
 {
 
     public function testKey()

@@ -13,8 +13,9 @@ use Haste\Http\Response\Response;
 use Haste\Http\Response\JsonResponse;
 use Haste\Http\Response\XmlResponse;
 use Haste\Http\Response\HtmlResponse;
+use PHPUnit\Framework\TestCase;
 
-class ResponseTest extends \PHPUnit_Framework_TestCase
+class ResponseTest extends TestCase
 {
     public function testInstance()
     {
@@ -71,12 +72,11 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(200, $objResponse->getStatusCode());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testSetStatusCodeException()
     {
         $objResponse = new Response('Foobar', 200);
+
+        $this->expectException(\InvalidArgumentException::class);
         $objResponse->setStatusCode(7000);
     }
 }

@@ -12,12 +12,13 @@ namespace Haste\Test\Form;
 include_once __DIR__ . '/../../../../../library/Haste/Form/Form.php';
 
 use Haste\Form\Form;
+use PHPUnit\Framework\TestCase;
 
-class FormTest extends \PHPUnit_Framework_TestCase
+class FormTest extends TestCase
 {
     protected $instance = null;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->instance = new Form('someid', 'POST', function() {
             return true;

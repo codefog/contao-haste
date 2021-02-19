@@ -20,9 +20,12 @@
         "contao-community-alliance/composer-plugin": "~2.4 || ~3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "4.8.*",
+        "phpunit/phpunit": "^9.2",
         "phpoffice/phpexcel": "^1.6",
         "phpoffice/phpspreadsheet": "^1.6"
+    },
+    "scripts": {
+        "unit-tests": "vendor/bin/phpunit"
     },
     "replace": {
         "contao-legacy/haste": "self.version"
