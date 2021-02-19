@@ -67,7 +67,7 @@ class Format
     {
         \System::loadLanguageFile($strTable);
         \Controller::loadDataContainer($strTable);
-        $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
+        $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField] ?? [];
 
         // Add the "name" key (backwards compatibility)
         if (!isset($arrField['name'])) {
@@ -89,7 +89,7 @@ class Format
         if (!empty($arrField['label'])) {
             $strLabel = is_array($arrField['label']) ? $arrField['label'][0] : $arrField['label'];
         } else {
-            $strLabel = is_array($GLOBALS['TL_LANG']['MSC'][$arrField['name']]) ? $GLOBALS['TL_LANG']['MSC'][$arrField['name']][0] : $GLOBALS['TL_LANG']['MSC'][$arrField['name']];
+            $strLabel = is_array($GLOBALS['TL_LANG']['MSC'][$arrField['name']] ?? null) ? $GLOBALS['TL_LANG']['MSC'][$arrField['name']][0] : $GLOBALS['TL_LANG']['MSC'][$arrField['name']] ?? '';
         }
 
         if ($strLabel == '') {
