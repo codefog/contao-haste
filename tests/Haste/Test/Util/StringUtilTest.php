@@ -15,11 +15,12 @@ namespace Haste\Test\Util;
 include_once __DIR__ . '/../../../../../library/Haste/Util/StringUtil.php';
 
 use Haste\Util\StringUtil;
+use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/../../../../../library/Haste/Util/StringUtil.php';
 
 
-class StringUtilTest extends \PHPUnit_Framework_TestCase
+class StringUtilTest extends TestCase
 {
 
     /**

@@ -136,10 +136,10 @@ class Relations
         if ($arrRelation !== false) {
             $cacheKey = $arrRelation['table'] . $dc->activeRecord->{$arrRelation['reference']};
 
-            $field = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field];
+            $field = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field] ?? [];
 
             // Support for csv values
-            if ($field['eval']['multiple'] && $field['eval']['csv']) {
+            if (($field['eval']['multiple'] ?? false) && ($field['eval']['csv'] ?? false)) {
                 $arrValues = explode($field['eval']['csv'], $varValue);
             } else {
                 $arrValues = deserialize($varValue, true);
@@ -313,7 +313,7 @@ class Relations
         }
 
         foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'] as $strField => $arrField) {
-            if ($arrField['eval']['doNotCopy']) {
+            if ($arrField['eval']['doNotCopy'] ?? false) {
                 continue;
             }
 
@@ -515,13 +515,13 @@ class Relations
         $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
 
         // Include the child records in tree view
-        if ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 5 && count($arrIds) > 0) {
+        if (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 5 && count($arrIds) > 0) {
             $arrIds = \Database::getInstance()->getChildRecords($arrIds, $dc->table, false, $arrIds);
         }
 
         $blnFilter = false;
         $session = \Session::getInstance()->getData();
-        $filterId = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
+        $filterId = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
 
         foreach (array_keys(static::$arrFilterableFields) as $field) {
             if (isset($session['filter'][$filterId][$field])) {
@@ -546,7 +546,7 @@ class Relations
             return;
         }
 
-        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
+        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] ?? null) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
         $blnFilter = false;
         $session = \Session::getInstance()->getData();
 
@@ -619,7 +619,7 @@ class Relations
             return '';
         }
 
-        $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
+        $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
         $session = \Session::getInstance()->getData();
 
         // Set filter from user input
@@ -641,7 +641,7 @@ class Relations
 
         foreach (static::$arrFilterableFields as $field => $arrRelation) {
             $return .= '<select name="' . $field . '" class="tl_select' . (isset($session['filter'][$filter][$field]) ? ' active' : '') . '">
-    <option value="tl_' . $field . '">' . $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] . '</option>
+    <option value="tl_' . $field . '">' . ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '') . '</option>
     <option value="tl_' . $field . '">---</option>';
 
             $arrIds = Model::getRelatedValues($arrRelation['reference_table'], $field);
@@ -664,14 +664,14 @@ class Relations
             $dc->field = $field;
 
             // Call the options_callback
-            if ((is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']) || is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) && !$GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference']) {
-                if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) {
+            if ((is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null) || is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) && !($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'] ?? null)) {
+                if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
                     $strClass = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][0];
                     $strMethod = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][1];
 
                     $objClass = \System::importStatic($strClass);
                     $options_callback = $objClass->$strMethod($dc);
-                } elseif (is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'])) {
+                } elseif (is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
                     $options_callback = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']($dc);
                 }
 
@@ -706,9 +706,9 @@ class Relations
                 // Use reference array
                 if (isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'])) {
                     $option_label = is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv]) ? $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv][0] : $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv];
-                } elseif ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['isAssociative'] || array_is_assoc($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options'])) {
+                } elseif (($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['isAssociative'] ?? false) || array_is_assoc($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options'] ?? null)) {
                     // Associative array
-                    $option_label = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options'][$vv];
+                    $option_label = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options'][$vv] ?? '';
                 }
 
                 // No empty options allowed
@@ -801,7 +801,7 @@ class Relations
 
             $options_sorter = [];
             foreach ($relatedSearchFields as $relatedSearchField) {
-                $option_label = $GLOBALS['TL_DCA'][$relTable]['fields'][$relatedSearchField]['label'][0] ?: (\is_array($GLOBALS['TL_LANG']['MSC'][$relatedSearchField]) ? $GLOBALS['TL_LANG']['MSC'][$relatedSearchField][0] : $GLOBALS['TL_LANG']['MSC'][$relatedSearchField]);
+                $option_label = $GLOBALS['TL_DCA'][$relTable]['fields'][$relatedSearchField]['label'][0] ?: (\is_array($GLOBALS['TL_LANG']['MSC'][$relatedSearchField] ?? null) ? $GLOBALS['TL_LANG']['MSC'][$relatedSearchField][0] : ($GLOBALS['TL_LANG']['MSC'][$relatedSearchField] ?? ''));
                 $options_sorter[utf8_romanize($option_label).'_'.$relatedSearchField] = '  <option value="'.specialchars($relatedSearchField).'"'.(($relatedSearchField == $sessionValues[$dc->table]['searchField'] && $sessionValues[$dc->table]['table'] == $relTable) ? ' selected="selected"' : '').'>'.$option_label.'</option>';
             }
 

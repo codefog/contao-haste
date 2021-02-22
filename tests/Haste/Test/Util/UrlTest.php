@@ -15,8 +15,9 @@ namespace Haste\Test\Util;
 include_once __DIR__ . '/../../../../../library/Haste/Util/Url.php';
 
 use Haste\Util\Url;
+use PHPUnit\Framework\TestCase;
 
-class UrlTest extends \PHPUnit_Framework_TestCase
+class UrlTest extends TestCase
 {
 
     /**

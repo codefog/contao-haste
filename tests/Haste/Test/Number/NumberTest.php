@@ -5,8 +5,9 @@ namespace Haste\Test\Number;
 include_once __DIR__ . '/../../../../../library/Haste/Number/Number.php';
 
 use Haste\Number\Number;
+use PHPUnit\Framework\TestCase;
 
-class NumberTest extends \PHPUnit_Framework_TestCase
+class NumberTest extends TestCase
 {
     public function testInstance()
     {
@@ -134,10 +135,11 @@ class NumberTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider createExceptionProvider
-     * @expectedException \InvalidArgumentException
      */
     public function testCreateExceptions($data)
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         Number::create($data);
     }
 
