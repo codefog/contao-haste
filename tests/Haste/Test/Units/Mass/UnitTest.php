@@ -13,8 +13,9 @@ include_once __DIR__ . '/../../../../../../library/Haste/Units/Converter.php';
 include_once __DIR__ . '/../../../../../../library/Haste/Units/Mass/Unit.php';
 
 use Haste\Units\Mass\Unit;
+use PHPUnit\Framework\TestCase;
 
-class UnitTest extends \PHPUnit_Framework_TestCase
+class UnitTest extends TestCase
 {
 
     public function testBase()

@@ -9,10 +9,11 @@
 namespace Haste\Test;
 
 use Haste\Haste;
+use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/../../../../../../library/Haste.php';
 
-class HasteTest extends \PHPUnit_Framework_TestCase
+class HasteTest extends TestCase
 {
     public function testInstance()
     {

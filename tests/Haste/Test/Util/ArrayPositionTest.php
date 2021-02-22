@@ -15,9 +15,10 @@ namespace Haste\Test\Util;
 include_once __DIR__ . '/../../../../../library/Haste/Util/ArrayPosition.php';
 
 use Haste\Util\ArrayPosition;
+use PHPUnit\Framework\TestCase;
 
 
-class ArrayPositionTest extends \PHPUnit_Framework_TestCase
+class ArrayPositionTest extends TestCase
 {
 
     public function testFirst()

@@ -15,8 +15,9 @@ namespace Haste\Test\Util;
 include_once __DIR__ . '/../../../../../library/Haste/Util/RepositoryVersion.php';
 
 use Haste\Util\RepositoryVersion;
+use PHPUnit\Framework\TestCase;
 
-class RepositoryVersionTest extends \PHPUnit_Framework_TestCase
+class RepositoryVersionTest extends TestCase
 {
 
     /**

@@ -13,10 +13,11 @@
 namespace Haste\Test\DateTime;
 
 use Haste\DateTime\DateTime;
+use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/../../../../../library/Haste/DateTime/DateTime.php';
 
-class DateTimeTest extends \PHPUnit_Framework_TestCase
+class DateTimeTest extends TestCase
 {
     public function testCreateFromFormat()
     {

@@ -12,8 +12,9 @@ namespace Haste\Test\DateTime;
 include_once __DIR__ . '/../../../../../library/Haste/DateTime/ZodiacSign.php';
 
 use Haste\DateTime\ZodiacSign;
+use PHPUnit\Framework\TestCase;
 
-class ZodiacSignTest extends \PHPUnit_Framework_TestCase
+class ZodiacSignTest extends TestCase
 {
 
     public function testLatins()

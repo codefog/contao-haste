@@ -186,7 +186,7 @@ class AjaxOperations
     {
         $hasPermission = true;
 
-        if ($GLOBALS['TL_DCA'][$table]['fields'][$hasteAjaxOperationSettings['field']]['exclude']
+        if (($GLOBALS['TL_DCA'][$table]['fields'][$hasteAjaxOperationSettings['field']]['exclude'] ?? false)
             && !\BackendUser::getInstance()->hasAccess($table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
         ) {
 
@@ -220,7 +220,7 @@ class AjaxOperations
         $field = $hasteAjaxOperationSettings['field'];
 
         // Trigger the save_callback
-        if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'])) {
+        if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] ?? null)) {
             foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] as $callback) {
                 if (is_array($callback)) {
 
