@@ -18,13 +18,14 @@ include_once __DIR__ . '/../../../../../../library/Haste/Units/Mass/Scale.php';
 use Haste\Units\Mass\Unit;
 use Haste\Units\Mass\Scale;
 use Haste\Units\Mass\Weight;
+use PHPUnit\Framework\TestCase;
 
-class ScaleTest extends \PHPUnit_Framework_TestCase
+class ScaleTest extends TestCase
 {
 
     protected $instance = null;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->instance = new Scale();
     }

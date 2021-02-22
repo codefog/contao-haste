@@ -72,7 +72,7 @@ class ModelData
 
             $arrAdditional['formatted'] = Format::dcaValue($strTable, $strField, $varValue);
 
-            if (in_array($arrFields[$strField]['eval']['rgxp'], array('date', 'datim', 'time'))) {
+            if (in_array($arrFields[$strField]['eval']['rgxp'] ?? null, array('date', 'datim', 'time'))) {
                 $arrData[$strField] = new Timestamp($varValue, $strLabel, $arrAdditional);
             } else {
                 $arrData[$strField] = new Plain($varValue, $strLabel, $arrAdditional);

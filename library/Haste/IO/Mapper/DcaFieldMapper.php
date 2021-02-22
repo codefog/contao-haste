@@ -26,11 +26,11 @@ class DcaFieldMapper extends ArrayMapper
      */
     public function __construct($strTable)
     {
-        if (!is_array($GLOBALS['TL_DCA'][$strTable])) {
+        if (!is_array($GLOBALS['TL_DCA'][$strTable] ?? null)) {
             \Controller::loadDataContainer($strTable);
         }
 
-        if (!is_array($GLOBALS['TL_DCA'][$strTable]['fields'])) {
+        if (!is_array($GLOBALS['TL_DCA'][$strTable]['fields'] ?? null)) {
             throw new \Exception('DCA for table "' . $strTable . '" does not have any fields.');
         }
 

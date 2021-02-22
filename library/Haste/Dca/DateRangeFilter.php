@@ -41,7 +41,7 @@ class DateRangeFilter
 
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
             if (!empty($arrField['rangeFilter'])
-                && in_array($arrField['eval']['rgxp'], array('date', 'time', 'datim'))
+                && in_array($arrField['eval']['rgxp'] ?? null, array('date', 'time', 'datim'))
             ) {
                 $this->arrFieldsToFilter[] = $strField;
             }
@@ -69,7 +69,7 @@ class DateRangeFilter
 
         $GLOBALS['TL_CSS'][] = 'system/modules/haste/assets/haste.css';
 
-        $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
+        $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
         $session = \Session::getInstance()->getData();
 
         // Set filter from user input
@@ -101,19 +101,19 @@ class DateRangeFilter
             $return .= '<div class="tl_subpanel haste_dateRangeFilter">';
 
             $return .= sprintf('<strong>%s: </strong>',
-                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0]
+                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? ''
             );
 
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_' . $field . '_from',
                 $session['filter'][$filter][$key]['from'],
-                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp']
+                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? ''
             );
 
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_' . $field . '_to',
                 $session['filter'][$filter][$key]['to'],
-                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp']
+                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? ''
             );
 
             $return .= '</div>';
@@ -136,7 +136,7 @@ class DateRangeFilter
 
         foreach ($this->arrFieldsToFilter as $field) {
             $key = 'haste_dateRangeFilter_' . $field;
-            $rgxp = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'];
+            $rgxp = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? '';
 
             $from = ($session['filter'][$filter][$key]['from']) ?: null;
             $to = ($session['filter'][$filter][$key]['to']) ?: null;
@@ -307,14 +307,14 @@ class DateRangeFilter
             ($value) ? ' active' : '',
             $value,
             $icon,
-            specialchars($GLOBALS['TL_LANG']['MSC']['datepicker']),
+            specialchars($GLOBALS['TL_LANG']['MSC']['datepicker'] ?? ''),
             $name,
             $name,
             $name,
             $format,
             $time,
-            $GLOBALS['TL_LANG']['MSC']['weekOffset'],
-            $GLOBALS['TL_LANG']['MSC']['titleFormat']
+            $GLOBALS['TL_LANG']['MSC']['weekOffset'] ?? '',
+            $GLOBALS['TL_LANG']['MSC']['titleFormat'] ?? ''
         );
     }
 }

@@ -84,12 +84,12 @@ class Controller
     {
         // I am a dummy
     }
-    public function generateFrontendUrl($strName)
+    public static function generateFrontendUrl($strName)
     {
         return $strName;
     }
 
-    public function replaceInsertTags($strText)
+    public static function replaceInsertTags($strText)
     {
         return $strText;
     }

@@ -635,7 +635,7 @@ class Form extends \Controller
         $this->loadDataContainer($strTable);
         $arrFields = &$GLOBALS['TL_DCA'][$strTable]['fields'];
 
-        foreach ($arrFields as $k => $v) {
+        foreach (($arrFields ?? []) as $k => $v) {
             if (is_callable($varCallback) && !call_user_func_array($varCallback, array(&$k, &$v))) {
                 continue;
             }
@@ -847,7 +847,7 @@ class Form extends \Controller
         // Initialize widgets
         foreach ($this->arrFormFields as $strName => $arrField) {
 
-            $strClass = $GLOBALS['TL_FFL'][$arrField['type']];
+            $strClass = $GLOBALS['TL_FFL'][$arrField['type']] ?? '';
 
             if (!class_exists($strClass)) {
                 throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $strClass, $arrField['type']));
