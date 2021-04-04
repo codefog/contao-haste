@@ -193,12 +193,12 @@ class AjaxOperations
             $hasPermission = false;
         }
 
-        if (is_array($hasteAjaxOperationSettings['check_permission_callback'])) {
+        if (isset($hasteAjaxOperationSettings['check_permission_callback']) && is_array($hasteAjaxOperationSettings['check_permission_callback'])) {
 
             \System::importStatic($hasteAjaxOperationSettings['check_permission_callback'][0])
                 ->{$hasteAjaxOperationSettings['check_permission_callback'][1]}($table, $hasteAjaxOperationSettings, $hasPermission);
         }
-        elseif (is_callable($hasteAjaxOperationSettings['check_permission_callback'])) {
+        elseif (isset($hasteAjaxOperationSettings['check_permission_callback']) && is_callable($hasteAjaxOperationSettings['check_permission_callback'])) {
 
             $hasteAjaxOperationSettings['check_permission_callback']($table, $hasteAjaxOperationSettings, $hasPermission);
         }
