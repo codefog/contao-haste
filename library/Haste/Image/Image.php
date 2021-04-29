@@ -178,6 +178,11 @@ class Image
             $objFile->extension = 'png';
         }
 
+        // Create an image parent folder if it does not exist yet
+        if (!is_dir(TL_ROOT . '/' . dirname($strCacheName))) {
+            Files::getInstance()->mkdir(dirname($strCacheName));
+        }
+
         // Create the new image
         switch ($objFile->extension) {
             case 'gif':
