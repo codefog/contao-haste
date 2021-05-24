@@ -87,13 +87,13 @@ class Relations
             $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['save_callback'][] = ['Haste\Model\Relations', 'updateRelatedRecords'];
 
             // Use custom filtering
-            if ($arrField['filter']) {
+            if (isset($arrField['filter']) && $arrField['filter']) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['filter'] = false;
                 static::$arrFilterableFields[$strField] = $arrRelation;
             }
 
             // Use custom search filtering
-            if ($arrField['search']) {
+            if (isset($arrField['search']) && $arrField['search']) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['search'] = false;
                 static::$arrSearchableFields[$strField] = $arrRelation;
             }
@@ -110,14 +110,18 @@ class Relations
         // Add filter callbacks
         if (!empty(static::$arrFilterableFields) && 'BE' === TL_MODE) {
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterByRelations'];
-            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_filter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
-            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = ['Haste\Model\Relations', 'addRelationFilters'];
+            if (isset($GLOBALS['TL_DCA'][$strTable]['list']['panelLayout'])){
+                $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_filter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
+                $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = ['Haste\Model\Relations', 'addRelationFilters'];
+            }
         }
 
         if (!empty(static::$arrSearchableFields) && 'BE' === TL_MODE) {
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterBySearch'];
-            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/search/', 'haste_search;search', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
-            $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_search'] = ['Haste\Model\Relations', 'addRelationSearch'];
+            if (isset($GLOBALS['TL_DCA'][$strTable]['list']['panelLayout'])){
+                $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/search/', 'haste_search;search', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
+                $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_search'] = ['Haste\Model\Relations', 'addRelationSearch'];
+            }
         }
     }
 
@@ -416,8 +420,8 @@ class Relations
             }
 
             $objDelete = \Database::getInstance()->execute(
-                "SELECT " . $arrRelation['reference'] . " 
-                FROM " . $strTable . " 
+                "SELECT " . $arrRelation['reference'] . "
+                FROM " . $strTable . "
                 WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0"
             );
 
@@ -512,7 +516,7 @@ class Relations
             return;
         }
 
-        $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
+        $arrIds = isset($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) && \is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
 
         // Include the child records in tree view
         if (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 5 && count($arrIds) > 0) {
@@ -855,18 +859,18 @@ class Relations
 
                     // Related table data
                     $varRelation['related_table'] = $arrField['table'];
-                    $varRelation['related_tableSql'] = $arrField['tableSql'];
+                    $varRelation['related_tableSql'] = $arrField['tableSql'] ?? null;
                     $varRelation['related_field'] = isset($arrField['fieldColumn']) ? $arrField['fieldColumn'] : (str_replace('tl_', '', $arrField['table']) . '_' . $varRelation['field']);
                     $varRelation['related_sql'] = isset($arrField['fieldSql']) ? $arrField['fieldSql'] : "int(10) unsigned NOT NULL default '0'";
 
                     // Force save
-                    $varRelation['forceSave'] = $arrField['forceSave'];
+                    $varRelation['forceSave'] = $arrField['forceSave'] ?? null;
 
                     // Bidirectional
                     $varRelation['bidirectional'] = true; // I'm here for BC only
 
                     // Do not add table in install tool
-                    $varRelation['skipInstall'] = (bool) $arrField['skipInstall'];
+                    $varRelation['skipInstall'] = (bool) ($arrField['skipInstall'] ?? false);
                 }
             }
 
