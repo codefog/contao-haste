@@ -110,7 +110,7 @@ class Relations
         // Add filter callbacks
         if (!empty(static::$arrFilterableFields) && 'BE' === TL_MODE) {
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterByRelations'];
-            if (isset($GLOBALS['TL_DCA'][$strTable]['list']['panelLayout'])){
+            if (isset($GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'])){
                 $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_filter;filter', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
                 $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_filter'] = ['Haste\Model\Relations', 'addRelationFilters'];
             }
@@ -118,7 +118,7 @@ class Relations
 
         if (!empty(static::$arrSearchableFields) && 'BE' === TL_MODE) {
             $GLOBALS['TL_DCA'][$strTable]['config']['onload_callback'][] = ['Haste\Model\Relations', 'filterBySearch'];
-            if (isset($GLOBALS['TL_DCA'][$strTable]['list']['panelLayout'])){
+            if (isset($GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'])){
                 $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'] = preg_replace('/search/', 'haste_search;search', $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panelLayout'], 1);
                 $GLOBALS['TL_DCA'][$strTable]['list']['sorting']['panel_callback']['haste_search'] = ['Haste\Model\Relations', 'addRelationSearch'];
             }
