@@ -12,6 +12,8 @@
 
 namespace Haste\Generator;
 
+use Contao\FormPassword;
+
 class RowClass
 {
 
@@ -152,7 +154,7 @@ class RowClass
             }
 
             // Increase total before generating class to prevent "last" on the first input field
-            if (!$hasColumns && $varValue instanceof \FormPassword) {
+            if (!$hasColumns && $varValue instanceof FormPassword) {
                 ++$total;
             }
 
@@ -165,7 +167,7 @@ class RowClass
             elseif (is_object($varValue))
             {
                 // Generate class on confirmation field
-                if (!$hasColumns && $varValue instanceof \FormPassword) {
+                if (!$hasColumns && $varValue instanceof FormPassword) {
                     ++$current;
                     $varValue->rowClassConfirm = $this->generateClass($current, $total, $k);
                 }

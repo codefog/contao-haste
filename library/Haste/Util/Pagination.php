@@ -12,6 +12,9 @@
 
 namespace Haste\Util;
 
+use Contao\Config;
+use Contao\Input;
+
 class Pagination
 {
 
@@ -90,7 +93,7 @@ class Pagination
         $this->setUrlParameter($urlParameter);
 
         // Default values
-        $this->setMaxPaginationLinks(\Config::get('maxPaginationLinks'));
+        $this->setMaxPaginationLinks(Config::get('maxPaginationLinks'));
     }
 
     /**
@@ -243,7 +246,7 @@ class Pagination
     /**
      * Gets the pagination object
      *
-     * @return \Pagination
+     * @return \Contao\Pagination
      * @throws \OutOfRangeException
      */
     public function getPagination()
@@ -284,7 +287,7 @@ class Pagination
             return;
         }
 
-        $page = \Input::get($this->getUrlParameter()) ?: 1;
+        $page = Input::get($this->getUrlParameter()) ?: 1;
 
         // Set limit and offset
         $limit = $this->getPerPage() ?: $this->getTotal();
@@ -295,7 +298,7 @@ class Pagination
             $limit = $this->getTotal() - $offset;
         }
 
-        $this->pagination = new \Pagination(
+        $this->pagination = new \Contao\Pagination(
             $this->getTotal(),
             $this->getPerPage(),
             $this->getMaxPaginationLinks(),

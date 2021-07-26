@@ -14,6 +14,9 @@
 namespace Haste\Geodesy\Datum;
 
 
+use Contao\Request;
+use Contao\System;
+
 class WGS84 implements GeodeticDatum
 {
 
@@ -79,12 +82,12 @@ class WGS84 implements GeodeticDatum
         $strAddress = urlencode($strAddress);
 
         // Get the coordinates
-        $objRequest = new \Request();
+        $objRequest = new Request();
         $objRequest->send('http://maps.googleapis.com/maps/api/geocode/json?address=' . $strAddress . '&sensor=false');
 
         // Request failed
         if ($objRequest->hasError()) {
-            \System::log('Could not get coordinates for: ' . $strAddress . ' (' . $objRequest->response . ')', __METHOD__, TL_ERROR);
+            System::log('Could not get coordinates for: ' . $strAddress . ' (' . $objRequest->response . ')', __METHOD__, TL_ERROR);
 
             return null;
         }

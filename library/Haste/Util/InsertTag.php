@@ -12,7 +12,10 @@
 
 namespace Haste\Util;
 
-use Haste\Haste;
+use Contao\Config;
+use Contao\Controller;
+use Contao\Date;
+use Contao\FormFieldModel;
 
 class InsertTag
 {
@@ -36,7 +39,7 @@ class InsertTag
             return $varValue;
         }
 
-        return \Controller::replaceInsertTags($varValue, false);
+        return Controller::replaceInsertTags($varValue, false);
     }
 
 
@@ -112,12 +115,12 @@ class InsertTag
         }
 
         try {
-            $date = new \Date($chunks[1], $this->determineFormat($chunks[2]));
+            $date = new Date($chunks[1], $this->determineFormat($chunks[2]));
         } catch (\OutOfBoundsException $e) {
             return false;
         }
 
-        return \Date::parse($this->determineFormat($chunks[3]), $date->tstamp);
+        return Date::parse($this->determineFormat($chunks[3]), $date->tstamp);
     }
 
 
@@ -133,7 +136,7 @@ class InsertTag
         if (\in_array($format, ['datim', 'date', 'time'], true)) {
             $key = $format.'Format';
 
-            return isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->{$key} : \Config::get($key);
+            return isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->{$key} : Config::get($key);
         }
 
         return $format;
@@ -175,7 +178,7 @@ class InsertTag
 
         // Custom format
         if (!in_array($strFormat, array('datim', 'date', 'time'))) {
-            return \Date::parse($strFormat, $intTimestamp);
+            return Date::parse($strFormat, $intTimestamp);
         }
 
         return Format::$strFormat($intTimestamp);
@@ -235,7 +238,7 @@ class InsertTag
     {
         $id    = $arrTag[1];
         $value = $arrTag[2];
-        $field = \FormFieldModel::findByPk($id);
+        $field = FormFieldModel::findByPk($id);
 
         if (null === $field) {
             return $value;

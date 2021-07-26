@@ -49,12 +49,12 @@ if (!class_exists(HasteUpdater::class)) {
                     $newTable = $relation['table'];
 
                     // Rename the table
-                    if ($oldTable !== $newTable && \Database::getInstance()->tableExists($oldTable, null, true)) {
-                        if (\Database::getInstance()->tableExists($newTable, null, true)) {
-                            \System::log("Haste updater: Could not rename $oldTable to $newTable automatically because $newTable already exists! You have to migrate the data manually!", __METHOD__, TL_ERROR);
+                    if ($oldTable !== $newTable && \Contao\Database::getInstance()->tableExists($oldTable, null, true)) {
+                        if (\Contao\Database::getInstance()->tableExists($newTable, null, true)) {
+                            \Contao\System::log("Haste updater: Could not rename $oldTable to $newTable automatically because $newTable already exists! You have to migrate the data manually!", __METHOD__, TL_ERROR);
                         } else {
-                            \Database::getInstance()->query("RENAME TABLE $oldTable TO $newTable");
-                            \System::log("Haste updater: renamed relations table $oldTable to $newTable", __METHOD__, TL_GENERAL);
+                            \Contao\Database::getInstance()->query("RENAME TABLE $oldTable TO $newTable");
+                            \Contao\System::log("Haste updater: renamed relations table $oldTable to $newTable", __METHOD__, TL_GENERAL);
                         }
                     }
                 }
@@ -68,8 +68,8 @@ if (!class_exists(HasteUpdater::class)) {
         {
             $tables = [];
 
-            if (!method_exists(\System::class, 'getContainer')) {
-                foreach (\ModuleLoader::getActive() as $module) {
+            if (!method_exists(\Contao\System::class, 'getContainer')) {
+                foreach (\Contao\ModuleLoader::getActive() as $module) {
                     $dir = TL_ROOT.'/system/modules/'.$module.'/dca';
 
                     if (!is_dir($dir)) {
@@ -85,7 +85,7 @@ if (!class_exists(HasteUpdater::class)) {
                     }
                 }
             } else {
-                $files = System::getContainer()
+                $files = \Contao\System::getContainer()
                     ->get('contao.resource_finder')
                     ->findIn('dca')
                     ->depth(0)
@@ -99,7 +99,7 @@ if (!class_exists(HasteUpdater::class)) {
             }
 
             foreach (array_unique($tables) as $table) {
-                \Controller::loadDataContainer($table);
+                \Contao\Controller::loadDataContainer($table);
             }
         }
     }

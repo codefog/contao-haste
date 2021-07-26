@@ -10,9 +10,18 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
-
 namespace Haste\Dca;
+
+use Contao\Backend;
+use Contao\BackendUser;
+use Contao\Controller;
+use Contao\Database;
+use Contao\DataContainer;
 use Contao\Environment;
+use Contao\Image;
+use Contao\Input;
+use Contao\System;
+use Contao\Versions;
 use Haste\Http\Response\JsonResponse;
 use Haste\Util\Debug;
 
@@ -27,18 +36,18 @@ class AjaxOperations
      * Execute AJAX post actions to toggle.
      *
      * @param string         $action
-     * @param \DataContainer $dc
+     * @param DataContainer $dc
      */
-    public function executePostActions($action, \DataContainer $dc)
+    public function executePostActions($action, DataContainer $dc)
     {
         if ($action !== 'hasteAjaxOperation') {
 
             return;
         }
 
-        $id = $dc->id = \Input::post('id');
-        $currentValue = \Input::post('value');
-        $operation = \Input::post('operation');
+        $id = $dc->id = Input::post('id');
+        $currentValue = Input::post('value');
+        $operation = Input::post('operation');
 
         $hasteAjaxOperationSettings = $GLOBALS['TL_DCA'][$dc->table]['list']['operations'][$operation]['haste_ajax_operation'];
 
@@ -50,7 +59,7 @@ class AjaxOperations
         // Check permissions
         if (!$this->checkPermission($dc->table, $hasteAjaxOperationSettings)) {
 
-            \System::log(
+            System::log(
                 sprintf('Not enough permissions to toggle field %s::%s',
                     $dc->table,
                     $hasteAjaxOperationSettings['field']
@@ -59,11 +68,11 @@ class AjaxOperations
                 TL_ERROR
             );
 
-            \Controller::redirect('contao/main.php?act=error');
+            Controller::redirect('contao/main.php?act=error');
         }
 
         // Initialize versioning
-        $versions = new \Versions($dc->table, $id);
+        $versions = new Versions($dc->table, $id);
         $versions->setEditUrl($this->getVersionEditUrl((int)$id, (string)$operation));
         $versions->initialize();
 
@@ -86,12 +95,12 @@ class AjaxOperations
         $value = $this->executeSaveCallback($dc, $value, $hasteAjaxOperationSettings);
 
         // Update DB
-        \Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
+        Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE id=?')
             ->execute($value, $id);
 
         $versions->create();
         if ($GLOBALS['TL_DCA'][$dc->table]['config']['enableVersioning']) {
-            \System::log(
+            System::log(
                 sprintf('A new version of record "%s.id=%s" has been created',
                     $dc->table,
                     $id
@@ -187,7 +196,7 @@ class AjaxOperations
         $hasPermission = true;
 
         if (($GLOBALS['TL_DCA'][$table]['fields'][$hasteAjaxOperationSettings['field']]['exclude'] ?? false)
-            && !\BackendUser::getInstance()->hasAccess($table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
+            && !BackendUser::getInstance()->hasAccess($table . '::' . $hasteAjaxOperationSettings['field'], 'alexf')
         ) {
 
             $hasPermission = false;
@@ -195,7 +204,7 @@ class AjaxOperations
 
         if (isset($hasteAjaxOperationSettings['check_permission_callback']) && is_array($hasteAjaxOperationSettings['check_permission_callback'])) {
 
-            \System::importStatic($hasteAjaxOperationSettings['check_permission_callback'][0])
+            System::importStatic($hasteAjaxOperationSettings['check_permission_callback'][0])
                 ->{$hasteAjaxOperationSettings['check_permission_callback'][1]}($table, $hasteAjaxOperationSettings, $hasPermission);
         }
         elseif (isset($hasteAjaxOperationSettings['check_permission_callback']) && is_callable($hasteAjaxOperationSettings['check_permission_callback'])) {
@@ -209,13 +218,13 @@ class AjaxOperations
     /**
      * Executes the save_callback.
      *
-     * @param \DataContainer $dc
+     * @param DataContainer $dc
      * @param mixed          $value
      * @param array          $hasteAjaxOperationSettings
      *
      * @return mixed
      */
-    private function executeSaveCallback(\DataContainer $dc, $value, array $hasteAjaxOperationSettings)
+    private function executeSaveCallback(DataContainer $dc, $value, array $hasteAjaxOperationSettings)
     {
         $field = $hasteAjaxOperationSettings['field'];
 
@@ -224,7 +233,7 @@ class AjaxOperations
             foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] as $callback) {
                 if (is_array($callback)) {
 
-                    $value = \System::importStatic($callback[0])->{$callback[1]}($value, $dc);
+                    $value = System::importStatic($callback[0])->{$callback[1]}($value, $dc);
                 }
                 elseif (is_callable($callback)) {
                     $value = $callback($value, $dc);
@@ -272,10 +281,10 @@ class AjaxOperations
             return sprintf('<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
                 $value,
                 $name,
-                \Backend::addToUrl($href),
+                Backend::addToUrl($href),
                 specialchars($title),
                 $attributes,
-                \Image::getHtml($icon, $label)
+                Image::getHtml($icon, $label)
             );
         };
     }

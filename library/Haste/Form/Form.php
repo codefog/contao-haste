@@ -12,12 +12,23 @@
 
 namespace Haste\Form;
 
+use Contao\Controller;
+use Contao\Date;
+use Contao\Environment;
+use Contao\FormFieldModel;
+use Contao\FormHidden;
 use Contao\FrontendTemplate;
+use Contao\Input;
+use Contao\Model;
+use Contao\PageModel;
+use Contao\System;
+use Contao\TemplateLoader;
+use Contao\Widget;
 use Haste\Form\Validator\ValidatorInterface;
 use Haste\Generator\RowClass;
 use Haste\Util\ArrayPosition;
 
-class Form extends \Controller
+class Form extends Controller
 {
     /**
      * State of the form
@@ -76,13 +87,13 @@ class Form extends \Controller
 
     /**
      * Widget instances
-     * @var \Widget[]
+     * @var Widget[]
      */
     protected $arrWidgets = array();
 
     /**
      * Bound model
-     * @var \Model
+     * @var Model
      */
     protected $objModel = null;
 
@@ -150,7 +161,7 @@ class Form extends \Controller
 
         // The form action can be set using several helper methods but by default it's just
         // pointing to the current page
-        $this->strFormAction = \Environment::get('request');
+        $this->strFormAction = Environment::get('request');
     }
 
     /**
@@ -177,11 +188,11 @@ class Form extends \Controller
      */
     public function setFormActionFromPageId($intId)
     {
-        if (($objPage = \PageModel::findWithDetails($intId)) === null) {
+        if (($objPage = PageModel::findWithDetails($intId)) === null) {
             throw new \InvalidArgumentException(sprintf('The page id "%s" does apparently not exist!', $intId));
         }
 
-        $this->strFormAction = \Controller::generateFrontendUrl($objPage->row(), null, $objPage->language);
+        $this->strFormAction = Controller::generateFrontendUrl($objPage->row(), null, $objPage->language);
 
         return $this;
     }
@@ -204,7 +215,7 @@ class Form extends \Controller
 
             $this->addFormField($k, array(
                 'inputType' => 'hidden',
-                'value' => \Input::get($k)
+                'value' => Input::get($k)
             ));
         }
     }
@@ -421,7 +432,7 @@ class Form extends \Controller
             throw new \RuntimeException(sprintf('You did not specify any inputType for the field "%s"!', $strName));
         }
 
-        /** @type \Widget $strClass */
+        /** @type Widget $strClass */
         $strClass = $GLOBALS['TL_FFL'][$arrDca['inputType']];
 
         if (!class_exists($strClass)) {
@@ -435,7 +446,7 @@ class Form extends \Controller
                 if ($varValue != '') {
                     $key = $rgxp . 'Format';
                     $format = isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->{$key} : $GLOBALS['TL_CONFIG'][$key];
-                    $objDate = new \Date($varValue, $format);
+                    $objDate = new Date($varValue, $format);
                     $varValue = $objDate->tstamp;
                 }
 
@@ -447,7 +458,7 @@ class Form extends \Controller
 
             $this->addValidator(
                 $strName,
-                function($varValue, \Widget $objWidget, Form $objForm) use ($arrDca, $strName) {
+                function($varValue, Widget $objWidget, Form $objForm) use ($arrDca, $strName) {
                     $objModel = $objForm->getBoundModel();
                     $dc = (object) array(
                         'id'            => $objModel ? $objModel->id : 0,
@@ -460,7 +471,7 @@ class Form extends \Controller
 
                     foreach ($arrDca['save_callback'] as $callback) {
                         if (is_array($callback)) {
-                            $objCallback = \System::importStatic($callback[0]);
+                            $objCallback = System::importStatic($callback[0]);
                             $varValue = $objCallback->{$callback[1]}($varValue, $dc);
                         } elseif (is_callable($callback)) {
                             $varValue = $callback($varValue, $dc);
@@ -548,11 +559,11 @@ class Form extends \Controller
      * Binds a model instance to the form. If there is data, haste form will add
      * the present values as default values.
      *
-     * @param \Model
+     * @param Model
      *
      * @return $this
      */
-    public function bindModel(\Model $objModel = null)
+    public function bindModel(Model $objModel = null)
     {
         $this->objModel = $objModel;
 
@@ -562,7 +573,7 @@ class Form extends \Controller
     /**
      * Gets the bound model
      *
-     * @return \Model
+     * @return Model
      */
     public function getBoundModel()
     {
@@ -631,7 +642,7 @@ class Form extends \Controller
      */
     public function addFieldsFromDca($strTable, $varCallback = null)
     {
-        \System::loadLanguageFile($strTable);
+        System::loadLanguageFile($strTable);
         $this->loadDataContainer($strTable);
         $arrFields = &$GLOBALS['TL_DCA'][$strTable]['fields'];
 
@@ -674,7 +685,7 @@ class Form extends \Controller
      */
     public function addFieldsFromFormGenerator($intId, $varCallback = null)
     {
-        if (($objFields = \FormFieldModel::findPublishedByPid($intId)) === null) {
+        if (($objFields = FormFieldModel::findPublishedByPid($intId)) === null) {
             throw new \InvalidArgumentException('Form ID "' . $intId . '" does not exist or has no published fields.');
         }
 
@@ -784,7 +795,7 @@ class Form extends \Controller
      *
      * @param string $strName The form field name
      *
-     * @return \Widget
+     * @return Widget
      */
     public function getWidget($strName)
     {
@@ -984,7 +995,7 @@ class Form extends \Controller
         $objObject->novalidate = $this->generateNoValidate();
         $objObject->tableless = $this->blnTableless;
 
-        /** @type \Widget $objWidget */
+        /** @type Widget $objWidget */
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
         // Generate hidden form fields
@@ -1031,13 +1042,13 @@ class Form extends \Controller
             $templateName = 'form';
 
             try {
-                \TemplateLoader::getPath($templateName, 'html5');
+                TemplateLoader::getPath($templateName, 'html5');
             } catch (\Exception $e) {
                 $templateName = 'form_wrapper';
             }
         }
 
-        $objTemplate = new \FrontendTemplate($templateName);
+        $objTemplate = new FrontendTemplate($templateName);
         $objTemplate->class = 'hasteform_' . $this->getFormId();
         $objTemplate->formSubmit = $this->getFormId();
 
@@ -1144,7 +1155,7 @@ class Form extends \Controller
     {
         $arrResult = array();
         foreach ($this->arrWidgets as $k => $objWidget) {
-            $strKey = ($objWidget instanceof \FormHidden) ? 'hidden' : 'visible';
+            $strKey = ($objWidget instanceof FormHidden) ? 'hidden' : 'visible';
             $arrResult[$strKey][$k] = $objWidget;
         }
 

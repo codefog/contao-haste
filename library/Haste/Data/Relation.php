@@ -12,13 +12,14 @@
 
 namespace Haste\Data;
 
+use Contao\Model;
 use Haste\Generator\ModelData;
 
 
 class Relation extends \ArrayObject
 {
 
-    public function __construct(\Model $objModel=null, $label='', array $additional=array(), $varCallable=null)
+    public function __construct(Model $objModel=null, $label='', array $additional=array(), $varCallable=null)
     {
         if ($label != '' && !isset($additional['label'])) {
             $additional['label'] = $label;

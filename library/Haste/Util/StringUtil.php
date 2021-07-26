@@ -12,6 +12,8 @@
 
 namespace Haste\Util;
 
+use Contao\Controller;
+
 /**
  * @author Andreas Schempp <https://github.com/aschempp>
  */
@@ -43,20 +45,20 @@ class StringUtil
         }
 
         // Must decode, tokens could be encoded
-        $strText = \StringUtil::decodeEntities($strText);
+        $strText = \Contao\StringUtil::decodeEntities($strText);
 
         // first parse the tokens as they might have if-else clauses
-        $strBuffer = \StringUtil::parseSimpleTokens($strText, $arrTokens);
+        $strBuffer = \Contao\StringUtil::parseSimpleTokens($strText, $arrTokens);
 
         // then replace the insert tags
-        $strBuffer = \Controller::replaceInsertTags($strBuffer, false);
+        $strBuffer = Controller::replaceInsertTags($strBuffer, false);
 
         // check if the insert tags have returned a simple token
         if (strpos($strBuffer, '##') !== false && $strBuffer != $strText) {
             $strBuffer = static::recursiveReplaceTokensAndTags($strBuffer, $arrTokens, $intTextFlags);
         }
 
-        $strBuffer = \StringUtil::restoreBasicEntities($strBuffer);
+        $strBuffer = \Contao\StringUtil::restoreBasicEntities($strBuffer);
 
         if ($intTextFlags > 0) {
             $strBuffer = static::convertToText($strBuffer, $intTextFlags);
@@ -84,7 +86,7 @@ class StringUtil
         }
 
         if ($options & static::NO_ENTITIES) {
-            $varValue = \StringUtil::restoreBasicEntities($varValue);
+            $varValue = \Contao\StringUtil::restoreBasicEntities($varValue);
             $varValue = html_entity_decode($varValue);
 
             // Convert non-breaking to regular white space
