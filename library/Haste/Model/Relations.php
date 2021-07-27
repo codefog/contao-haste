@@ -12,7 +12,15 @@
 
 namespace Haste\Model;
 
+use Contao\Config;
+use Contao\Controller;
+use Contao\Database;
 use Contao\DataContainer;
+use Contao\DcaLoader;
+use Contao\Input;
+use Contao\ModuleLoader;
+use Contao\Session;
+use Contao\System;
 use Haste\Util\Format;
 use Haste\Util\Undo;
 
@@ -129,7 +137,7 @@ class Relations
      * Update the records in related table
      *
      * @param mixed          $varValue
-     * @param \DataContainer $dc in BE
+     * @param DataContainer $dc in BE
      *
      * @return mixed
      */
@@ -158,7 +166,7 @@ class Relations
             $saveRecords = true;
 
             // Do not save the record again in "override all" mode if it has been saved already
-            if ('overrideAll' === \Input::get('act')) {
+            if ('overrideAll' === Input::get('act')) {
                 if (in_array($cacheKey, static::$overrideAllCache)) {
                     $saveRecords = false;
                 }
@@ -174,7 +182,7 @@ class Relations
                         $arrRelation['related_field']   => $value,
                     ];
 
-                    \Database::getInstance()
+                    Database::getInstance()
                         ->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                         ->set($arrSet)
                         ->execute()
@@ -193,7 +201,7 @@ class Relations
     /**
      * Delete the records in related table
      *
-     * @param \DataContainer $dc in BE
+     * @param DataContainer $dc in BE
      * @param int            $intUndoId
      */
     public function deleteRelatedRecords($dc, $intUndoId)
@@ -273,7 +281,7 @@ class Relations
                     $arrRelation['related_field'] => $blnTableReference ? $value : $intId,
                 ];
 
-                \Database::getInstance()
+                Database::getInstance()
                     ->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                     ->set($arrSet)
                     ->execute()
@@ -287,7 +295,7 @@ class Relations
      */
     protected function loadDataContainers()
     {
-        foreach (\ModuleLoader::getActive() as $strModule) {
+        foreach (ModuleLoader::getActive() as $strModule) {
             $strDir = 'system/modules/' . $strModule . '/dca';
 
             if (!is_dir(TL_ROOT . '/' . $strDir)) {
@@ -299,7 +307,7 @@ class Relations
                     continue;
                 }
 
-                \Controller::loadDataContainer(substr($strFile, 0, -4));
+                Controller::loadDataContainer(substr($strFile, 0, -4));
             }
         }
     }
@@ -308,7 +316,7 @@ class Relations
      * Copy the records in related table
      *
      * @param int            $intId
-     * @param \DataContainer $dc in BE
+     * @param DataContainer $dc in BE
      */
     public function copyRelatedRecords($intId, $dc)
     {
@@ -331,7 +339,7 @@ class Relations
 
             // Get the reference value (if not an ID)
             if ('id' !== $arrRelation['reference']) {
-                $objReference = \Database::getInstance()
+                $objReference = Database::getInstance()
                     ->prepare("SELECT " . $arrRelation['reference'] . " FROM " . $dc->table . " WHERE id=?")
                     ->limit(1)
                     ->execute($intId)
@@ -342,13 +350,13 @@ class Relations
                 }
             }
 
-            $objValues = \Database::getInstance()
+            $objValues = Database::getInstance()
                 ->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
                 ->execute($dc->{$arrRelation['reference']})
             ;
 
             while ($objValues->next()) {
-                \Database::getInstance()
+                Database::getInstance()
                     ->prepare("INSERT INTO " . $arrRelation['table'] . " (`" . $arrRelation['reference_field'] . "`, `" . $arrRelation['related_field'] . "`) VALUES (?, ?)")
                     ->execute($varReference, $objValues->{$arrRelation['related_field']})
                 ;
@@ -392,7 +400,7 @@ class Relations
                     continue;
                 }
 
-                \Database::getInstance()
+                Database::getInstance()
                     ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['related_field'] . "=?")
                     ->execute($dc->{$arrRelation['field']})
                 ;
@@ -419,7 +427,7 @@ class Relations
                 continue;
             }
 
-            $objDelete = \Database::getInstance()->execute(
+            $objDelete = Database::getInstance()->execute(
                 "SELECT " . $arrRelation['reference'] . "
                 FROM " . $strTable . "
                 WHERE id IN (" . implode(',', array_map('intval', $arrIds)) . ") AND tstamp=0"
@@ -437,7 +445,7 @@ class Relations
      * Get related records of particular field
      *
      * @param mixed          $varValue
-     * @param \DataContainer $dc in BE
+     * @param DataContainer $dc in BE
      *
      * @return mixed
      */
@@ -459,7 +467,7 @@ class Relations
      */
     protected function purgeRelatedRecords($arrRelation, $varId)
     {
-        \Database::getInstance()
+        Database::getInstance()
             ->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
             ->execute($varId)
         ;
@@ -474,10 +482,10 @@ class Relations
      */
     public function addRelationTables($arrDefinitions)
     {
-        $arrTables = preg_grep('/^tl_/', \Database::getInstance()->listTables(null, true));
+        $arrTables = preg_grep('/^tl_/', Database::getInstance()->listTables(null, true));
 
         foreach ($arrTables as $strTable) {
-            $objDcaLoader = new \DcaLoader($strTable);
+            $objDcaLoader = new DcaLoader($strTable);
             $objDcaLoader->load();
 
             if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'])) {
@@ -508,7 +516,7 @@ class Relations
 
     /**
      * Filter records by relations set in custom filter
-     * @param \DataContainer $dc in BE
+     * @param DataContainer $dc in BE
      */
     public function filterByRelations($dc)
     {
@@ -520,11 +528,11 @@ class Relations
 
         // Include the child records in tree view
         if (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 5 && count($arrIds) > 0) {
-            $arrIds = \Database::getInstance()->getChildRecords($arrIds, $dc->table, false, $arrIds);
+            $arrIds = Database::getInstance()->getChildRecords($arrIds, $dc->table, false, $arrIds);
         }
 
         $blnFilter = false;
-        $session = \Session::getInstance()->getData();
+        $session = Session::getInstance()->getData();
         $filterId = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
 
         foreach (array_keys(static::$arrFilterableFields) as $field) {
@@ -542,7 +550,7 @@ class Relations
 
     /**
      * Filter records by relation search
-     * @param \DataContainer $dc
+     * @param DataContainer $dc
      */
     public function filterBySearch($dc)
     {
@@ -552,11 +560,11 @@ class Relations
 
         $arrIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] ?? null) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
         $blnFilter = false;
-        $session = \Session::getInstance()->getData();
+        $session = Session::getInstance()->getData();
 
         foreach (static::$arrSearchableFields as $field => $arrRelation) {
             $relTable = $arrRelation['related_table'];
-            \Controller::loadDataContainer($relTable);
+            Controller::loadDataContainer($relTable);
             if (isset($session['haste_search'][$dc->table])
                 && '' !== $session['haste_search'][$dc->table]['searchValue']
                 && $relTable == $session['haste_search'][$dc->table]['table']
@@ -584,7 +592,7 @@ class Relations
 
                 $strPattern = "CAST(%s AS CHAR) REGEXP ?";
 
-                if (substr(\Config::get('dbCollation'), -3) == '_ci') {
+                if (substr(Config::get('dbCollation'), -3) == '_ci') {
                     $strPattern = "LOWER(CAST(%s AS CHAR)) REGEXP LOWER(?)";
                 }
 
@@ -602,7 +610,7 @@ class Relations
 
                 $query .= ' WHERE ' . implode(' AND ', $procedure);
 
-                $ids = \Database::getInstance()->prepare($query)->execute($values)->fetchEach('sourceId');
+                $ids = Database::getInstance()->prepare($query)->execute($values)->fetchEach('sourceId');
                 $arrIds = empty($arrIds) ? $ids : array_intersect($arrIds, $ids);
             }
         }
@@ -614,7 +622,7 @@ class Relations
 
     /**
      * Add the relation filters
-     * @param \DataContainer $dc in BE
+     * @param DataContainer $dc in BE
      * @return string
      */
     public function addRelationFilters($dc)
@@ -624,19 +632,19 @@ class Relations
         }
 
         $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
-        $session = \Session::getInstance()->getData();
+        $session = Session::getInstance()->getData();
 
         // Set filter from user input
-        if ('tl_filters' === \Input::post('FORM_SUBMIT')) {
+        if ('tl_filters' === Input::post('FORM_SUBMIT')) {
             foreach (array_keys(static::$arrFilterableFields) as $field) {
-                if (\Input::post($field, true) != 'tl_' . $field) {
-                    $session['filter'][$filter][$field] = \Input::post($field, true);
+                if (Input::post($field, true) != 'tl_' . $field) {
+                    $session['filter'][$filter][$field] = Input::post($field, true);
                 } else {
                     unset($session['filter'][$filter][$field]);
                 }
             }
 
-            \Session::getInstance()->setData($session);
+            Session::getInstance()->setData($session);
         }
 
         $count = 0;
@@ -673,7 +681,7 @@ class Relations
                     $strClass = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][0];
                     $strMethod = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][1];
 
-                    $objClass = \System::importStatic($strClass);
+                    $objClass = System::importStatic($strClass);
                     $options_callback = $objClass->$strMethod($dc);
                 } elseif (is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
                     $options_callback = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']($dc);
@@ -696,7 +704,7 @@ class Relations
                     // Replace the ID with the foreign key
                     $key = explode('.', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'], 2);
 
-                    $objParent = \Database::getInstance()->prepare("SELECT " . $key[1] . " AS value FROM " . $key[0] . " WHERE id=?")
+                    $objParent = Database::getInstance()->prepare("SELECT " . $key[1] . " AS value FROM " . $key[0] . " WHERE id=?")
                         ->limit(1)
                         ->execute($vv);
 
@@ -749,7 +757,7 @@ class Relations
         }
 
         $return = '<div class="tl_filter tl_subpanel">';
-        $session = \Session::getInstance();
+        $session = Session::getInstance();
         $sessionValues = $session->get('haste_search');
 
         // Search field per relation
@@ -759,7 +767,7 @@ class Relations
             $relatedSearchFields = [];
             $relTable = $arrRelation['related_table'];
 
-            \Controller::loadDataContainer($relTable);
+            Controller::loadDataContainer($relTable);
             foreach ((array) $GLOBALS['TL_DCA'][$relTable]['fields'] as $relatedField => $dca) {
                 if (isset($dca['search']) && true === $dca['search']) {
                     $relatedSearchFields[] = $relatedField;
@@ -771,9 +779,9 @@ class Relations
             }
 
             // Store search value in the current session
-            if (\Input::post('FORM_SUBMIT') == 'tl_filters') {
-                $strField = \Input::post('tl_field_' . $field, true);
-                $strKeyword = ltrim(\Input::postRaw('tl_value_' . $field), '*');
+            if (Input::post('FORM_SUBMIT') == 'tl_filters') {
+                $strField = Input::post('tl_field_' . $field, true);
+                $strKeyword = ltrim(Input::postRaw('tl_value_' . $field), '*');
 
                 if ($strField && !\in_array($strField, $relatedSearchFields, true)) {
                     $strField = '';
@@ -783,7 +791,7 @@ class Relations
                 // Make sure the regular expression is valid
                 if ($strField && $strKeyword) {
                     try {
-                        \Database::getInstance()->prepare("SELECT * FROM " . $relTable . " WHERE " . $strField . " REGEXP ?")
+                        Database::getInstance()->prepare("SELECT * FROM " . $relTable . " WHERE " . $strField . " REGEXP ?")
                             ->limit(1)
                             ->execute($strKeyword);
                     }
@@ -832,7 +840,7 @@ class Relations
      */
     public static function getRelation($strTable, $strField)
     {
-        \Controller::loadDataContainer($strTable);
+        Controller::loadDataContainer($strTable);
 
         $strCacheKey = $strTable . '_' . $strField;
 

@@ -12,6 +12,13 @@
 
 namespace Haste\Util;
 
+use Contao\Backend;
+use Contao\Controller;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\Image;
+use Contao\System;
+
 class Undo
 {
 
@@ -24,7 +31,7 @@ class Undo
      */
     public static function add($intUndoId, $strKey, $varData)
     {
-        $objRecords = \Database::getInstance()->prepare("SELECT haste_data FROM tl_undo WHERE id=?")
+        $objRecords = Database::getInstance()->prepare("SELECT haste_data FROM tl_undo WHERE id=?")
                                               ->limit(1)
                                               ->execute($intUndoId);
 
@@ -35,7 +42,7 @@ class Undo
         $arrData = json_decode($objRecords->haste_data, true);
         $arrData[$strKey] = $varData;
 
-        $intAffectedRows = \Database::getInstance()->prepare("UPDATE tl_undo SET haste_data=? WHERE id=?")
+        $intAffectedRows = Database::getInstance()->prepare("UPDATE tl_undo SET haste_data=? WHERE id=?")
                                                    ->execute(json_encode($arrData), $intUndoId)
                                                    ->affectedRows;
 
@@ -47,7 +54,7 @@ class Undo
      * @param integer
      * @return boolean
      */
-    public static function undo($intUndoId, \DataContainer $dc = null)
+    public static function undo($intUndoId, DataContainer $dc = null)
     {
         if (!isset($GLOBALS['HASTE_HOOKS']['undoData']) || !is_array($GLOBALS['HASTE_HOOKS']['undoData'])) {
             $GLOBALS['HASTE_HOOKS']['undoData'] = [];
@@ -58,7 +65,7 @@ class Undo
             $GLOBALS['HASTE_HOOKS']['undoData'] = array_merge($GLOBALS['HASTE_HOOKS']['undoData'], $GLOBALS['TL_HOOKS']['hasteUndoData']);
         }
 
-        $objRecords = \Database::getInstance()->prepare("SELECT * FROM tl_undo WHERE id=?")
+        $objRecords = Database::getInstance()->prepare("SELECT * FROM tl_undo WHERE id=?")
                                               ->limit(1)
                                               ->execute($intUndoId);
 
@@ -78,7 +85,7 @@ class Undo
 
             // Get the currently available fields
             if (!isset($arrFields[$table])) {
-                $arrFields[$table] = array_flip(\Database::getInstance()->getFieldnames($table));
+                $arrFields[$table] = array_flip(Database::getInstance()->getFieldnames($table));
             }
 
             foreach ($fields as $row) {
@@ -87,7 +94,7 @@ class Undo
                 $row = array_intersect_key($row, $arrFields[$table]);
 
                 // Re-insert the data
-                $objInsertStmt = \Database::getInstance()->prepare("INSERT INTO " . $table . " %s")
+                $objInsertStmt = Database::getInstance()->prepare("INSERT INTO " . $table . " %s")
                                                          ->set($row)
                                                          ->execute();
 
@@ -98,11 +105,11 @@ class Undo
                 }
 
                 // Trigger the undo_callback
-                \Controller::loadDataContainer($table);
+                Controller::loadDataContainer($table);
                 if (is_array($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] ?? null)) {
                     foreach ($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] as $callback) {
                         if (is_array($callback)) {
-                            \System::importStatic($callback[0])->{$callback[1]}($table, $row, $dc);
+                            System::importStatic($callback[0])->{$callback[1]}($table, $row, $dc);
                         } elseif (is_callable($callback)) {
                             $callback($table, $row, $dc);
                         }
@@ -117,7 +124,7 @@ class Undo
 
                 foreach ($GLOBALS['HASTE_HOOKS']['undoData'] as $callback) {
                     if (is_array($callback)) {
-                        \System::importStatic($callback[0])->{$callback[1]}($hasteData, $insertId, $table, $row);
+                        System::importStatic($callback[0])->{$callback[1]}($hasteData, $insertId, $table, $row);
                     } elseif (is_callable($callback)) {
                         $callback($hasteData, $insertId, $table, $row);
                     }
@@ -127,9 +134,9 @@ class Undo
 
         // Add log entry and delete record from tl_undo if there was no error
         if (!$error) {
-            \System::log('Undone '. $query, __METHOD__, TL_GENERAL);
+            System::log('Undone '. $query, __METHOD__, TL_GENERAL);
 
-            \Database::getInstance()->prepare("DELETE FROM tl_undo WHERE id=?")
+            Database::getInstance()->prepare("DELETE FROM tl_undo WHERE id=?")
                                     ->limit(1)
                                     ->execute($intUndoId);
         }
@@ -144,7 +151,7 @@ class Undo
      */
     public static function hasData($intUndoId)
     {
-        $objRecords = \Database::getInstance()->prepare("SELECT haste_data FROM tl_undo WHERE id=?")
+        $objRecords = Database::getInstance()->prepare("SELECT haste_data FROM tl_undo WHERE id=?")
                                               ->limit(1)
                                               ->execute($intUndoId);
 
@@ -159,12 +166,12 @@ class Undo
 
     /**
      * Undo the record manually triggered in the backend
-     * @param \DataContainer
+     * @param DataContainer
      */
-    public function callback(\DataContainer $dc)
+    public function callback(DataContainer $dc)
     {
         static::undo($dc->id, $dc);
-        \System::redirect(\System::getReferer());
+        System::redirect(System::getReferer());
     }
 
     /**
@@ -183,6 +190,6 @@ class Undo
             $href = '&amp;key=haste_undo';
         }
 
-        return '<a href="'.\Backend::addToUrl($href.'&amp;id='.$row['id']).'" title="'.specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
+        return '<a href="'.Backend::addToUrl($href.'&amp;id='.$row['id']).'" title="'.specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ';
     }
 }

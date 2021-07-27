@@ -12,6 +12,8 @@
 
 namespace Haste\DateTime;
 
+use Contao\System;
+
 class ZodiacSign
 {
 
@@ -76,7 +78,7 @@ class ZodiacSign
      */
     public function getLabel()
     {
-        \System::loadLanguageFile('zodiacsigns');
+        System::loadLanguageFile('zodiacsigns');
 
         $strKey = $this->getLatin();
 

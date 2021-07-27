@@ -12,7 +12,7 @@
 
 namespace Haste\Input;
 
-class Input extends \Input
+class Input extends \Contao\Input
 {
 
     /**

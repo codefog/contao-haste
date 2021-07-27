@@ -12,7 +12,10 @@
 
 namespace Haste\Util;
 
-use Haste\Haste;
+use Contao\Controller;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\System;
 
 class Format
 {
@@ -26,7 +29,7 @@ class Format
     {
         $strFormat = isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->dateFormat : $GLOBALS['TL_CONFIG']['dateFormat'];
 
-        return \System::parseDate($strFormat, $intTstamp);
+        return System::parseDate($strFormat, $intTstamp);
     }
 
 
@@ -39,7 +42,7 @@ class Format
     {
         $strFormat = isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->timeFormat : $GLOBALS['TL_CONFIG']['timeFormat'];
 
-        return \System::parseDate($strFormat, $intTstamp);
+        return System::parseDate($strFormat, $intTstamp);
     }
 
 
@@ -52,7 +55,7 @@ class Format
     {
         $strFormat = isset($GLOBALS['objPage']) ? $GLOBALS['objPage']->datimFormat : $GLOBALS['TL_CONFIG']['datimFormat'];
 
-        return \System::parseDate($strFormat, $intTstamp);
+        return System::parseDate($strFormat, $intTstamp);
     }
 
     /**
@@ -65,8 +68,8 @@ class Format
      */
     public static function dcaLabel($strTable, $strField)
     {
-        \System::loadLanguageFile($strTable);
-        \Controller::loadDataContainer($strTable);
+        System::loadLanguageFile($strTable);
+        Controller::loadDataContainer($strTable);
         $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField] ?? [];
 
         // Add the "name" key (backwards compatibility)
@@ -105,14 +108,14 @@ class Format
      * @param string              $strTable
      * @param string              $strField
      * @param mixed               $varValue
-     * @param \DataContainer|null $objDc
+     * @param DataContainer|null $objDc
      *
      * @return mixed
      */
-    public static function dcaValue($strTable, $strField, $varValue, \DataContainer $objDc = null)
+    public static function dcaValue($strTable, $strField, $varValue, DataContainer $objDc = null)
     {
-        \System::loadLanguageFile($strTable);
-        \Controller::loadDataContainer($strTable);
+        System::loadLanguageFile($strTable);
+        Controller::loadDataContainer($strTable);
         $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
 
         // Add the "name" key (backwards compatibility)
@@ -128,25 +131,25 @@ class Format
      *
      * @param array               $arrField
      * @param                     $varValue
-     * @param \DataContainer|null $objDc
+     * @param DataContainer|null $objDc
      *
      * @return mixed
      */
-    public static function dcaValueFromArray(array $arrField, $varValue, \DataContainer $objDc = null)
+    public static function dcaValueFromArray(array $arrField, $varValue, DataContainer $objDc = null)
     {
         $varValue = deserialize($varValue);
 
         if (is_array($arrField['options_callback']) && $objDc !== null) { // Options callback (array)
 
             $arrCallback = $arrField['options_callback'];
-            $arrField['options'] = \System::importStatic($arrCallback[0])->{$arrCallback[1]}($objDc);
+            $arrField['options'] = System::importStatic($arrCallback[0])->{$arrCallback[1]}($objDc);
 
         } elseif (is_callable($arrField['options_callback']) && $objDc !== null) { // Options callback (callable)
             $arrField['options'] = $arrField['options_callback']($objDc);
 
         } elseif (isset($arrField['foreignKey']) && $varValue) { // foreignKey
             $chunks = explode('.', $arrField['foreignKey'], 2);
-            $objOptions = \Database::getInstance()->query("SELECT id, " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $varValue)) . ")");
+            $objOptions = Database::getInstance()->query("SELECT id, " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $varValue)) . ")");
             $arrField['options'] = array();
 
             while ($objOptions->next()) {

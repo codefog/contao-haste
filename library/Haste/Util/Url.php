@@ -12,6 +12,10 @@
 
 namespace Haste\Util;
 
+use Contao\Controller;
+use Contao\Environment;
+use Contao\PageModel;
+
 class Url
 {
 
@@ -122,16 +126,16 @@ class Url
     protected static function prepareUrl($varUrl)
     {
         if ($varUrl === null) {
-            $varUrl = \Environment::get('request');
+            $varUrl = Environment::get('request');
 
         } elseif (is_numeric($varUrl)) {
-            if (($objJump = \PageModel::findByPk($varUrl)) === null) {
+            if (($objJump = PageModel::findByPk($varUrl)) === null) {
                 throw new \InvalidArgumentException('Given page id does not exist.');
             }
 
-            $varUrl = \Controller::generateFrontendUrl($objJump->row());
+            $varUrl = Controller::generateFrontendUrl($objJump->row());
 
-            list(, $strQueryString) = explode('?', \Environment::get('request'), 2);
+            list(, $strQueryString) = explode('?', Environment::get('request'), 2);
 
             if ($strQueryString != '') {
                 $varUrl .= '?' . $strQueryString;

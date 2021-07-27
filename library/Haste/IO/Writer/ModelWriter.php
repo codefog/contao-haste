@@ -12,6 +12,8 @@
 
 namespace Haste\IO\Writer;
 
+use Contao\Model;
+
 class ModelWriter extends AbstractWriter
 {
 
@@ -56,7 +58,7 @@ class ModelWriter extends AbstractWriter
             return false;
         }
 
-        /** @type \Model $objModel */
+        /** @type Model $objModel */
         $objModel = new $this->strModel();
         $objModel->setRow($arrData);
         $objModel->save();
