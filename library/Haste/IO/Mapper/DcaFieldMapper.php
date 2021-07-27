@@ -12,7 +12,7 @@
 
 namespace Haste\IO\Mapper;
 
-use Haste\Haste;
+use Contao\Controller;
 
 class DcaFieldMapper extends ArrayMapper
 {
@@ -27,7 +27,7 @@ class DcaFieldMapper extends ArrayMapper
     public function __construct($strTable)
     {
         if (!is_array($GLOBALS['TL_DCA'][$strTable] ?? null)) {
-            \Controller::loadDataContainer($strTable);
+            Controller::loadDataContainer($strTable);
         }
 
         if (!is_array($GLOBALS['TL_DCA'][$strTable]['fields'] ?? null)) {

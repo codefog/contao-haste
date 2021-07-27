@@ -12,6 +12,7 @@
 
 namespace Haste\Form\Validator;
 
+use Contao\Widget;
 
 interface ValidatorInterface
 {
@@ -19,11 +20,11 @@ interface ValidatorInterface
      * Validates a widget
      *
      * @param mixed            $varValue Widget value
-     * @param \Widget          $objWidget
+     * @param Widget           $objWidget
      * @param \Haste\Form\Form $objForm
      *
      * @return mixed Widget value
      * @todo Add type hinting to the method parameters (in 5.0, as it would break the Interface)
      */
     public function validate($varValue, $objWidget, $objForm);
-} 
+}

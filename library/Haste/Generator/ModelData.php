@@ -12,7 +12,10 @@
 
 namespace Haste\Generator;
 
-use Haste\Haste;
+use Contao\Controller;
+use Contao\DcaExtractor;
+use Contao\Model;
+use Contao\System;
 use Haste\Data\Collection;
 use Haste\Data\Plain;
 use Haste\Data\Relation;
@@ -25,23 +28,23 @@ class ModelData
 
     /**
      * Auto-format model data based on DCA config
-     * @param   \Model
+     * @param   Model
      * @param   callable
      * @return  \ArrayObject
      */
-    public static function generate(\Model $objModel=null, $varCallable=null)
+    public static function generate(Model $objModel=null, $varCallable=null)
     {
         if (null === $objModel) {
             return new \ArrayObject(array(), \ArrayObject::ARRAY_AS_PROPS);
         }
 
         $strTable = $objModel->getTable();
-        $objDca = \DcaExtractor::getInstance($strTable);
+        $objDca = DcaExtractor::getInstance($strTable);
         $arrRelations = $objDca->getRelations();
         $arrData = array();
 
-        \System::loadLanguageFile($strTable);
-        \Controller::loadDataContainer($strTable);
+        System::loadLanguageFile($strTable);
+        Controller::loadDataContainer($strTable);
 
         $arrFields = &$GLOBALS['TL_DCA'][$strTable]['fields'];
 
@@ -56,7 +59,7 @@ class ModelData
 
                 if ($objRelated == null) {
                     $arrData[$strField] = new Plain('', $strLabel, $arrAdditional);
-                } elseif ($objRelated instanceof \Model\Collection) {
+                } elseif ($objRelated instanceof Model\Collection) {
                     $arrCollection = array();
                     foreach ($objRelated as $objRelatedModel) {
                         $arrCollection[] = new Relation($objRelatedModel, '', array(), $varCallable);
@@ -88,11 +91,11 @@ class ModelData
 
     /**
      * Generate tokens for model data
-     * @param   \Model
+     * @param   Model
      * @param   callable
      * @return  array
      */
-    public static function generateTokens(\Model $objModel=null, $varCallable=null)
+    public static function generateTokens(Model $objModel=null, $varCallable=null)
     {
         $objData = static::generate($objModel, $varCallable);
 

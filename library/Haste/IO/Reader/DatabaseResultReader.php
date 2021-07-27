@@ -12,6 +12,8 @@
 
 namespace Haste\IO\Reader;
 
+use Database\Result;
+
 class DatabaseResultReader implements HeaderFieldsInterface, \Iterator
 {
 
@@ -37,7 +39,7 @@ class DatabaseResultReader implements HeaderFieldsInterface, \Iterator
      * Initialize the object
      * @param object
      */
-    public function __construct(\Database\Result $objResult)
+    public function __construct(Result $objResult)
     {
         $this->objResult = $objResult;
         $this->blnValid = ($this->objResult->numRows > 0);

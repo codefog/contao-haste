@@ -12,6 +12,12 @@
 
 namespace Haste\Dca;
 
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\Date;
+use Contao\Session;
+use Contao\Validator;
+
 class DateRangeFilter
 {
     /**
@@ -57,7 +63,7 @@ class DateRangeFilter
     /**
      * Adds the filters to the panel
      *
-     * @param \DataContainer $dc
+     * @param DataContainer $dc
      *
      * @return string
      */
@@ -70,7 +76,7 @@ class DateRangeFilter
         $GLOBALS['TL_CSS'][] = 'system/modules/haste/assets/haste.css';
 
         $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
-        $session = \Session::getInstance()->getData();
+        $session = Session::getInstance()->getData();
 
         // Set filter from user input
         if ('tl_filters' === \Input::post('FORM_SUBMIT')) {
@@ -90,7 +96,7 @@ class DateRangeFilter
                 }
             }
 
-            \Session::getInstance()->setData($session);
+            Session::getInstance()->setData($session);
         }
 
         $return = '';
@@ -125,12 +131,12 @@ class DateRangeFilter
     /**
      * Filters the records by setting sorting->root if filters are set
      *
-     * @param \DataContainer $dc
+     * @param DataContainer $dc
      */
     public function filterRecords($dc)
     {
         $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
-        $session = \Session::getInstance()->getData();
+        $session = Session::getInstance()->getData();
         $root = array();
         $blnDoFilter = false;
 
@@ -186,7 +192,7 @@ class DateRangeFilter
     /**
      * Fetch valid records within from->to range
      *
-     * @param \DataContainer $dc
+     * @param DataContainer $dc
      * @param string         $field
      * @param int            $from
      * @param int            $to
@@ -215,7 +221,7 @@ class DateRangeFilter
             implode(' AND ', $where)
         );
 
-        return \Database::getInstance()->query($sql)->fetchEach('id');
+        return Database::getInstance()->query($sql)->fetchEach('id');
     }
 
     /**
@@ -232,7 +238,7 @@ class DateRangeFilter
         // Validate first
         $method = 'is' . ucfirst($rgxp);
 
-        if (!\Validator::$method($value)) {
+        if (!Validator::$method($value)) {
             return null;
         }
 
@@ -266,7 +272,7 @@ class DateRangeFilter
     private function createDatepickerInputField($name, $value, $rgxp)
     {
         $icon = 'assets/datepicker/images/icon.svg';
-        $format = \Date::formatToJs($GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+        $format = Date::formatToJs($GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
 
         if (version_compare(VERSION, '4.2', '<')) {
             $icon = sprintf('assets/mootools/datepicker/%s/icon.gif', $GLOBALS['TL_ASSETS']['DATEPICKER']);

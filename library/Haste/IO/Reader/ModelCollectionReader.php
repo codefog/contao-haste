@@ -12,6 +12,8 @@
 
 namespace Haste\IO\Reader;
 
+use Model\Collection;
+
 class ModelCollectionReader implements HeaderFieldsInterface, \Iterator
 {
 
@@ -37,7 +39,7 @@ class ModelCollectionReader implements HeaderFieldsInterface, \Iterator
      * Initialize the object
      * @param object
      */
-    public function __construct(\Model\Collection $objCollection)
+    public function __construct(Collection $objCollection)
     {
         $this->objCollection = $objCollection;
         $this->blnValid = ($this->objCollection->numRows > 0);

@@ -5,7 +5,6 @@ namespace Haste\EventListener;
 use Contao\ContentModel;
 use Contao\Environment;
 use Contao\ModuleModel;
-use Contao\Template;
 use Haste\Ajax\ReloadHelper;
 use Haste\Util\Debug;
 

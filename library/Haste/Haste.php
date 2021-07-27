@@ -12,7 +12,10 @@
 
 namespace Haste;
 
-class Haste extends \Controller
+use Contao\Controller;
+use Contao\Files;
+
+class Haste extends Controller
 {
     /**
      * Current object instance (Singleton)
@@ -70,7 +73,7 @@ class Haste extends \Controller
 
             // Does not matter if file or directory
             if (!file_exists(TL_ROOT . '/' . $strDirectory)) {
-                if (!\Files::getInstance()->mkdir($strDirectory)) {
+                if (!Files::getInstance()->mkdir($strDirectory)) {
                     return false;
                 }
             }

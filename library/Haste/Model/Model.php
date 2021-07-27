@@ -12,7 +12,9 @@
 
 namespace Haste\Model;
 
-abstract class Model extends \Model
+use Contao\Database;
+
+abstract class Model extends \Contao\Model
 {
 
     /**
@@ -38,7 +40,7 @@ abstract class Model extends \Model
 
         if ($arrRelation !== false) {
 
-            /** @type \Model $strClass */
+            /** @type \Contao\Model $strClass */
             $strClass = static::getClassFromTable($arrRelation['related_table']);
 
             if (class_exists($strClass)) {
@@ -98,8 +100,8 @@ abstract class Model extends \Model
         $strOrder = "";
 
         // Preserve the values order by using the force saved values in the table in the ORDER BY statement
-        if (count($arrValues) == 1 && $arrRelation['forceSave'] && \Database::getInstance()->fieldExists($strField, $arrRelation['related_table'])) {
-            $objRecord = \Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['related_table'] . " WHERE " . $arrRelation['field'] . "=?")
+        if (count($arrValues) == 1 && $arrRelation['forceSave'] && Database::getInstance()->fieldExists($strField, $arrRelation['related_table'])) {
+            $objRecord = Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['related_table'] . " WHERE " . $arrRelation['field'] . "=?")
                 ->limit(1)
                 ->execute($arrValues[0]);
 
@@ -109,10 +111,10 @@ abstract class Model extends \Model
                 $arrRecordValues = array(0);
             }
 
-            $strOrder = " ORDER BY " . \Database::getInstance()->findInSet($arrRelation['reference_field'], $arrRecordValues);
+            $strOrder = " ORDER BY " . Database::getInstance()->findInSet($arrRelation['reference_field'], $arrRecordValues);
         }
 
-        return \Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')") : "") . $strOrder)
+        return Database::getInstance()->prepare("SELECT " . $arrRelation['reference_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['related_field'] . " IN ('" . implode("','", $arrValues) . "')") : "") . $strOrder)
                                        ->execute()
                                        ->fetchEach($arrRelation['reference_field']);
     }
@@ -140,8 +142,8 @@ abstract class Model extends \Model
         $strOrder = "";
 
         // Preserve the values order by using the force saved values in the table in the ORDER BY statement
-        if (count($arrValues) == 1 && $arrRelation['forceSave'] && \Database::getInstance()->fieldExists($strField, $arrRelation['reference_table'])) {
-            $objRecord = \Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['reference_table'] . " WHERE " . $arrRelation['reference'] . "=?")
+        if (count($arrValues) == 1 && $arrRelation['forceSave'] && Database::getInstance()->fieldExists($strField, $arrRelation['reference_table'])) {
+            $objRecord = Database::getInstance()->prepare("SELECT " . $strField . " FROM " . $arrRelation['reference_table'] . " WHERE " . $arrRelation['reference'] . "=?")
                 ->limit(1)
                 ->execute($arrValues[0]);
 
@@ -151,10 +153,10 @@ abstract class Model extends \Model
                 $arrRecordValues = array(0);
             }
 
-            $strOrder = " ORDER BY " . \Database::getInstance()->findInSet($arrRelation['related_field'], $arrRecordValues);
+            $strOrder = " ORDER BY " . Database::getInstance()->findInSet($arrRelation['related_field'], $arrRecordValues);
         }
 
-        return \Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')") : "") . $strOrder)
+        return Database::getInstance()->prepare("SELECT " . $arrRelation['related_field'] . " FROM " . $arrRelation['table'] . (!empty($arrValues) ? (" WHERE " . $arrRelation['reference_field'] . " IN ('" . implode("','", $arrValues) . "')") : "") . $strOrder)
                                        ->execute()
                                        ->fetchEach($arrRelation['related_field']);
     }
@@ -189,7 +191,7 @@ abstract class Model extends \Model
                 $arrRelation['related_field'] => $varValue,
             );
 
-            \Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
+            Database::getInstance()->prepare("INSERT INTO " . $arrRelation['table'] . " %s")
                 ->set($arrSet)
                 ->execute();
         }
@@ -212,10 +214,10 @@ abstract class Model extends \Model
             throw new \Exception('Field ' . $strField . ' does not seem to be related!');
         }
 
-        \Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
+        Database::getInstance()->prepare("DELETE FROM " . $arrRelation['table'] . " WHERE " . $arrRelation['reference_field'] . "=?")
             ->execute($varReference);
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -228,16 +230,16 @@ abstract class Model extends \Model
                 $arrValues[$strField] = $this->$strField;
             }
         }
-        
+
         parent::save();
-        
+
         foreach($arrValues as $strField => $arrValue) {
             // Check if $arrValue is an array. Otherwise don't change the relation table.
             if (is_array($arrValue)) {
                 static::setRelatedValues(static::$strTable, $strField, $this->id, $arrValue);
             }
         }
-        
+
         return $this;
     }
 }

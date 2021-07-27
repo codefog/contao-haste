@@ -2,7 +2,7 @@
 
 namespace Haste\Form\Validator;
 
-
+use Contao\Widget;
 use Haste\Form\Form;
 
 class MandatoryOn implements ValidatorInterface
@@ -29,7 +29,7 @@ class MandatoryOn implements ValidatorInterface
      * Validates a widget
      *
      * @param mixed   $varValue Widget value
-     * @param \Widget $objWidget
+     * @param Widget  $objWidget
      * @param Form    $objForm
      *
      * @return mixed Widget value
@@ -55,4 +55,4 @@ class MandatoryOn implements ValidatorInterface
 
         return $varValue;
     }
-} 
+}

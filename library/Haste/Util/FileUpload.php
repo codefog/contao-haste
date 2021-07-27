@@ -2,7 +2,10 @@
 
 namespace Haste\Util;
 
-class FileUpload extends \FileUpload
+use Contao\Message;
+use Contao\System;
+
+class FileUpload extends \Contao\FileUpload
 {
 
     /**
@@ -286,8 +289,8 @@ class FileUpload extends \FileUpload
 
             foreach ($files as $k => $file) {
                 if (!$file['error'] && $file['size'] < $this->minFileSize) {
-                    \Message::addError(sprintf($GLOBALS['TL_LANG']['ERR']['minFileSize'], $minlength_kb_readable));
-                    \System::log('File "'.$file['name'].'" exceeds the minimum file size of '.$minlength_kb_readable, __METHOD__, TL_ERROR);
+                    Message::addError(sprintf($GLOBALS['TL_LANG']['ERR']['minFileSize'], $minlength_kb_readable));
+                    System::log('File "'.$file['name'].'" exceeds the minimum file size of '.$minlength_kb_readable, __METHOD__, TL_ERROR);
                     $this->blnHasError = true;
                     unset($files[$k]);
                 }

@@ -12,11 +12,13 @@
 
 namespace Haste\Number;
 
+use Contao\TextField;
+
 /**
  * Class BackendWidget
  * Provide methods to handle Number input.
  */
-class BackendWidget extends \TextField
+class BackendWidget extends TextField
 {
 
     /**
