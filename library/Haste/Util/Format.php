@@ -163,27 +163,34 @@ class Format
             }
 
             return implode(', ', $varValue);
+        }
 
-        } elseif ($arrField['eval']['rgxp'] == 'date') {
+        if ('date' === $arrField['eval']['rgxp']) {
             return static::date($varValue);
+        }
 
-        } elseif ($arrField['eval']['rgxp'] == 'time') {
+        if ('time' === $arrField['eval']['rgxp']) {
             return static::time($varValue);
+        }
 
-        } elseif ($arrField['eval']['rgxp'] == 'datim' || in_array($arrField['flag'], array(5, 6, 7, 8, 9, 10)) || $arrField['name'] == 'tstamp') {
+        if ('datim' === $arrField['eval']['rgxp'] || in_array($arrField['flag'], array(5, 6, 7, 8, 9, 10)) || 'tstamp' === $arrField['name']) {
             return static::datim($varValue);
+        }
 
-        } elseif ($arrField['inputType'] == 'checkbox' && !$arrField['eval']['multiple']) {
+        if ($arrField['eval']['isBoolean'] || ('checkbox' === $arrField['inputType'] && !$arrField['eval']['multiple'])) {
             return strlen($varValue) ? $GLOBALS['TL_LANG']['MSC']['yes'] : $GLOBALS['TL_LANG']['MSC']['no'];
+        }
 
-        } elseif ($arrField['inputType'] == 'textarea' && ($arrField['eval']['allowHtml'] || $arrField['eval']['preserveTags'])) {
-            return specialchars($varValue);
+        if ('textarea' === $arrField['inputType'] && ($arrField['eval']['allowHtml'] || $arrField['eval']['preserveTags'])) {
+            return \Contao\StringUtil::specialchars($varValue);
+        }
 
-        } elseif (is_array($arrField['reference'])) {
-            return isset($arrField['reference'][$varValue]) ? ((is_array($arrField['reference'][$varValue])) ? $arrField['reference'][$varValue][0] : $arrField['reference'][$varValue]) : $varValue;
+        if (is_array($arrField['reference']) && isset($arrField['reference'][$varValue])) {
+            return is_array($arrField['reference'][$varValue]) ? $arrField['reference'][$varValue][0] : $arrField['reference'][$varValue];
+        }
 
-        } elseif ($arrField['eval']['isAssociative'] || array_is_assoc($arrField['options'])) {
-            return isset($arrField['options'][$varValue]) ? ((is_array($arrField['options'][$varValue])) ? $arrField['options'][$varValue][0] : $arrField['options'][$varValue]) : $varValue;
+        if (($arrField['eval']['isAssociative'] || array_is_assoc($arrField['options'])) && isset($arrField['options'][$varValue])) {
+            return is_array($arrField['options'][$varValue]) ? $arrField['options'][$varValue][0] : $arrField['options'][$varValue];
         }
 
         return $varValue;
