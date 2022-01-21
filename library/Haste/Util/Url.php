@@ -33,7 +33,7 @@ class Url
         $strUrl = static::prepareUrl($varUrl);
         $strQuery = trim(ampersand($strQuery, false), '&');
 
-        list($strScript, $strQueryString) = explode('?', $strUrl, 2);
+        list($strScript, $strQueryString) = explode('?', $strUrl, 2) + array('', '');
 
         parse_str($strQueryString, $queries);
 
