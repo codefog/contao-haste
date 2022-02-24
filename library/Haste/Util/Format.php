@@ -139,12 +139,12 @@ class Format
     {
         $varValue = deserialize($varValue);
 
-        if (is_array($arrField['options_callback']) && $objDc !== null) { // Options callback (array)
+        if (is_array($arrField['options_callback'] ?? null) && $objDc !== null) { // Options callback (array)
 
             $arrCallback = $arrField['options_callback'];
             $arrField['options'] = System::importStatic($arrCallback[0])->{$arrCallback[1]}($objDc);
 
-        } elseif (is_callable($arrField['options_callback']) && $objDc !== null) { // Options callback (callable)
+        } elseif (is_callable($arrField['options_callback'] ?? null) && $objDc !== null) { // Options callback (callable)
             $arrField['options'] = $arrField['options_callback']($objDc);
 
         } elseif (isset($arrField['foreignKey']) && $varValue) { // foreignKey
@@ -165,31 +165,31 @@ class Format
             return implode(', ', $varValue);
         }
 
-        if ('date' === $arrField['eval']['rgxp']) {
+        if ('date' === ($arrField['eval']['rgxp'] ?? null)) {
             return static::date($varValue);
         }
 
-        if ('time' === $arrField['eval']['rgxp']) {
+        if ('time' === ($arrField['eval']['rgxp'] ?? null)) {
             return static::time($varValue);
         }
 
-        if ('datim' === $arrField['eval']['rgxp'] || in_array($arrField['flag'], array(5, 6, 7, 8, 9, 10)) || 'tstamp' === $arrField['name']) {
+        if ('datim' === ($arrField['eval']['rgxp'] ?? null) || in_array(($arrField['flag'] ?? null), array(5, 6, 7, 8, 9, 10)) || 'tstamp' === $arrField['name']) {
             return static::datim($varValue);
         }
 
-        if ($arrField['eval']['isBoolean'] || ('checkbox' === $arrField['inputType'] && !$arrField['eval']['multiple'])) {
+        if (($arrField['eval']['isBoolean'] ?? false) || ('checkbox' === $arrField['inputType'] && !($arrField['eval']['multiple'] ?? false))) {
             return strlen($varValue) ? $GLOBALS['TL_LANG']['MSC']['yes'] : $GLOBALS['TL_LANG']['MSC']['no'];
         }
 
-        if ('textarea' === $arrField['inputType'] && ($arrField['eval']['allowHtml'] || $arrField['eval']['preserveTags'])) {
+        if ('textarea' === $arrField['inputType'] && (($arrField['eval']['allowHtml'] ?? false) || ($arrField['eval']['preserveTags'] ?? false))) {
             return \Contao\StringUtil::specialchars($varValue);
         }
 
-        if (is_array($arrField['reference']) && isset($arrField['reference'][$varValue])) {
+        if (is_array($arrField['reference'] ?? null) && isset($arrField['reference'][$varValue])) {
             return is_array($arrField['reference'][$varValue]) ? $arrField['reference'][$varValue][0] : $arrField['reference'][$varValue];
         }
 
-        if (($arrField['eval']['isAssociative'] || array_is_assoc($arrField['options'])) && isset($arrField['options'][$varValue])) {
+        if ((($arrField['eval']['isAssociative'] ?? null) || array_is_assoc($arrField['options'] ?? null)) && isset($arrField['options'][$varValue])) {
             return is_array($arrField['options'][$varValue]) ? $arrField['options'][$varValue][0] : $arrField['options'][$varValue];
         }
 
