@@ -592,11 +592,14 @@ class Form extends Controller
             'value' => $this->getFormId()
         ));
 
+        $tokenName = System::getContainer()->getParameter('contao.csrf_token_name');
+        $tokenManager = System::getContainer()->get('contao.csrf.token_manager');
+
         $this->addFormField('REQUEST_TOKEN', array(
             'name' => 'REQUEST_TOKEN',
             'inputType' => 'hidden',
             'ignoreModelValue' => true,
-            'value' => REQUEST_TOKEN
+            'value' => $tokenManager->getToken($tokenName)->getValue()
         ));
     }
 
@@ -984,8 +987,12 @@ class Form extends Controller
     {
         $this->createWidgets();
 
+        $tokenName = System::getContainer()->getParameter('contao.csrf_token_name');
+        $tokenManager = System::getContainer()->get('contao.csrf.token_manager');
+
         $objObject->action = $this->getFormAction();
         $objObject->formId = $this->getFormId();
+        $objObject->requestToken = $tokenManager->getToken($tokenName)->getValue();
         $objObject->method = strtolower($this->getMethod());
         $objObject->enctype = $this->getEnctype();
         $objObject->widgets = $this->arrWidgets;
