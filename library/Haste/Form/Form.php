@@ -423,7 +423,7 @@ class Form extends Controller
             }
 
             // Try to load the default value from bound Model
-            if (!$arrDca['ignoreModelValue'] && $this->objModel !== null) {
+            if (!($arrDca['ignoreModelValue'] ?? null) && $this->objModel !== null) {
                 $arrDca['value'] = $this->objModel->$strName;
             }
         }
@@ -440,7 +440,7 @@ class Form extends Controller
         }
 
         // Convert date formats into timestamps
-        $rgxp = $arrDca['eval']['rgxp'];
+        $rgxp = $arrDca['eval']['rgxp'] ?? null;
         if (in_array($rgxp, array('date', 'time', 'datim'), true)) {
             $this->addValidator($strName, function($varValue) use ($rgxp) {
                 if ($varValue != '') {
@@ -454,7 +454,7 @@ class Form extends Controller
             });
         }
 
-        if (is_array($arrDca['save_callback'])) {
+        if (is_array($arrDca['save_callback'] ?? null)) {
 
             $this->addValidator(
                 $strName,
@@ -487,16 +487,16 @@ class Form extends Controller
         $dc = (object) array(
             'id'            => $objModel ? $objModel->id : 0,
             'table'         => $objModel ? $objModel::getTable() : '',
-            'value'         => $arrDca['value'],
+            'value'         => $arrDca['value'] ?? null,
             'field'         => $strName,
             'inputName'     => $arrDca['name'],
             'activeRecord'  => $objModel
         );
 
         // Preserve the label
-        $strLabel = $arrDca['label'];
+        $strLabel = $arrDca['label'] ?? null;
 
-        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'], $strName, $dc->table, $dc);
+        $arrDca = $strClass::getAttributesFromDca($arrDca, $arrDca['name'], $arrDca['value'] ?? null, $strName, $dc->table, $dc);
 
         // Reset the ID to the field name
         $arrDca['id'] = $strName;
@@ -507,7 +507,7 @@ class Form extends Controller
         }
 
         // Convert optgroups so they work with FormSelectMenu
-        if (is_array($arrDca['options']) && array_is_assoc($arrDca['options'])) {
+        if (is_array($arrDca['options'] ?? null) && array_is_assoc($arrDca['options'])) {
             $arrOptions = $arrDca['options'];
             $arrDca['options'] = array();
 
@@ -868,7 +868,7 @@ class Form extends Controller
 
             // Some widgets render the mandatory asterisk only based on "require" attribute
             if (!isset($arrField['required'])) {
-                $arrField['required'] = (bool) $arrField['mandatory'];
+                $arrField['required'] = (bool) ($arrField['mandatory'] ?? false);
             }
 
             $objWidget = new $strClass($arrField);
@@ -999,7 +999,7 @@ class Form extends Controller
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
         // Generate hidden form fields
-        foreach ((array) $arrWidgets['hidden'] as $objWidget) {
+        foreach ((array) ($arrWidgets['hidden'] ?? []) as $objWidget) {
             $objObject->hidden .= $objWidget->parse();
         }
 
@@ -1008,8 +1008,8 @@ class Form extends Controller
             $objObject->fields .= $objWidget->parse();
         }
 
-        $objObject->hiddenWidgets  = $arrWidgets['hidden'];
-        $objObject->visibleWidgets = $arrWidgets['visible'];
+        $objObject->hiddenWidgets  = $arrWidgets['hidden'] ?? [];
+        $objObject->visibleWidgets = $arrWidgets['visible'] ?? [];
 
         $objObject->hasteFormInstance = $this;
 
