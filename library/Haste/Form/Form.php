@@ -423,7 +423,7 @@ class Form extends Controller
             }
 
             // Try to load the default value from bound Model
-            if (!($arrDca['ignoreModelValue'] ?? null) && $this->objModel !== null) {
+            if (!($arrDca['ignoreModelValue'] ?? false) && $this->objModel !== null) {
                 $arrDca['value'] = $this->objModel->$strName;
             }
         }
