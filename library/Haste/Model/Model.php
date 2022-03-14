@@ -22,7 +22,7 @@ abstract class Model extends \Contao\Model
      */
     public function __set($strKey, $varValue)
     {
-        if ($this->arrRelations[$strKey]['type'] == 'haste-ManyToMany'
+        if (($this->arrRelations[$strKey]['type'] ?? null) == 'haste-ManyToMany'
             && !is_array($varValue)
         ) {
             throw new \InvalidArgumentException('Values set on many-to-many relation fields have to be an array');
