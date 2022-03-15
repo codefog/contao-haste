@@ -177,11 +177,11 @@ class Format
             return static::datim($varValue);
         }
 
-        if (($arrField['eval']['isBoolean'] ?? false) || ('checkbox' === $arrField['inputType'] && !($arrField['eval']['multiple'] ?? false))) {
+        if (($arrField['eval']['isBoolean'] ?? false) || ('checkbox' === ($arrField['inputType'] ?? null) && !($arrField['eval']['multiple'] ?? false))) {
             return strlen($varValue) ? $GLOBALS['TL_LANG']['MSC']['yes'] : $GLOBALS['TL_LANG']['MSC']['no'];
         }
 
-        if ('textarea' === $arrField['inputType'] && (($arrField['eval']['allowHtml'] ?? false) || ($arrField['eval']['preserveTags'] ?? false))) {
+        if ('textarea' === ($arrField['inputType'] ?? null) && (($arrField['eval']['allowHtml'] ?? false) || ($arrField['eval']['preserveTags'] ?? false))) {
             return \Contao\StringUtil::specialchars($varValue);
         }
 
