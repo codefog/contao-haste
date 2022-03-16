@@ -162,7 +162,7 @@ class RowClass
 
             if (is_array($varValue))
             {
-                $arrData[$k][$this->strKey] = trim($arrData[$k][$this->strKey] . $class);
+                $arrData[$k][$this->strKey] = trim(($arrData[$k][$this->strKey] ?? '') . $class);
             }
             elseif (is_object($varValue))
             {
