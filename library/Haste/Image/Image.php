@@ -332,7 +332,7 @@ class Image
         $meta = Frontend::getMetaData($fileModel->meta, $options['language']);
 
         // Use the file name as title if none is given
-        if ('' === $meta['title']) {
+        if ('' === ($meta['title'] ?? null)) {
             $meta['title'] = specialchars($file->basename);
         }
 
@@ -341,9 +341,9 @@ class Image
             'uuid'      => $fileModel->uuid,
             'name'      => $file->basename,
             'singleSRC' => $fileModel->path,
-            'alt'       => $meta['title'],
-            'imageUrl'  => $meta['link'],
-            'caption'   => $meta['caption'],
+            'alt'       => ($meta['title'] ?? null),
+            'imageUrl'  => ($meta['link'] ?? null),
+            'caption'   => ($meta['caption'] ?? null),
             'mtime'     => $file->mtime
         ];
 
@@ -357,7 +357,7 @@ class Image
         // to set one because Controller::addImageToTemplate() would generate
         // one by calling $template->getName() which does not exist on our
         // stdClass object
-        if ($image['fullsize']) {
+        if ($image['fullsize'] ?? false) {
             if (!isset($options['lightboxId'])) {
                 $options['lightboxId'] = 'lightbox';
             } else {
