@@ -129,7 +129,7 @@ class AjaxReloadListener
      */
     private function getEvent()
     {
-        if (!Environment::get('isAjaxRequest') || !($event = $_SERVER['HTTP_HASTE_AJAX_RELOAD'])) {
+        if (!Environment::get('isAjaxRequest') || !($event = $_SERVER['HTTP_HASTE_AJAX_RELOAD'] ?? null)) {
             return null;
         }
 
