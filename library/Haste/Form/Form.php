@@ -593,7 +593,7 @@ class Form extends Controller
         ));
 
         $tokenName = System::getContainer()->getParameter('contao.csrf_token_name');
-        $tokenManager = System::getContainer()->get('contao.csrf.token_manager');
+        $tokenManager = System::getContainer()->has('contao.csrf.token_manager') ? System::getContainer()->get('contao.csrf.token_manager') : System::getContainer()->get('security.csrf.token_manager');
 
         $this->addFormField('REQUEST_TOKEN', array(
             'name' => 'REQUEST_TOKEN',
@@ -988,7 +988,7 @@ class Form extends Controller
         $this->createWidgets();
 
         $tokenName = System::getContainer()->getParameter('contao.csrf_token_name');
-        $tokenManager = System::getContainer()->get('contao.csrf.token_manager');
+        $tokenManager = System::getContainer()->has('contao.csrf.token_manager') ? System::getContainer()->get('contao.csrf.token_manager') : System::getContainer()->get('security.csrf.token_manager');
 
         $objObject->action = $this->getFormAction();
         $objObject->formId = $this->getFormId();
