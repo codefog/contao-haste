@@ -1005,10 +1005,14 @@ class Form extends Controller
         /** @type Widget $objWidget */
         $arrWidgets = $this->splitHiddenAndVisibleWidgets();
 
+        $objObject->hidden = '';
+
         // Generate hidden form fields
         foreach ((array) ($arrWidgets['hidden'] ?? []) as $objWidget) {
             $objObject->hidden .= $objWidget->parse();
         }
+
+        $objObject->fields = '';
 
         // Generate visible form fields
         foreach ((array) $arrWidgets['visible'] as $objWidget) {
