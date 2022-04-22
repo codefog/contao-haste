@@ -30,7 +30,7 @@ class ReloadHelper
     public static function subscribe($id, array $events)
     {
         foreach ($events as $event) {
-            if (!static::$listeners[$event] || !in_array($id, static::$listeners[$event], true)) {
+            if (!isset(static::$listeners[$event]) || !in_array($id, static::$listeners[$event], true)) {
                 static::$listeners[$event][] = $id;
             }
         }
