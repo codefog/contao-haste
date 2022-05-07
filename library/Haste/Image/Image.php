@@ -325,11 +325,11 @@ class Image
     {
         $file = new File($fileModel->path, true);
 
-        if (!isset($options['language'])) {
+        if (!isset($options['language']) && isset($GLOBALS['objPage'])) {
             $options['language'] = $GLOBALS['objPage']->language;
         }
 
-        $meta = Frontend::getMetaData($fileModel->meta, $options['language']);
+        $meta = Frontend::getMetaData($fileModel->meta, $options['language'] ?? '');
 
         // Use the file name as title if none is given
         if ('' === ($meta['title'] ?? null)) {
