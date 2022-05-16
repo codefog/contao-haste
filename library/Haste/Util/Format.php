@@ -116,6 +116,11 @@ class Format
     {
         System::loadLanguageFile($strTable);
         Controller::loadDataContainer($strTable);
+
+        if (!isset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField])) {
+            return '';
+        }
+
         $arrField = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
 
         // Add the "name" key (backwards compatibility)
