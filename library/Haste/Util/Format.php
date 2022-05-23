@@ -178,7 +178,7 @@ class Format
             return static::time($varValue);
         }
 
-        if ('datim' === ($arrField['eval']['rgxp'] ?? null) || in_array(($arrField['flag'] ?? null), array(5, 6, 7, 8, 9, 10)) || 'tstamp' === $arrField['name']) {
+        if ('datim' === ($arrField['eval']['rgxp'] ?? null) || in_array(($arrField['flag'] ?? null), array(5, 6, 7, 8, 9, 10)) || 'tstamp' === ($arrField['name'] ?? null)) {
             return static::datim($varValue);
         }
 
