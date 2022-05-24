@@ -114,6 +114,7 @@ class Format
      */
     public static function dcaValue($strTable, $strField, $varValue, DataContainer $objDc = null)
     {
+        System::loadLanguageFile('default');
         System::loadLanguageFile($strTable);
         Controller::loadDataContainer($strTable);
 
