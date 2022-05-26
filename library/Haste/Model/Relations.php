@@ -652,7 +652,7 @@ class Relations
 <strong>' . $GLOBALS['TL_LANG']['HST']['advanced_filter'] . '</strong> ';
 
         foreach (static::$arrFilterableFields as $field => $arrRelation) {
-            $return .= '<select name="' . $field . '" class="tl_select' . (isset($session['filter'][$filter][$field]) ? ' active' : '') . '">
+            $return .= '<select name="' . $field . '" class="tl_select tl_chosen' . (isset($session['filter'][$filter][$field]) ? ' active' : '') . '">
     <option value="tl_' . $field . '">' . ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '') . '</option>
     <option value="tl_' . $field . '">---</option>';
 
@@ -821,7 +821,7 @@ class Relations
             $options_sorter = natcaseksort($options_sorter);
             $active = ($sessionValues[$dc->table]['searchValue'] != '' && $sessionValues[$dc->table]['table'] == $relTable) ? true : false;
 
-            $return .= '<select name="tl_field_' . $field . '" class="tl_select' . ($active ? ' active' : '') . '">
+            $return .= '<select name="tl_field_' . $field . '" class="tl_select tl_chosen' . ($active ? ' active' : '') . '">
             '.implode("\n", $options_sorter).'
             </select>
             <span>=</span>
