@@ -39,7 +39,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate
      */
     public function __toString()
     {
-        $varValue = ($this->data['formatted'] ?: $this->data['value']);
+        $varValue = (($this->data['formatted'] ?? null) ?: $this->data['value']);
 
         if (is_array($varValue)) {
             return implode('', $varValue);
