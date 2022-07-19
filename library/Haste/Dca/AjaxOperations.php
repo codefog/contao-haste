@@ -263,7 +263,7 @@ class AjaxOperations
                 return '';
             }
 
-            if ($table == 'tl_files' && $row['type'] == 'folder') return '';
+            if ($table == 'tl_files' && !isset($row[$hasteAjaxOperationSettings['field']])) return '';
 
             $value = $row[$hasteAjaxOperationSettings['field']];
             $options = $this->getOptions($hasteAjaxOperationSettings);
