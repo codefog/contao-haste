@@ -165,7 +165,7 @@ class AjaxOperations
      */
     private function addOnClickAttribute(&$operation)
     {
-        $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
+        $clickEventString = 'return Haste.toggleAjaxOperation(this, \'%s\');';
 
         if (!isset($operation['attributes'])) {
             $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
@@ -262,6 +262,8 @@ class AjaxOperations
 
                 return '';
             }
+
+            if ($table == 'tl_files' && $row['type'] == 'folder') return '';
 
             $value = $row[$hasteAjaxOperationSettings['field']];
             $options = $this->getOptions($hasteAjaxOperationSettings);
