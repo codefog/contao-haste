@@ -269,7 +269,7 @@ class AjaxOperations
             }
 
             if(!isset($row[$hasteAjaxOperationSettings['field']])) {
-                $res = Database::getInstance()->prepare("SELECT * FROM " . $table . " WHERE " . ($dc instanceof \DC_Folder || $dc instanceof \DC_File ? 'path' : 'id') . " = ?")->execute(urldecode($row['id']));
+                $res = Database::getInstance()->prepare("SELECT * FROM " . $table . " WHERE " . (isset($_GLOBALS['TL_DCA'][$table]['config']['dataContainer']) && $_GLOBALS['TL_DCA'][$table]['config']['dataContainer'] == \DC_Folder::class ? 'path' : 'id') . " = ? LIMIT 1")->execute(urldecode($row['id']));
                 if ($res->next()) {
                     $row = $res->row();
                 } else {
