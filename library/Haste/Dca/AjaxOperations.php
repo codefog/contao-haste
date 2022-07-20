@@ -46,7 +46,7 @@ class AjaxOperations
         }
 
         $id = Input::post('id');
-        if ($dc->table == 'tl_files') {
+        if ($dc instanceof \DC_Folder || $dc instanceof \DC_File) {
             $dc->path = urldecode(Input::post('id'));
         } else {
             $dc->id = Input::post('id');
@@ -100,7 +100,7 @@ class AjaxOperations
         $value = $this->executeSaveCallback($dc, $value, $hasteAjaxOperationSettings);
 
         // Update DB
-        Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE ' . ($dc->table == 'tl_files' ? 'path' : 'id') . '=?')
+        Database::getInstance()->prepare('UPDATE ' . $dc->table . ' SET ' . $hasteAjaxOperationSettings['field'] .'=? WHERE ' . ($dc instanceof \DC_Folder || $dc instanceof \DC_File ? 'path' : 'id') . '=?')
             ->execute($value, $id);
 
         $versions->create();
@@ -269,7 +269,7 @@ class AjaxOperations
             }
 
             if(!isset($row[$hasteAjaxOperationSettings['field']])) {
-                $res = Database::getInstance()->prepare("SELECT * FROM " . $table . " WHERE " . ($table == 'tl_files' ? 'path' : 'id') . " = ?")->execute(urldecode($row['id']));
+                $res = Database::getInstance()->prepare("SELECT * FROM " . $table . " WHERE " . ($dc instanceof \DC_Folder || $dc instanceof \DC_File ? 'path' : 'id') . " = ?")->execute(urldecode($row['id']));
                 if ($res->next()) {
                     $row = $res->row();
                 } else {
