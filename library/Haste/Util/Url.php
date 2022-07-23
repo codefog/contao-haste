@@ -135,7 +135,7 @@ class Url
 
             $varUrl = Controller::generateFrontendUrl($objJump->row());
 
-            list(, $strQueryString) = explode('?', Environment::get('request'), 2);
+            $strQueryString = Environment::get('queryString');
 
             if ($strQueryString != '') {
                 $varUrl .= '?' . $strQueryString;
