@@ -68,7 +68,7 @@ class Url
             return $strUrl;
         }
 
-        list($strScript, $strQueryString) = explode('?', $strUrl, 2);
+        list($strScript, $strQueryString) = explode('?', $strUrl, 2) + array('', '');
 
         parse_str($strQueryString, $queries);
 
@@ -96,7 +96,7 @@ class Url
     {
         $strUrl = static::prepareUrl($varUrl);
 
-        list($strScript, $strQueryString) = explode('?', $strUrl, 2);
+        list($strScript, $strQueryString) = explode('?', $strUrl, 2) + array('', '');
 
         parse_str($strQueryString, $queries);
 
@@ -135,7 +135,7 @@ class Url
 
             $varUrl = Controller::generateFrontendUrl($objJump->row());
 
-            list(, $strQueryString) = explode('?', Environment::get('request'), 2);
+            $strQueryString = Environment::get('queryString');
 
             if ($strQueryString != '') {
                 $varUrl .= '?' . $strQueryString;
