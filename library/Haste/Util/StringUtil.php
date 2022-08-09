@@ -85,6 +85,10 @@ class StringUtil
             return $varValue;
         }
 
+        if (!\is_string($varValue)) {
+            return $varValue;
+        }
+
         if ($options & static::NO_ENTITIES) {
             $varValue = \Contao\StringUtil::restoreBasicEntities($varValue);
             $varValue = html_entity_decode($varValue);
@@ -144,7 +148,9 @@ class StringUtil
     {
         if (is_object($varValue)) {
             return;
-        } elseif (!is_array($varValue)) {
+        }
+
+        if (!is_array($varValue)) {
             $arrData[$strKey] = $varValue;
             return;
         }
