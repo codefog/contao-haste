@@ -212,7 +212,7 @@ class Image
         }
 
         // Set the file permissions when the Safe Mode Hack is used
-        if ($GLOBALS['TL_CONFIG']['useFTP'] ?? '') {
+        if ($GLOBALS['TL_CONFIG']['useFTP'] ?? false) {
             $objFiles = Files::getInstance();
             $objFiles->chmod($strCacheName, 0644);
         }
