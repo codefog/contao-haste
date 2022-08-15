@@ -26,7 +26,7 @@ class Input extends \Contao\Input
      */
     public static function getAutoItem($strKey, $blnDecodeEntities=false, $blnKeepUnused=false)
     {
-        if (($GLOBALS['TL_CONFIG']['useAutoItem'] ?? '') && isset($GLOBALS['TL_AUTO_ITEM']) && in_array($strKey, $GLOBALS['TL_AUTO_ITEM'])) {
+        if (($GLOBALS['TL_CONFIG']['useAutoItem'] ?? false) && isset($GLOBALS['TL_AUTO_ITEM']) && in_array($strKey, $GLOBALS['TL_AUTO_ITEM'])) {
             $strKey = 'auto_item';
         }
 
