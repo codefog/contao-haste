@@ -99,7 +99,7 @@ class AjaxOperations
             ->execute($value, $id);
 
         $versions->create();
-        if ($GLOBALS['TL_DCA'][$dc->table]['config']['enableVersioning']) {
+        if ($GLOBALS['TL_DCA'][$dc->table]['config']['enableVersioning'] ?? false) {
             System::log(
                 sprintf('A new version of record "%s.id=%s" has been created',
                     $dc->table,
