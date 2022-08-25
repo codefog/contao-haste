@@ -37,6 +37,11 @@ Haste also provides several insert tags to ease working with Contao.
 See the [insert tags documentation](docs/Util/InsertTags.md).
 
 
+## Migration from version 4.x
+
+Please refer to the [UPGRADE](UPGRADE.md) document.
+
+
 ## Copyright
 
 This project has been created and is maintained by:

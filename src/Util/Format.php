@@ -201,22 +201,4 @@ class Format
 
         return $varValue;
     }
-
-    /**
-     * @deprecated Deprecated since Haste 4.8, to be removed in Haste 5.
-     *             Use RepositoryVersion::format() instead.
-     */
-    public static function repositoryVersion($aVersion)
-    {
-        return RepositoryVersion::format($aVersion);
-    }
-
-    /**
-     * @deprecated Deprecated since Haste 4.8, to be removed in Haste 5.
-     *             Use RepositoryVersion::formatShort() instead.
-     */
-    public static function repositoryShortVersion($aVersion)
-    {
-        return RepositoryVersion::formatShort($aVersion);
-    }
 }
