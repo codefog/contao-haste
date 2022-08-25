@@ -2,120 +2,84 @@
 
 namespace Codefog\HasteBundle\EventListener;
 
+use Codefog\HasteBundle\AjaxReloadManager;
 use Contao\ContentModel;
-use Contao\Environment;
+use Contao\CoreBundle\ServiceAnnotation\Hook;
 use Contao\ModuleModel;
-use Codefog\HasteBundle\Ajax\ReloadHelper;
-use Codefog\HasteBundle\Util\Debug;
+use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class AjaxReloadListener
 {
+    public function __construct(
+        private readonly AjaxReloadManager $manager,
+        private readonly Packages $packages,
+        private readonly RequestStack $requestStack,
+    ) {}
+
     /**
-     * On get the content element
-     *
-     * @param ContentModel $model
-     * @param string       $buffer
-     *
-     * @return string
+     * @Hook("getContentElement")
      */
-    public function onGetContentElement(ContentModel $model, $buffer)
+    public function onGetContentElement(ContentModel $model, string $buffer): string
     {
         // Subscribe the content element if the included frontend module has subscribed itself
-        if ($model->type === 'module'
-            && ReloadHelper::isRegistered(ReloadHelper::getUniqid(ReloadHelper::TYPE_MODULE, $model->module))
-        ) {
-            ReloadHelper::subscribe(
-                ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT, $model->id),
-                ReloadHelper::getEvents(ReloadHelper::getUniqid(ReloadHelper::TYPE_MODULE, $model->module))
-            );
+        if ($model->type === 'module' && $this->manager->isRegistered(AjaxReloadManager::TYPE_MODULE, (int) $model->module)) {
+            $this->manager->subscribe(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $this->manager->getEvents(AjaxReloadManager::TYPE_MODULE, (int) $model->module));
         }
 
         // Subscribe the content element if the included content element has subscribed itself
-        if ($model->type === 'alias'
-            && ReloadHelper::isRegistered(ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT, $model->cteAlias))
-        ) {
-            ReloadHelper::subscribe(
-                ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT, $model->id),
-                ReloadHelper::getEvents(ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT, $model->cteAlias))
-            );
+        if ($model->type === 'alias' && $this->manager->isRegistered(AjaxReloadManager::TYPE_CONTENT, (int) $model->cteAlias)) {
+            $this->manager->subscribe(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $this->manager->getEvents(AjaxReloadManager::TYPE_CONTENT, (int) $model->cteAlias));
         }
 
-        $event  = $this->getEvent();
+        $event = $this->getEventFromCurrentRequest();
         $isAjax = $event !== null;
-        $buffer = ReloadHelper::updateBuffer(
-            ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT, $model->id),
-            $buffer,
-            $isAjax
-        );
+        $buffer = $this->manager->updateBuffer(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $buffer, $isAjax);
 
         if ($isAjax) {
-            ReloadHelper::storeResponse(
-                ReloadHelper::getUniqid(ReloadHelper::TYPE_CONTENT, $model->id),
-                $event,
-                $buffer
-            );
+            $this->manager->storeBuffer(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $event, $buffer);
         }
 
         return $buffer;
     }
 
     /**
-     * On get the frontend module
-     *
-     * @param ModuleModel $model
-     * @param string      $buffer
-     *
-     * @return string
+     * @Hook("getFrontendModule")
      */
-    public function onGetFrontendModule(ModuleModel $model, $buffer)
+    public function onGetFrontendModule(ModuleModel $model, string $buffer): string
     {
-        $event  = $this->getEvent();
+        $event = $this->getEventFromCurrentRequest();
         $isAjax = $event !== null;
-        $buffer = ReloadHelper::updateBuffer(
-            ReloadHelper::getUniqid(ReloadHelper::TYPE_MODULE, $model->id),
-            $buffer,
-            $isAjax
-        );
+        $buffer = $this->manager->updateBuffer(AjaxReloadManager::TYPE_MODULE, (int) $model->id, $buffer, $isAjax);
 
         if ($isAjax) {
-            ReloadHelper::storeResponse(
-                ReloadHelper::getUniqid(ReloadHelper::TYPE_MODULE, $model->id),
-                $event,
-                $buffer
-            );
+            $this->manager->storeBuffer(AjaxReloadManager::TYPE_MODULE, (int) $model->id, $event, $buffer);
         }
 
         return $buffer;
     }
 
     /**
-     * On modify the frontend page. Handle the request for entries included via insert tags,
-     * e.g. via page layout or content elements
-     *
-     * @param string $buffer
-     * @param string $template
-     *
-     * @return string
+     * @Hook("modifyFrontendPage")
      */
-    public function onModifyFrontendPage($buffer, $template)
+    public function onModifyFrontendPage(string $buffer,  string $template): string
     {
-        if (stripos($template, 'fe_') === 0) {
-            if (($response = ReloadHelper::getResponse()) !== null) {
+        if (str_starts_with($template, 'fe_')) {
+            if (($response = $this->manager->getResponse()) !== null) {
                 $response->send();
             }
 
-            if (ReloadHelper::hasListeners()) {
+            $request = $this->requestStack->getCurrentRequest();
+
+            if ($this->manager->hasListeners()) {
                 $buffer = str_replace(
                     '</body>',
-                    sprintf(
-                        '<script src="%s"></script></body>',
-                        'bundles/codefoghaste/ajax-reload.min.js'
-                    ),
+                    sprintf('<script src="%s"></script></body>', $this->packages->getUrl('ajax-reload.js', 'codefog_haste')),
                     $buffer
                 );
 
                 // Make sure the request is not cached by the browser alongside with the initial request
-                header('Vary: Haste-Ajax-Reload');
+                $request->headers->set('Vary', 'Haste-Ajax-Reload');
             }
         }
 
@@ -123,16 +87,16 @@ class AjaxReloadListener
     }
 
     /**
-     * Get the event
-     *
-     * @return string|null
+     * Get the event from the current request.
      */
-    private function getEvent()
+    private function getEventFromCurrentRequest(): ?string
     {
-        if (!Environment::get('isAjaxRequest') || !($event = $_SERVER['HTTP_HASTE_AJAX_RELOAD'] ?? null)) {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if ($request === null || !$request->isXmlHttpRequest() || !$request->server->has('HTTP_HASTE_AJAX_RELOAD')) {
             return null;
         }
 
-        return $event;
+        return $request->server->get('HTTP_HASTE_AJAX_RELOAD');
     }
 }

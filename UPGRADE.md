@@ -1,12 +1,46 @@
-# API changes
+# API changes – Version 4.* to 5.0
 
-## Version 4.* to 5.0
-
-### Conversion to bundle
+## Conversion to bundle
 
 Haste becomes a regular Contao bundle as of version 5.0. 
 
-### Removed components
+
+## AjaxReload component
+
+The AjaxReload component has become a service and no longer accepts custom IDs:
+
+```php
+// Content element (old)
+\Haste\Ajax\ReloadHelper::subscribe(
+    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_CONTENT, $contentElementId),
+    ['foo-event']
+);
+
+// Content element (new)
+$this->ajaxReloadManager->subscribe(\Codefog\HasteBundle\AjaxReloadManager::TYPE_CONTENT, $contentElementId, ['foo-event']);
+
+
+
+// Frontend module (old)
+\Haste\Ajax\ReloadHelper::subscribe(
+    \Haste\Ajax\ReloadHelper::getUniqid(\Haste\Ajax\ReloadHelper::TYPE_MODULE, $this->id),
+    ['bar-event']
+);
+
+// Frontend module (new)
+$this->ajaxReloadManager->subscribe(AjaxReloadManager::TYPE_MODULE, $frontendModuleId, ['bar-event']);
+
+
+
+// Custom (old)
+\Haste\Ajax\ReloadHelper::subscribe('my-unique-id', ['baz-event']);
+
+// Custom (new)
+// No longer supported!
+```
+
+
+## Removed components
 
 1. `Haste\Dca\PaletteManipulator` – it is a part of Contao core now.
 2. `Haste\Dca\SortingFlag` – it is a part of Contao core now.

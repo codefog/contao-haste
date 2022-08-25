@@ -21,12 +21,9 @@ $GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Util\Undo', 'callbac
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['executePostActions'][] = array('Dca\AjaxOperations', 'executePostActions');
-$GLOBALS['TL_HOOKS']['getContentElement'][]  = ['EventListener\AjaxReloadListener', 'onGetContentElement'];
-$GLOBALS['TL_HOOKS']['getFrontendModule'][]  = ['EventListener\AjaxReloadListener', 'onGetFrontendModule'];
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Dca\DateRangeFilter', 'addCallbacks');
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Dca\AjaxOperations', 'modifyDca');
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Model\Relations', 'addRelationCallbacks');
-$GLOBALS['TL_HOOKS']['modifyFrontendPage'][] = ['EventListener\AjaxReloadListener', 'onModifyFrontendPage'];
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][]  = array('Util\InsertTag', 'replaceHasteInsertTags');
 $GLOBALS['TL_HOOKS']['reviseTable'][]        = array('Model\Relations', 'reviseRelatedRecords');
 

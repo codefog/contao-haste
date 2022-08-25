@@ -16,6 +16,7 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\Date;
 use Contao\Session;
+use Contao\System;
 use Contao\Validator;
 
 class DateRangeFilter
@@ -73,7 +74,7 @@ class DateRangeFilter
             return '';
         }
 
-        $GLOBALS['TL_CSS'][] = 'bundles/codefoghaste/haste.css';
+        $GLOBALS['TL_CSS'][] = System::getContainer()->get('assets.packages')->getUrl('date-range-filter.css', 'codefog_haste');
 
         $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) == 4) ? $dc->table.'_'.CURRENT_ID : $dc->table;
         $session = Session::getInstance()->getData();

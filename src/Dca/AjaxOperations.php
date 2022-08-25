@@ -141,7 +141,7 @@ class AjaxOperations
             $operation = &$GLOBALS['TL_DCA'][$table]['list']['operations'][$name];
 
             // Add the JavaScript
-            $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/codefoghaste/haste.min.js|static';
+            $GLOBALS['TL_JAVASCRIPT'][] = System::getContainer()->get('assets.packages')->getUrl('dca-ajax-operations.js', 'codefog_haste');
 
             // Add default button callback to display the correct initial state
             // but only add it if not already present

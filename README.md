@@ -20,7 +20,7 @@ Then, run the Contao install tool to update the database.
 
 ## Documentation
 
-- [Ajax/ReloadHelper](docs/Ajax/ReloadHelper.md)
+- [AjaxReload](docs/AjaxReload.md)
 - [Dca](docs/Dca/index.md)
 - [Form](docs/Form/Form.md)
 - [Image](docs/Image/index.md)
