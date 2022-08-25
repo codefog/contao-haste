@@ -18,12 +18,6 @@ $GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Util\Undo', 'callbac
 
 
 /**
- * Backend widgets
- */
-$GLOBALS['BE_FFL']['numberField'] = 'Number\BackendWidget';
-
-
-/**
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['executePostActions'][] = array('Dca\AjaxOperations', 'executePostActions');
