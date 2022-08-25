@@ -10,14 +10,13 @@ This utility class is designed to ease string handling.
 This is most useful to convert values to simple tokens. 
 Simple tokens can only handle string values and have special support for if/else constructs.
 
-
 ```php
 <?php
 
 $value = array('foo', 'bar');
 $data  = array();
 
-\Haste\Util\StringUtil::flatten($value, 'prefix', $data);
+Util\StringUtil::flatten($value, 'prefix', $data);
 
 // Result
 $data = array(
@@ -27,14 +26,13 @@ $data = array(
 );
 ```
 
-
 ```php
 <?php
 
 $value = array('foo' => 'bar');
 $data  = array();
 
-\Haste\Util\StringUtil::flatten($value, 'prefix', $data);
+Util\StringUtil::flatten($value, 'prefix', $data);
 
 // Result
 $data = array(

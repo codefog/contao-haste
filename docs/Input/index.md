@@ -10,7 +10,7 @@ Various classes to improve input handling.
 ```php
 <?php
 
-$strValue = \Haste\Input\Input::getAutoItem('items');
+$strValue = Input\Input::getAutoItem('items');
 ```
 
 This will check if `auto_item` is activated on the given key,
@@ -26,7 +26,7 @@ http://example.com/item/12-news-title.html
 ```php
 <?php
 
-$intId = \Haste\Input\UrlId::get('items');
+$intId = Input\UrlId::get('items');
 $objItem = \NewsModel::findByPk($intId);
 
 if (null === $objItem) {
@@ -34,7 +34,7 @@ if (null === $objItem) {
 }
 
 // Validate the news title in the URL
-\Haste\Input\UrlId::validate('items', $intId, $objItem->title);
+Input\UrlId::validate('items', $intId, $objItem->title);
 ```
 
 If the given name is not correct, (e.g. it would be "the-news-title"), the

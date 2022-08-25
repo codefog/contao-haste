@@ -26,13 +26,13 @@ Adding a query string is as simple as passing it as a string argument.
 Haste will correctly add ampersand or question mark to the URL as needed.
 
 ```php
-$url = \Haste\Util\Url::addQueryString('foo=bar');
+$url = Util\Url::addQueryString('foo=bar');
 ```
 
 You can also add multiple query strings with ease:
 
 ```php
-$url = \Haste\Util\Url::addQueryString('foo1=bar1&foo2=bar2');
+$url = Util\Url::addQueryString('foo1=bar1&foo2=bar2');
 ```
 
 
@@ -41,7 +41,7 @@ $url = \Haste\Util\Url::addQueryString('foo1=bar1&foo2=bar2');
 The `removeQueryString` method accepts an array of query parameters to remove.
 
 ```php
-$url = \Haste\Util\Url::removeQueryString(['foo', 'bar']);
+$url = Util\Url::removeQueryString(['foo', 'bar']);
 ```
 
 
@@ -53,7 +53,7 @@ This method behaves similar to [`array_filter`](https://php.net/array_filter)
 with flag `ARRAY_FILTER_USE_BOTH`.
 
 ```php
-$url = \Haste\Util\Url::removeQueryStringCallback(
+$url = Util\Url::removeQueryStringCallback(
     function ($value, $key) {
         // Remove keys that start with "foo_"
         return strpos($key, 'foo_') !== 0;

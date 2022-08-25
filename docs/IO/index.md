@@ -48,13 +48,12 @@ usually classes that are reusable.
 > If you do not set a file name for the Writer (constructor argument), it will create a random file
 > in Contao's `system/tmp` folder.
 
-
 ```php
 // Initialize reader from model collection
-$objReader = new \Haste\IO\Reader\ModelCollectionReader($objModel);
+$objReader = new \IO\Reader\ModelCollectionReader($objModel);
 
 // Initialize writer
-$objWriter = new \Haste\IO\Writer\CsvFileWriter();
+$objWriter = new \IO\Writer\CsvFileWriter();
 
 // Set row callback
 $objWriter->setRowCallback(function($arrRow) {

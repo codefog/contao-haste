@@ -15,9 +15,9 @@ the `generate()` method just call the parent method.
 ### Example 1
  
 No need to have a `generate()` method if you simply want the wildcard in BE.
- 
+
 ```php
-class MyModule extends \Haste\Frontend\AbstractFrontendModule
+class MyModule extends Frontend\AbstractFrontendModule
 {
     
     protected function compile() 
@@ -31,7 +31,7 @@ class MyModule extends \Haste\Frontend\AbstractFrontendModule
 Override `generate()` and call `generateWildcard()` if you need special handling.
 
 ```php
-class MyModule extends \Haste\Frontend\AbstractFrontendModule
+class MyModule extends Frontend\AbstractFrontendModule
 {
 
     /**

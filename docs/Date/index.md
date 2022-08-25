@@ -10,7 +10,7 @@ Provides helper classes to handle dates.
 <?php
 
 $objMember = \MemberModel::findByPk('1');
-$intAge = \Haste\DateTime\DateTime::createFromFormat('U', $objMember->dateOfBirth)->getAge();
+$intAge = DateTime\DateTime::createFromFormat('U', $objMember->dateOfBirth)->getAge();
 ```
 
 

@@ -28,10 +28,10 @@ The `Unit` class can measure and convert between several mass units.
 ```php
 <?php
 
-echo \Haste\Units\Mass\Unit::convert(
+echo \Units\Mass\Unit::convert(
 	1,
-	\Haste\Units\Mass\Unit::KILOGRAM,
-	\Haste\Units\Mass\Unit::POUND
+	\Units\Mass\Unit::KILOGRAM,
+	\Units\Mass\Unit::POUND
 );
 ```
 > Returns `2.20459`
@@ -45,22 +45,23 @@ echo \Haste\Units\Mass\Unit::convert(
 $objScale = new Scale();
 
 // Add one kilogram
-$objScale->add(new \Haste\Units\Mass\Weight(1, \Haste\Units\Mass\Unit::KILOGRAM));
+$objScale->add(new \Units\Mass\Weight(1, \Units\Mass\Unit::KILOGRAM));
 
 // Add 500 gram
-$objScale->add(new \Haste\Units\Mass\Weight(5000, \Haste\Units\Mass\Unit::MILIGRAM));
+$objScale->add(new \Units\Mass\Weight(5000, \Units\Mass\Unit::MILIGRAM));
 
-echo $objScale->amountIn(\Haste\Units\Mass\Unit::GRAM);
+echo $objScale->amountIn(\Units\Mass\Unit::GRAM);
 ```
 > Returns `1005`
 
 Add some more to the scale:
+
 ```php
 <?php
 
 // Add some stones
-$objScale->add(new \Haste\Units\Mass\Weight(3, \Haste\Units\Mass\Unit::STONE));
+$objScale->add(new \Units\Mass\Weight(3, \Units\Mass\Unit::STONE));
 
-echo $objScale->amountIn(\Haste\Units\Mass\Unit::POUND);
+echo $objScale->amountIn(\Units\Mass\Unit::POUND);
 ```
 > Returns `2257.60776`

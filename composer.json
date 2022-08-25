@@ -2,52 +2,47 @@
     "name": "codefog/contao-haste",
     "description": "haste extension for Contao Open Source CMS",
     "keywords": ["contao", "haste"],
-    "type": "contao-module",
-    "license": "LGPL-3.0-or-later",
+    "type": "contao-bundle",
+    "license": "MIT",
     "authors": [
         {
             "name": "Codefog",
-            "homepage": "http://codefog.pl"
+            "homepage": "https://codefog.pl"
         },
         {
             "name": "terminal42 gmbh",
             "homepage": "https://www.terminal42.ch"
         }
     ],
+    "support": {
+        "issues": "https://github.com/codefog/contao-haste/issues",
+        "forum": "https://community.contao.org",
+        "source": "https://github.com/codefog/contao-haste"
+    },
     "require": {
-        "php": "~7.0 || ~8.0",
-        "contao/core-bundle": "^4.4",
-        "contao-community-alliance/composer-plugin": "~2.4 || ~3.0"
+        "php": "^8.1",
+        "contao/core-bundle": "^4.13 || ^5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.2",
+        "contao/manager-plugin": "^2.0",
         "phpoffice/phpexcel": "^1.6",
         "phpoffice/phpspreadsheet": "^1.6"
     },
-    "scripts": {
-        "unit-tests": "vendor/bin/phpunit"
-    },
-    "replace": {
-        "contao-legacy/haste": "self.version"
+    "conflict": {
+        "contao/manager-plugin": "<2.0 || >=3.0"
     },
     "suggest": {
         "phpoffice/phpspreadsheet": "Required for the Haste\\IO\\ExcelFileWriter component."
     },
     "autoload": {
-        "psr-0": {
-            "Haste\\": [
-                "library/"
-            ]
+        "psr-4": {
+            "Codefog\\HasteBundle\\": "src/"
         }
     },
     "extra": {
-        "contao": {
-            "sources": {
-                "": "system/modules/haste"
-            },
-            "runonce": [
-                "config/upgrade.php"
-            ]
-        }
+        "contao-manager-plugin": "Codefog\\HasteBundle\\ContaoManager\\Plugin"
+    },
+    "scripts": {
+        "cs-fixer": "tools/ecs/vendor/bin/ecs check src/ --fix --ansi"
     }
 }

@@ -10,7 +10,7 @@ Various classes to ease HTTP handling.
 ```php
 <?php
 
-$objResponse = new Haste\Http\Response\Response();
+$objResponse = new \Http\Response\Response();
 $objResponse->send();
 ```
 
@@ -19,7 +19,7 @@ $objResponse->send();
 ```php
 <?php
 
-$objResponse = new Haste\Http\Response\Response('Foobar content', 400);
+$objResponse = new \Http\Response\Response('Foobar content', 400);
 $objResponse->send();
 ```
 
@@ -30,10 +30,10 @@ You can use different types of responses.
 ```php
 <?php
 
-$objResponse = new Haste\Http\Response\Response();
-$objResponse = new Haste\Http\Response\JsonResponse();
-$objResponse = new Haste\Http\Response\HtmlResponse();
-$objResponse = new Haste\Http\Response\XmlResponse();
+$objResponse = new \Http\Response\Response();
+$objResponse = new \Http\Response\JsonResponse();
+$objResponse = new \Http\Response\HtmlResponse();
+$objResponse = new \Http\Response\XmlResponse();
 ```
 
 ### Redirecting ###
@@ -44,6 +44,6 @@ Defaults to HTTP status code 301 (Moved Permanently).
 ```php
 <?php
 
-$objResponse = new Haste\Http\Response\RedirectResponse('http://example.com', 303);
+$objResponse = new \Http\Response\RedirectResponse('http://example.com', 303);
 $objResponse->send();
 ```

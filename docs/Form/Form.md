@@ -13,6 +13,7 @@ A lot of the following examples can be combined.
 For more internal details please read the source ;-)
 
 ### Preparing a form instance
+
 ```php
 <?php
 
@@ -20,7 +21,7 @@ For more internal details please read the source ;-)
     // Second is either GET or POST
     // Third is a callable that decides when your form is submitted
     // You can pass an optional fourth parameter (true by default) to turn the form into a table based one
-    $objForm = new \Haste\Form\Form('someid', 'POST', function($objHaste) {
+    $objForm = new Form\Form('someid', 'POST', function($objHaste) {
         return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
     });
 
@@ -28,7 +29,7 @@ For more internal details please read the source ;-)
     // You have to tell it! Let's have a look at an example using GET
     // Haste will turn into the submitted state as soon as the GET param
     // "foo" contains the value "bar"
-    $objForm = new \Haste\Form\Form('someid', 'GET', function() {
+    $objForm = new Form\Form('someid', 'GET', function() {
         return \Input::get('foo') === 'bar';
     });
 
@@ -172,6 +173,7 @@ ArrayPosition::BEFORE
 ArrayPosition::AFTER
 ```
 `FIRST` and `LAST` do not require the second parameter of the constructor.
+
 ```php
 <?php
     // this example adds an explanation form field before the existing submit 
@@ -179,7 +181,7 @@ ArrayPosition::AFTER
     $objForm->addFormField('mandatory', array(
         'inputType' => 'explanation',
         'eval' => array('text' => '<p>Mandatory</p>', 'class' => 'mandatory-label')
-    ), new \Haste\Util\ArrayPosition(\Haste\Util\ArrayPosition::BEFORE, 'submit'));
+    ), new Util\ArrayPosition(Util\ArrayPosition::BEFORE, 'submit'));
 ```
 
 

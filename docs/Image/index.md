@@ -17,10 +17,10 @@ This is very useful for using it in a template like so:
 
 ```php
 <?php
-$this->insert('gallery_default', \Haste\Image\Image::getForGalleryTemplate(
+$this->insert('gallery_default', Image\Image::getForGalleryTemplate(
     $this->gallery_field,
     [
-        'sortBy' => \Haste\Image\Image::SORT_CUSTOM,
+        'sortBy' => Image\Image::SORT_CUSTOM,
         'orderSRC' => $this->gallery_order_field,
         'size' => 42
     ]

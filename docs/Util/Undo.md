@@ -14,7 +14,7 @@ class tl_table
     public function storeUndoData(DataContainer $dc, $intUndoId)
     {
         $arrData = array('foo'=>'bar');
-        \Haste\Util\Undo::add($intUndoId, 'my_data', $arrData);
+        Util\Undo::add($intUndoId, 'my_data', $arrData);
     }
 }
 ```

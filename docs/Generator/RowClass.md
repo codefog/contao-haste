@@ -10,6 +10,7 @@ Examples
 ------------
 
 ### Add the first/last and even/odd classes
+
 ```php
 <?php
 
@@ -18,5 +19,5 @@ while ($objItems->next()) {
     // ...
 }
 
-\Haste\Generator\RowClass::withKey('class')->addFirstLast()->addEvenOdd()->applyTo($arrItems);
+Generator\RowClass::withKey('class')->addFirstLast()->addEvenOdd()->applyTo($arrItems);
 ```

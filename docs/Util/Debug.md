@@ -12,7 +12,7 @@ This method will remove `.min` from the file path if debug mode is active.
 ```php
 <?php
 
-$GLOBALS['TL_JAVASCRIPT'][] = \Haste\Util\Debug::uncompressedFile('path/to/file.min.js');
+$GLOBALS['TL_JAVASCRIPT'][] = Util\Debug::uncompressedFile('path/to/file.min.js');
 ```
 
 
@@ -23,5 +23,5 @@ Using this method, you can add custom messages to the Contao debug console.
 ```php
 <?php
 
-\Haste\Util\Debug::addToConsole(print_r($myVar, true), 'my_group');
+Util\Debug::addToConsole(print_r($myVar, true), 'my_group');
 ```

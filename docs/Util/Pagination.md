@@ -28,7 +28,7 @@ the `isOutOfRange` property. The default would be to show a 404 (page not found)
 ```php
 $intTotal = $this->Database->execute("SELECT COUNT(*) AS total FROM tl_table")->total;
 
-$objPagination = new \Haste\Util\Pagination($intTotal, $this->perPage, 'page_i' . $this->id);
+$objPagination = new Util\Pagination($intTotal, $this->perPage, 'page_i' . $this->id);
 
 if ($objPagination->isOutOfRange()) {
     $objHandler = new $GLOBALS['TL_PTY']['error_404']();
@@ -49,7 +49,7 @@ $this->Template->pagination = $objPagination->generate();
 ```php
 $arrItems = range(1, 10)
 
-$objPagination = new \Haste\Util\Pagination(count($arrItems), $this->perPage, 'page_i' . $this->id);
+$objPagination = new Util\Pagination(count($arrItems), $this->perPage, 'page_i' . $this->id);
 
 if ($objPagination->isOutOfRange()) {
     $objHandler = new $GLOBALS['TL_PTY']['error_404']();

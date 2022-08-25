@@ -43,7 +43,7 @@ The model class must extend \Haste\Model\Model.
 ```php
 <?php
 
-class TableOneModel extends \Haste\Model\Model
+class TableOneModel extends Model\Model
 {
     // ...
 }
