@@ -1,53 +1,43 @@
-var Haste = Haste || {};
+window.Haste = window.Haste || {};
 
 /**
  * Toggle ajax operation
- *
- * @param {object} el   The DOM element
- * @param {string} id   The ID of the target element
- *
+ * @param {object} el The DOM element
+ * @param {string} id The ID of the target element
  * @returns {boolean}
  */
-Haste.toggleAjaxOperation = function(el, id) {
+window.Haste.toggleAjaxOperation = function(el, id) {
     el.blur();
 
     function getUrlParameter(name, href) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(href);
+        const regex = new RegExp('[\\?&]' + name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]') + '=([^&#]*)');
+        const results = regex.exec(href);
+
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     }
 
-    var image = $(el).getFirst('img'),
-        operation = el.getAttribute('data-haste-ajax-operation-name'),
-        value = el.getAttribute('data-haste-ajax-operation-value'),
-        buttonHref = el.getAttribute('href'),
-        urlTable = getUrlParameter('table', buttonHref),
-        urlAppend = (urlTable ? ('&table=' + urlTable) : '');
+    const image = $(el).getFirst('img');
+    const operation = el.getAttribute('data-haste-ajax-operation-name');
+    const value = el.getAttribute('data-haste-ajax-operation-value');
+    const buttonHref = el.getAttribute('href');
+    const urlTable = getUrlParameter('table', buttonHref);
+    const urlAppend = (urlTable ? ('&table=' + urlTable) : '');
 
     // Send the request
     new Request.JSON({
         followRedirects: true,
         url: window.location.href + urlAppend,
         onComplete: function(json) {
-
             // Support Contao redirects
             if (this.getHeader('X-Ajax-Location')) {
                 window.location.replace(this.getHeader('X-Ajax-Location'));
                 return;
             }
 
-            var iconPath = json.nextIcon;
+            let iconPath = json.nextIcon;
 
-            if (iconPath.indexOf('/') == -1) {
-                var folder = 'images';
-
-                // Support SVG images in Contao 4
-                if (/\.svg$/i.test(iconPath)) {
-                    folder = 'icons';
-                }
-
-                iconPath = Contao.script_url + 'system/themes/' + Contao.theme + '/' + folder + '/' + json.nextIcon;
+            if (iconPath.indexOf('/') === -1) {
+                iconPath = Contao.script_url + 'system/themes/' + Contao.theme + '/icons/' + json.nextIcon;
             }
 
             image.src = iconPath;

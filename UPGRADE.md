@@ -40,6 +40,12 @@ $this->ajaxReloadManager->subscribe(AjaxReloadManager::TYPE_MODULE, $frontendMod
 ```
 
 
+## DcaAjaxOperations component
+
+This component did not change much, but we advise you to switch to the Contao core default features described 
+in the [manual](docs/DcaAjaxOperations.md).
+
+
 ## Removed components
 
 1. `Haste\Dca\PaletteManipulator` – it is a part of Contao core now.

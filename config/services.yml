@@ -6,3 +6,6 @@ services:
     # AjaxReload
     Codefog\HasteBundle\AjaxReloadManager: ~
     Codefog\HasteBundle\EventListener\AjaxReloadListener: ~
+
+    # DcaAjaxOperations
+    Codefog\HasteBundle\EventListener\DcaAjaxOperationsListener: ~

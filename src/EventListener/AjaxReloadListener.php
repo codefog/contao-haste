@@ -4,7 +4,7 @@ namespace Codefog\HasteBundle\EventListener;
 
 use Codefog\HasteBundle\AjaxReloadManager;
 use Contao\ContentModel;
-use Contao\CoreBundle\ServiceAnnotation\Hook;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\ModuleModel;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -17,9 +17,7 @@ class AjaxReloadListener
         private readonly RequestStack $requestStack,
     ) {}
 
-    /**
-     * @Hook("getContentElement")
-     */
+    #[AsHook('getContentElement')]
     public function onGetContentElement(ContentModel $model, string $buffer): string
     {
         // Subscribe the content element if the included frontend module has subscribed itself
@@ -43,9 +41,7 @@ class AjaxReloadListener
         return $buffer;
     }
 
-    /**
-     * @Hook("getFrontendModule")
-     */
+    #[AsHook('getFrontendModule')]
     public function onGetFrontendModule(ModuleModel $model, string $buffer): string
     {
         $event = $this->getEventFromCurrentRequest();
@@ -59,9 +55,7 @@ class AjaxReloadListener
         return $buffer;
     }
 
-    /**
-     * @Hook("modifyFrontendPage")
-     */
+    #[AsHook('modifyFrontendPage')]
     public function onModifyFrontendPage(string $buffer,  string $template): string
     {
         if (str_starts_with($template, 'fe_')) {
