@@ -5,8 +5,9 @@ namespace Codefog\HasteBundle;
 use Contao\StringUtil;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Service\ResetInterface;
 
-class AjaxReloadManager
+class AjaxReloadManager implements ResetInterface
 {
     public const TYPE_CONTENT = 'ce';
     public const TYPE_MODULE = 'fmd';
@@ -115,6 +116,15 @@ class AjaxReloadManager
         }
 
         return array_unique($events);
+    }
+
+    /**
+     * Reset the service state on kernel shutdown.
+     */
+    public function reset(): void
+    {
+        $this->buffers = [];
+        $this->listeners = [];
     }
 
     /**
