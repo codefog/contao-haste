@@ -9,3 +9,10 @@ services:
 
     # DcaAjaxOperations
     Codefog\HasteBundle\EventListener\DcaAjaxOperationsListener: ~
+
+    # DcaDateRangeFilter
+    Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
+
+    # Relations
+    Codefog\HasteBundle\Model\Relations:
+        public: true

@@ -51,6 +51,14 @@ in the [manual](docs/DcaAjaxOperations.md).
 The class with static methods has been converted to a service.
 
 
+## DcaRelations component
+
+The DCA configurations did not change, but the class changes are BC breaks:
+
+1. The `\Haste\Model\Relations` class has been converted to the `\Codefog\HasteBundle\DcaRelations` service.
+2. The model class has been renamed from `\Haste\Model\Model` to `\Haste\Model\DcaRelationsModel`. 
+
+
 ## Form component
 
 The `\Haste\Form` class has been reworked and contains some BC breaks:

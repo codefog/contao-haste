@@ -20,13 +20,11 @@ $GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Util\Undo', 'callbac
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Dca\DateRangeFilter', 'addCallbacks');
-$GLOBALS['TL_HOOKS']['loadDataContainer'][]  = array('Model\Relations', 'addRelationCallbacks');
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][]  = array('Util\InsertTag', 'replaceHasteInsertTags');
 $GLOBALS['TL_HOOKS']['reviseTable'][]        = array('Model\Relations', 'reviseRelatedRecords');
 
 if (TL_MODE !== 'FE') {
-    $GLOBALS['TL_HOOKS']['sqlGetFromFile'][] = ['Model\Relations', 'addRelationTables'];
+    $GLOBALS['TL_HOOKS'][''][] = ['Model\Relations', 'addRelationTables'];
 }
 
 
