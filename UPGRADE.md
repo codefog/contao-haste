@@ -46,6 +46,11 @@ This component did not change much, but we advise you to switch to the Contao co
 in the [manual](docs/DcaAjaxOperations.md).
 
 
+## DcaDateRangeFilter component
+
+The class with static methods has been converted to a service.
+
+
 ## Removed components
 
 1. `Haste\Dca\PaletteManipulator` – it is a part of Contao core now.

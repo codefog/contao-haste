@@ -21,7 +21,8 @@ Then, run the Contao install tool to update the database.
 ## Documentation
 
 - [AjaxReload](docs/AjaxReload.md)
-- [Dca](docs/Dca/index.md)
+- [DcaAjaxOperations](docs/DcaAjaxOperations.md)
+- [DcaDateRangeFilter](docs/DcaDateRangeFilter.md)
 - [Form](docs/Form/Form.md)
 - [Image](docs/Image/index.md)
 - [IO](docs/IO/index.md)
