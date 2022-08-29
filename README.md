@@ -24,7 +24,6 @@ Then, run the Contao install tool to update the database.
 - [DcaAjaxOperations](docs/DcaAjaxOperations.md)
 - [DcaDateRangeFilter](docs/DcaDateRangeFilter.md)
 - [Form](docs/Form.md)
-- [IO](docs/IO/index.md)
 - [Model](docs/Model/index.md)
 - [Util/Pagination](docs/Util/Pagination.md)
 - [Util/Undo](docs/Util/Undo.md)
