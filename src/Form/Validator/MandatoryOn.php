@@ -7,52 +7,26 @@ use Codefog\HasteBundle\Form\Form;
 
 class MandatoryOn implements ValidatorInterface
 {
-    /**
-     * Matches
-     * @var array
-     */
-    protected $arrMatches = array();
+    protected array $matches = [];
 
-
-    /**
-     * Add match
-     *
-     * @param string $strFieldName
-     * @param mixed  $varValue
-     */
-    public function addMatch($strFieldName, $varValue)
+    public function addMatch(string $strFieldName, mixed $varValue): self
     {
-        $this->arrMatches[$strFieldName][] = $varValue;
+        $this->matches[$strFieldName][] = $varValue;
+
+        return $this;
     }
 
-    /**
-     * Validates a widget
-     *
-     * @param mixed   $varValue Widget value
-     * @param Widget  $objWidget
-     * @param Form    $objForm
-     *
-     * @return mixed Widget value
-     *
-     * @throws \Exception If value is not provided
-     */
-    public function validate($varValue, $objWidget, $objForm)
+    public function validate(mixed $value, Widget $widget, Form $form): mixed
     {
-        foreach ($this->arrMatches as $strFieldName => $arrValues) {
-            $objTarget = $objForm->getWidget($strFieldName);
+        foreach ($this->matches as $fieldName => $values) {
+            $targetWidget = $form->getWidget($fieldName);
+            $targetWidgetValue = $targetWidget->value;
 
-            // @todo if the target widget isn't validated, we have no value here
-            // can we do anything about it?
-            $varTargetValue = $objTarget->value;
-
-            if (trim($varValue) == ''
-                && $this->arrMatches[$objTarget->name]
-                && in_array($varTargetValue, $this->arrMatches[$objTarget->name])
-            ) {
-                throw new \Exception($GLOBALS['TL_LANG']['MSC']['mandatory']);
+            if (trim($value) === '' && $this->matches[$targetWidget->name] && in_array($targetWidgetValue, $this->matches[$targetWidget->name])) {
+                throw new \RuntimeException($GLOBALS['TL_LANG']['MSC']['mandatory']);
             }
         }
 
-        return $varValue;
+        return $value;
     }
 }

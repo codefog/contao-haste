@@ -51,6 +51,30 @@ in the [manual](docs/DcaAjaxOperations.md).
 The class with static methods has been converted to a service.
 
 
+## Form component
+
+The `\Haste\Form` class has been reworked and contains some BC breaks:
+
+- The `tableless` feature has been dropped.
+- The form can now be initialized without the "submit check" callback.
+- The `__toString()` method has been dropped.
+- The `splitHiddenAndVisibleWidgets()` method has been dropped.
+- The `addSubmitFormField()` method has a different argument order. Previously it was `addSubmitFormField($fieldName, $label, $position = null)` and now it is `addSubmitFormField($label, $fieldName = 'submit', $position = null')`.
+- The `isDirty()` method has been dropped. Please use `getCurrentState()` instead.
+- The `addToTemplate()` method has been dropped. Please use `addToObject()` instead.
+- The `getMethod()` method has been renamed to `getHttpMethod()`.
+- The `isNoValidate()` method has been renamed to `isDisableHtmlValidation()`.
+- The `setNoValidate()` method has been renamed to `setDisableHtmlValidation()`.
+- The `setIsSubmitted()` method has been renamed to `setIsSubmitted()`.
+- The `bindModel()` method has been renamed to `setBoundModel()`.
+- The `getFormAction()` method has been renamed to `getAction()`.
+- The `setFormActionFromUri()` method has been renamed to `setAction()`.
+- The `setFormActionFromPageId()` method has been renamed to `setActionFromPageId()`.
+- The `generateNoValidate()` method has been renamed to `generateNoValidateAttribute()`.
+
+Please refer to the [manual](docs/Form.md) for new code examples.
+
+
 ## Removed components
 
 1. `Haste\Dca\PaletteManipulator` – it is a part of Contao core now.

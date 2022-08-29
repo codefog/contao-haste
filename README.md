@@ -23,7 +23,7 @@ Then, run the Contao install tool to update the database.
 - [AjaxReload](docs/AjaxReload.md)
 - [DcaAjaxOperations](docs/DcaAjaxOperations.md)
 - [DcaDateRangeFilter](docs/DcaDateRangeFilter.md)
-- [Form](docs/Form/Form.md)
+- [Form](docs/Form.md)
 - [Image](docs/Image/index.md)
 - [IO](docs/IO/index.md)
 - [Model](docs/Model/index.md)
