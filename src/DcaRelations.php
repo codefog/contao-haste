@@ -342,9 +342,7 @@ class DcaRelations
         }
     }
 
-    /**
-     * Delete the related records on table revision.
-     */
+    #[AsHook('reviseTable')]
     public function reviseRelatedRecords(string $table, array $ids): bool
     {
         if (empty($ids) || !isset($GLOBALS['TL_DCA'][$table]['fields'])) {

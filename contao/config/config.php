@@ -21,17 +21,9 @@ $GLOBALS['BE_MOD']['system']['undo']['haste_undo'] = array('Util\Undo', 'callbac
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][]  = array('Util\InsertTag', 'replaceHasteInsertTags');
-$GLOBALS['TL_HOOKS']['reviseTable'][]        = array('Model\Relations', 'reviseRelatedRecords');
-
-if (TL_MODE !== 'FE') {
-    $GLOBALS['TL_HOOKS'][''][] = ['Model\Relations', 'addRelationTables'];
-}
 
 
-/**
- * Haste hooks
- */
-$GLOBALS['HASTE_HOOKS']['undoData'] = array
-(
-    array('Model\Relations', 'undoRelations')
-);
+// Haste hooks
+$GLOBALS['HASTE_HOOKS']['undoData'] = [
+    [\Codefog\HasteBundle\DcaRelations::class, 'undoRelations'],
+];
