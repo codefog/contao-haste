@@ -155,24 +155,17 @@ $form->addFieldsFromFormGenerator($formId, static function(string &$fieldName, a
 
 ### Add form fields at specific positions
 
-By passing the `\Haste\Util\ArrayPosition` instance as the third parameter, you can insert the field at a specific position.
-Available positions are:
+By passing the [\Codefog\HasteBundle\Util\ArrayPosition](Util/ArrayPosition.md) instance as the third parameter, 
+you can insert the field at a specific position:
 
 ```php
-ArrayPosition::FIRST
-ArrayPosition::LAST
-ArrayPosition::BEFORE
-ArrayPosition::AFTER
-```
+use Codefog\HasteBundle\Util\ArrayPosition;
 
-`FIRST` and `LAST` positions do not require the second parameter of the constructor.
-
-```php
 // This example adds an explanation form field before the existing submit form field
 $form->addFormField('mandatory', [
     'inputType' => 'explanation',
     'eval' => ['text' => '<p>Mandatory</p>', 'class' => 'mandatory-label'],
-], new Util\ArrayPosition(Util\ArrayPosition::BEFORE, 'submit'));
+], ArrayPosition::before('submit'));
 ```
 
 

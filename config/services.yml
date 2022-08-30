@@ -13,6 +13,19 @@ services:
     # DcaDateRangeFilter
     Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
 
+    # Formatter
+    Codefog\HasteBundle\Formatter: ~
+
     # Relations
-    Codefog\HasteBundle\Model\Relations:
+    Codefog\HasteBundle\EventListener\DcaRelationsListener: ~
+    Codefog\HasteBundle\DcaRelationsManager:
         public: true
+
+    # StringParser
+    Codefog\HasteBundle\StringParser: ~
+
+    # UndoManager
+    Codefog\HasteBundle\UndoManager: ~
+
+    # UrlParser
+    Codefog\HasteBundle\UrlParser: ~

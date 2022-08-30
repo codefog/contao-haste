@@ -23,17 +23,20 @@ Then, run the Contao install tool to update the database.
 - [AjaxReload](docs/AjaxReload.md)
 - [DcaAjaxOperations](docs/DcaAjaxOperations.md)
 - [DcaDateRangeFilter](docs/DcaDateRangeFilter.md)
-- [Model](docs/DcaRelations.md)
+- [DcaRelations](docs/DcaRelations.md)
 - [Form](docs/Form.md)
+- [Formatter](docs/Formatter.md)
+- [StringParser](docs/StringParser.md)
+- [Undo](docs/Undo.md)
+- [UrlParser](docs/UrlParser.md)
+- [Util/ArrayPosition](docs/Util/ArrayPosition.md)
+- [Util/FileUpload](docs/Util/FileUpload.md)
 - [Util/Pagination](docs/Util/Pagination.md)
-- [Util/Undo](docs/Util/Undo.md)
-- [Util/StringUtil](docs/Util/StringUtil.md)
-- [Util/Url](docs/Util/Url.md)
 
 ### Insert tags
 
 Haste also provides several insert tags to ease working with Contao.
-See the [insert tags documentation](docs/Util/InsertTags.md).
+See the [insert tags documentation](docs/InsertTags.md).
 
 
 ## Migration from version 4.x

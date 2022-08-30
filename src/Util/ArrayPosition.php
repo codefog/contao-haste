@@ -1,32 +1,20 @@
 <?php
 
-/**
- * Haste utilities for Contao Open Source CMS
- *
- * Copyright (C) 2012-2013 Codefog & terminal42 gmbh
- *
- * @package    Haste
- * @link       http://github.com/codefog/contao-haste/
- * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
- */
-
 namespace Codefog\HasteBundle\Util;
 
 class ArrayPosition
 {
+    public const FIRST = 0;
+    public const LAST = 1;
+    public const BEFORE = 2;
+    public const AFTER = 3;
 
-    const FIRST = 0;
-    const LAST = 1;
-    const BEFORE = 2;
-    const AFTER = 3;
+    protected int $position;
+    protected string $fieldName;
 
-    protected $position;
-    protected $fieldName;
-
-    public function __construct($position, $fieldName = null)
+    public function __construct(int $position, string $fieldName = null)
     {
         switch ($position) {
-
             case static::FIRST:
             case static::LAST:
                 $this->position = $position;
@@ -34,7 +22,7 @@ class ArrayPosition
 
             case static::BEFORE:
             case static::AFTER:
-                if ($fieldName == '') {
+                if (!$fieldName) {
                     throw new \LogicException('Missing field name for before/after position.');
                 }
 
@@ -57,56 +45,51 @@ class ArrayPosition
         return $this->fieldName;
     }
 
-    /**
-     * @param array $arrValues
-     * @param array $arrNew
-     * @return array
-     */
-    public function addToArray(array $arrValues, array $arrNew)
+    public function addToArray(array $existing, array $new): array
     {
         switch ($this->position) {
 
             case static::FIRST:
-                $arrValues = array_merge($arrNew, $arrValues);
+                $existing = array_merge($new, $existing);
                 break;
 
             case static::LAST;
-                $arrValues = array_merge($arrValues, $arrNew);
+                $existing = array_merge($existing, $new);
                 break;
 
             case static::BEFORE;
             case static::AFTER;
-                if (!isset($arrValues[$this->fieldName])) {
+                if (!isset($existing[$this->fieldName])) {
                     throw new \LogicException('Index "' . $this->fieldName . '" does not exist in array');
                 }
 
-                $keys = array_keys($arrValues);
-                $pos = array_search($this->fieldName, $keys) + (int) ($this->position == static::AFTER);
+                $keys = array_keys($existing);
+                $pos = array_search($this->fieldName, $keys) + (int) ($this->position === static::AFTER);
 
-                $arrBuffer = array_splice($arrValues, 0, $pos);
-                $arrValues = array_merge($arrBuffer, $arrNew, $arrValues);
+                $arrBuffer = array_splice($existing, 0, $pos);
+                $existing = array_merge($arrBuffer, $new, $existing);
                 break;
         }
 
-        return $arrValues;
+        return $existing;
     }
 
-    public static function first()
+    public static function first(): static
     {
         return new static(static::FIRST);
     }
 
-    public static function last()
+    public static function last(): static
     {
         return new static(static::LAST);
     }
 
-    public static function before($fieldName)
+    public static function before($fieldName): static
     {
         return new static(static::BEFORE, $fieldName);
     }
 
-    public static function after($fieldName)
+    public static function after($fieldName): static
     {
         return new static(static::AFTER, $fieldName);
     }

@@ -14,21 +14,21 @@ use Contao\DataContainer;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
-use Codefog\HasteBundle\Util\Format;
-use Codefog\HasteBundle\Util\Undo;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\String\UnicodeString;
 
-class DcaRelations
+class DcaRelationsManager
 {
     public function __construct(
         private readonly Connection $connection,
+        private readonly Formatter $formatter,
         private readonly RequestStack $requestStack,
         private readonly ResourceFinderInterface $resourceFinder,
         private readonly ScopeMatcher $scopeMatcher,
+        private readonly UndoManager $undoManager,
     )
     {}
 
@@ -211,7 +211,7 @@ class DcaRelations
 
         // Store the relations in the tl_undo table
         if (count($undo) > 0) {
-            Undo::add($undoId, 'haste_relations', $undo);
+            $this->undoManager->add($undoId, 'haste_relations', $undo);
         }
     }
 
@@ -718,7 +718,7 @@ class DcaRelations
             }
 
             $return .= '<div class="tl_search tl_subpanel">';
-            $return .= '<strong>'.sprintf($GLOBALS['TL_LANG']['HST']['advanced_search'], Format::dcaLabel($dc->table, $field)).'</strong> ';
+            $return .= '<strong>'.sprintf($GLOBALS['TL_LANG']['HST']['advanced_search'], $this->formatter->dcaLabel($dc->table, $field)).'</strong> ';
 
             $options_sorter = [];
             foreach ($relatedSearchFields as $relatedSearchField) {

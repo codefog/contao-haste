@@ -1,11 +1,11 @@
-# Haste Pagination
+# Pagination component
 
-This utility class is designed to help paginate the records. 
+This component is designed to help paginate the records. 
 
 
 ## About offset and limit
 
-The `Haste\Util\Pagination` helper uses the standard Contao Pagination class, but calculates
+The `Codefog\HasteBundle\Util\Pagination` helper uses the standard Contao Pagination class, but calculates
 the limit and offset values for you. The class has specially been designed to always
 return a valid value.
 
@@ -16,49 +16,47 @@ will return an offset of `0` and a limit equal to total number of records.
 ## Checking the pagination range
 
 If your result set has 5 pages, but the URL parameter says to show page 6,
-the pagination is out of range. As a developer, you must check for this case using 
+the pagination is out of range. As a developer, you must check for this case using
 the `isOutOfRange` property. The default would be to show a 404 (page not found) error.
 
 
-## Examples
+## Usage
 
-
-### Use the pagination with database
+### Use the pagination with models
 
 ```php
-$intTotal = $this->Database->execute("SELECT COUNT(*) AS total FROM tl_table")->total;
+use Codefog\HasteBundle\Util\Pagination;
+use Contao\CoreBundle\Exception\PageNotFoundException;
 
-$objPagination = new Util\Pagination($intTotal, $this->perPage, 'page_i' . $this->id);
+$total = MyModel::countAll();
 
-if ($objPagination->isOutOfRange()) {
-    $objHandler = new $GLOBALS['TL_PTY']['error_404']();
-    $objHandler->generate($GLOBALS['objPage']->id);
-    exit;
+$pagination = new Pagination($total, $this->perPage, 'page_i' . $this->id);
+
+if ($pagination->isOutOfRange()) {
+    throw new PageNotFoundException();
 }
 
-$objItems = $this->Database->prepare("SELECT * FROM tl_table")
-                           ->limit($objPagination->getLimit(), $objPagination->getOffset())
-                           ->execute();
+$models = MyModel::findAll(['limit' => $pagination->getLimit(), 'offset' => $pagination->getOffset()]);
 
-$this->Template->pagination = $objPagination->generate();
+$template->pagination = $pagination->generate();
 ```
-
 
 ### Use the pagination with array
 
 ```php
-$arrItems = range(1, 10)
+use Codefog\HasteBundle\Util\Pagination;
+use Contao\CoreBundle\Exception\PageNotFoundException;
 
-$objPagination = new Util\Pagination(count($arrItems), $this->perPage, 'page_i' . $this->id);
+$items = range(1, 100)
+$total = count($items);
 
-if ($objPagination->isOutOfRange()) {
-    $objHandler = new $GLOBALS['TL_PTY']['error_404']();
-    $objHandler->generate($GLOBALS['objPage']->id);
-    exit;
+$pagination = new Pagination($total, $this->perPage, 'page_i' . $this->id);
+
+if ($pagination->isOutOfRange()) {
+    throw new PageNotFoundException();
 }
 
-// Paginate the result
-$arrItems = array_slice($arrItems, $objPagination->getOffset(), $objPagination->getLimit());
+$items = array_slice($items, $pagination->getOffset(), $pagination->getLimit());
 
-$this->Template->pagination = $objPagination->generate();
+$template->pagination = $pagination->generate();
 ```

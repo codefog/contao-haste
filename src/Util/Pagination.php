@@ -1,15 +1,5 @@
 <?php
 
-/**
- * Haste utilities for Contao Open Source CMS
- *
- * Copyright (C) 2012-2013 Codefog & terminal42 gmbh
- *
- * @package    Haste
- * @link       http://github.com/codefog/contao-haste/
- * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
- */
-
 namespace Codefog\HasteBundle\Util;
 
 use Contao\Config;
@@ -17,239 +7,106 @@ use Contao\Input;
 
 class Pagination
 {
+    public const STATE_CLEAN = 0;
+    public const STATE_DIRTY = 1;
 
-    /**
-     * State of the pagination
-     * Can be either clean or dirty
-     */
-    const STATE_CLEAN = 0;
-    const STATE_DIRTY = 1;
+    protected int $currentState = self::STATE_DIRTY;
+    protected bool $outOfRange = false;
+    protected int $total;
+    protected int $perPage;
+    protected string $urlParameter;
+    protected int $maxPaginationLinks;
+    protected int $limit;
+    protected int $offset;
+    protected \Contao\Pagination $pagination;
 
-    /**
-     * State
-     * @var integer
-     */
-    protected $state = self::STATE_DIRTY;
-
-    /**
-     * If the URL pagination parameter is out of range
-     * @type bool
-     */
-    protected $outOfRange = false;
-
-    /**
-     * Total items
-     * @var int
-     */
-    protected $total;
-
-    /**
-     * Items per page
-     * @var int
-     */
-    protected $perPage;
-
-    /**
-     * URL parameter name
-     * @var string
-     */
-    protected $urlParameter;
-
-    /**
-     * Max pagination links
-     * @var int
-     */
-    protected $maxPaginationLinks;
-
-    /**
-     * Limit
-     * @var int
-     */
-    protected $limit;
-
-    /**
-     * Offset
-     * @var int
-     */
-    protected $offset;
-
-    /**
-     * Pagination object
-     * @var \Pagination
-     */
-    protected $pagination;
-
-    /**
-     * Initialize the object
-     *
-     * @param int    $total
-     * @param int    $perPage
-     * @param string $urlParameter
-     */
-    public function __construct($total, $perPage, $urlParameter)
+    public function __construct(int $total, int $perPage, string $urlParameter)
     {
         $this->setTotal($total);
         $this->setPerPage($perPage);
         $this->setUrlParameter($urlParameter);
-
-        // Default values
         $this->setMaxPaginationLinks(Config::get('maxPaginationLinks'));
     }
 
-    /**
-     * Check if data is dirty (pagination needs to be generated)
-     *
-     * @return bool
-     */
-    public function isDirty()
+    public function getCurrentState(): int
     {
-        return ($this->state === static::STATE_DIRTY);
+        return $this->currentState;
     }
 
-    /**
-     * Gets the total number of rows
-     *
-     * @return int
-     */
-    public function getTotal()
+    public function getTotal(): int
     {
         return $this->total;
     }
 
-    /**
-     * Sets the total number of rows
-     *
-     * @param int $total
-     *
-     * @return $this
-     */
-    public function setTotal($total)
+    public function setTotal(int $total): self
     {
-        $this->state = self::STATE_DIRTY;
+        $this->currentState = self::STATE_DIRTY;
         $this->total = $total;
 
         return $this;
     }
 
-    /**
-     * Gets the number of rows per page
-     *
-     * @return int
-     */
-    public function getPerPage()
+    public function getPerPage(): int
     {
         return $this->perPage;
     }
 
-    /**
-     * Sets the number of rows per page
-     *
-     * @param int $perPage
-     *
-     * @return $this
-     */
-    public function setPerPage($perPage)
+    public function setPerPage(int $perPage): Pagination
     {
-        $this->state = self::STATE_DIRTY;
+        $this->currentState = self::STATE_DIRTY;
         $this->perPage = $perPage;
 
         return $this;
     }
 
-    /**
-     * Gets the URL parameter
-     *
-     * @return string
-     */
-    public function getUrlParameter()
+    public function getUrlParameter(): string
     {
         return $this->urlParameter;
     }
 
-    /**
-     * Set the URL parameter
-     *
-     * @param string $name
-     *
-     * @return $this
-     */
-    public function setUrlParameter($name)
+    public function setUrlParameter(string $urlParameter): Pagination
     {
-        $this->urlParameter = $name;
+        $this->currentState = self::STATE_DIRTY;
+        $this->urlParameter = $urlParameter;
 
         return $this;
     }
 
-    /**
-     * Gets maximum pagination links
-     *
-     * @return int
-     */
-    public function getMaxPaginationLinks()
+    public function getMaxPaginationLinks(): int
     {
         return $this->maxPaginationLinks;
     }
 
-    /**
-     * Sets the maximum pagination links
-     *
-     * @param int $maxPaginationLinks
-     *
-     * @return $this
-     */
-    public function setMaxPaginationLinks($maxPaginationLinks)
+    public function setMaxPaginationLinks(int $maxPaginationLinks): Pagination
     {
-        $this->state = self::STATE_DIRTY;
+        $this->currentState = self::STATE_DIRTY;
         $this->maxPaginationLinks = $maxPaginationLinks;
 
         return $this;
     }
 
-    /**
-     * Check if pagination URL parameter is out of range
-     *
-     * @return bool
-     */
-    public function isOutOfRange()
+    public function isOutOfRange(): bool
     {
         $this->compile();
 
         return $this->outOfRange;
     }
 
-    /**
-     * Gets the calculated limit
-     *
-     * @return int
-     * @throws \OutOfRangeException
-     */
-    public function getLimit()
+    public function getLimit(): int
     {
         $this->compile();
 
         return $this->limit;
     }
 
-    /**
-     * Gets the calculated offset
-     *
-     * @return int
-     * @throws \OutOfRangeException
-     */
-    public function getOffset()
+    public function getOffset(): int
     {
         $this->compile();
 
         return $this->offset;
     }
 
-    /**
-     * Gets the pagination object
-     *
-     * @return \Contao\Pagination
-     * @throws \OutOfRangeException
-     */
-    public function getPagination()
+    public function getPagination(): \Contao\Pagination
     {
         $this->compile();
 
@@ -257,11 +114,9 @@ class Pagination
     }
 
     /**
-     * Generate the pagination and return it as HTML string
-     *
-     * @return string
+     * Generate the pagination and return it as HTML string.
      */
-    public function generate()
+    public function generate(): string
     {
         $this->compile();
 
@@ -269,21 +124,11 @@ class Pagination
     }
 
     /**
-     * Generate a pagination and return it as HTML string
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->generate();
-    }
-
-    /**
      * Compile the pagination
      */
-    protected function compile()
+    protected function compile(): void
     {
-        if (!$this->isDirty()) {
+        if ($this->getCurrentState() === self::STATE_CLEAN) {
             return;
         }
 
@@ -305,9 +150,9 @@ class Pagination
             $this->getUrlParameter()
         );
 
-        $this->state      = self::STATE_CLEAN;
-        $this->limit      = $limit;
-        $this->offset     = $offset;
+        $this->currentState = self::STATE_CLEAN;
+        $this->limit = $limit;
+        $this->offset = $offset;
         $this->outOfRange = false;
 
         // The pagination is not valid if the page number is outside the range

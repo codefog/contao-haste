@@ -1,11 +1,10 @@
-# Haste InsertTags
+# InsertTags component
 
-Haste provides several insert tags for every-day use.
-They are not related to Haste functionality, but just for
-general use in a Contao environment.
+Haste provides several insert tags for everyday use. They are not related to Haste functionality but for general
+use in a Contao environment.
 
 
-## Formatting helpers
+## Usage
 
 ### Apply insert tag flags to a string
 
@@ -15,6 +14,7 @@ the insert tag flags.
 **Example:** `{{flag::foobar|strtoupper}}` will return `FOOBAR`.
 
 See the [Contao documentation][flags] for available flags.
+
 
 ## Date / Time
 

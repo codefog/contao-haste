@@ -55,13 +55,13 @@ The class with static methods has been converted to a service.
 
 The DCA configurations did not change, but the class changes are BC breaks:
 
-1. The `\Haste\Model\Relations` class has been converted to the `\Codefog\HasteBundle\DcaRelations` service.
+1. The `\Haste\Model\Relations` class has been converted to the `\Codefog\HasteBundle\DcaRelationsManager` service.
 2. The model class has been renamed from `\Haste\Model\Model` to `\Haste\Model\DcaRelationsModel`. 
 
 
 ## Form component
 
-The `\Haste\Form` class has been reworked and contains some BC breaks:
+The `\Haste\Form\Form` class has been reworked and contains some BC breaks:
 
 - The `tableless` feature has been dropped.
 - The form can now be initialized without the "submit check" callback.
@@ -83,6 +83,39 @@ The `\Haste\Form` class has been reworked and contains some BC breaks:
 Please refer to the [manual](docs/Form.md) for new code examples.
 
 
+## Formatter component
+
+The `\Haste\Util\Format` class has been reworked and is now a `\Codefog\HateBundle\Formatter` service.
+
+
+## Pagination component
+
+The `\Haste\Util\Pagination` class has been reworked and contains some BC breaks:
+
+- The `__toString()` method has been dropped.
+- The `isDirty()` method has been dropped. Please use `getCurrentState()` instead.
+
+
+## StringParser component
+
+The `\Haste\Util\StringUtil` class has been reworked and is now a `\Codefog\HateBundle\StringParser` service.
+
+
+## UrlParser component
+
+The `\Haste\Util\Url` class has been reworked and is now a `\Codefog\HateBundle\UrlParser` service.
+
+Furthermore, it no longer accepts the page ID as a second argument. Please provide the URL on your own instead.
+
+
+## UndoManager component
+
+The `\Haste\Util\Undo` class has been reworked and is now a `\Codefog\HasteBundle\UndoManager` service.
+
+Furthermore, the `$GLOBALS['HASTE_HOOKS']` and `$GLOBALS['TL_HOOKS']['hasteUndoData']` has been removed. Use the event
+dispatcher instead with the `haste.undo` event.
+
+
 ## Removed components
 
 - `Haste\Dca\PaletteManipulator` – it is a part of Contao core now.
@@ -97,6 +130,7 @@ Please refer to the [manual](docs/Form.md) for new code examples.
 - `Haste\Http` – use Symfony components instead.
 - `Haste\Image` – obsolete stuff.
 - `Haste\Input` – auto_item is always active in Contao core now.
+- `Haste\InsertTag` – obsolete stuff. The insert tags are still there.
 - `Haste\IO` – use an alternative, for example [thephpleague/csv](https://github.com/thephpleague/csv) or [PHPOffice/PhpSpreadsheet](https://github.com/PHPOffice/PhpSpreadsheet).
 - `Haste\Number` – obsolete stuff.
 - `Haste\Units` – use an alternative, for example [jordanbrauer/unit-converter](https://github.com/jordanbrauer/unit-converter).

@@ -2,70 +2,41 @@
 
 namespace Codefog\HasteBundle\Util;
 
+use Contao\Config;
 use Contao\Message;
+use Contao\StringUtil;
 use Contao\System;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 class FileUpload extends \Contao\FileUpload
 {
-
-    /**
-     * @var bool
-     */
-    protected $doNotOverwrite = false;
-
-    /**
-     * @var array
-     */
-    protected $extensions;
-
-    /**
-     * @var int
-     */
-    protected $minFileSize = 0;
-
-    /**
-     * @var int
-     */
-    protected $maxFileSize;
-
-    /**
-     * @var int
-     */
-    protected $imageWidth;
-
-    /**
-     * @var int
-     */
-    protected $imageHeight;
-
-    /**
-     * @var int
-     */
-    protected $gdMaxImgWidth;
-
-    /**
-     * @var int
-     */
-    protected $gdMaxImgHeight;
+    protected bool $doNotOverwrite = false;
+    protected array $extensions = [];
+    protected int $minFileSize = 0;
+    protected int $maxFileSize;
+    protected int $imageWidth;
+    protected int $imageHeight;
+    protected int $gdMaxImgWidth;
+    protected int $gdMaxImgHeight;
 
     /**
      * Temporary store target from uploadTo() to make it available to getFilesFromGlobal()
-     * @var string
      */
-    private $target;
+    private string $target;
 
-    public function __construct($name)
+    public function __construct(string $name)
     {
         parent::__construct();
 
         $this->setName($name);
 
-        $this->extensions     = trimsplit(',', strtolower($GLOBALS['TL_CONFIG']['uploadTypes']));
-        $this->maxFileSize    = $GLOBALS['TL_CONFIG']['maxFileSize'];
-        $this->imageWidth     = $GLOBALS['TL_CONFIG']['imageWidth'];
-        $this->imageHeight    = $GLOBALS['TL_CONFIG']['imageHeight'];
-        $this->gdMaxImgWidth  = $GLOBALS['TL_CONFIG']['gdMaxImgWidth'];
-        $this->gdMaxImgHeight = $GLOBALS['TL_CONFIG']['gdMaxImgHeight'];
+        $this->extensions = StringUtil::trimsplit(',', strtolower(Config::get('uploadTypes')));
+        $this->maxFileSize = Config::get('maxFileSize');
+        $this->imageWidth = Config::get('imageWidth');
+        $this->imageHeight = Config::get('imageHeight');
+        $this->gdMaxImgWidth = Config::get('gdMaxImgWidth');
+        $this->gdMaxImgHeight = Config::get('gdMaxImgHeight');
     }
 
     public function getName()
@@ -73,172 +44,103 @@ class FileUpload extends \Contao\FileUpload
         return $this->strName;
     }
 
-    /**
-     * @return bool
-     */
-    public function doNotOverwrite()
+    public function isDoNotOverwrite(): bool
     {
         return $this->doNotOverwrite;
     }
 
-    /**
-     * @param bool $doNotOverwrite
-     *
-     * @return $this
-     */
-    public function setDoNotOverwrite($doNotOverwrite)
+    public function setDoNotOverwrite(bool $doNotOverwrite): self
     {
-        $this->doNotOverwrite = (bool) $doNotOverwrite;
+        $this->doNotOverwrite = $doNotOverwrite;
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getExtensions()
+    public function getExtensions(): array
     {
         return $this->extensions;
     }
 
-    /**
-     * @param array $extensions
-     *
-     * @return $this
-     */
-    public function setExtensions(array $extensions)
+    public function setExtensions(array $extensions): self
     {
         $this->extensions = array_map('strtolower', $extensions);
 
         return $this;
     }
 
-    /**
-     * @param string $extension
-     *
-     * @return $this
-     */
-    public function addExtension($extension)
+    public function addExtension(string $extension): self
     {
         $this->extensions[] = strtolower($extension);
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getMinFileSize()
+    public function getMinFileSize(): int
     {
         return $this->minFileSize;
     }
 
-    /**
-     * @param int $minFileSize
-     *
-     * @return $this
-     */
-    public function setMinFileSize($minFileSize)
+    public function setMinFileSize(int $minFileSize): self
     {
         $this->minFileSize = $minFileSize;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getMaxFileSize()
+    public function getMaxFileSize(): int
     {
         return $this->maxFileSize;
     }
 
-    /**
-     * @param int $maxFileSize
-     *
-     * @return $this
-     */
-    public function setMaxFileSize($maxFileSize)
+    public function setMaxFileSize(int $maxFileSize): self
     {
         $this->maxFileSize = $maxFileSize;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getImageWidth()
+    public function getImageWidth(): int
     {
         return $this->imageWidth;
     }
 
-    /**
-     * @param int $imageWidth
-     *
-     * @return $this
-     */
-    public function setImageWidth($imageWidth)
+    public function setImageWidth(int $imageWidth): self
     {
         $this->imageWidth = $imageWidth;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getImageHeight()
+    public function getImageHeight(): int
     {
         return $this->imageHeight;
     }
 
-    /**
-     * @param int $imageHeight
-     *
-     * @return $this
-     */
-    public function setImageHeight($imageHeight)
+    public function setImageHeight(int $imageHeight): self
     {
         $this->imageHeight = $imageHeight;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getGdMaxImgWidth()
+    public function getGdMaxImgWidth(): int
     {
         return $this->gdMaxImgWidth;
     }
 
-    /**
-     * @param int $gdMaxImgWidth
-     *
-     * @return $this
-     */
-    public function setGdMaxImgWidth($gdMaxImgWidth)
+    public function setGdMaxImgWidth(int $gdMaxImgWidth): self
     {
         $this->gdMaxImgWidth = $gdMaxImgWidth;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getGdMaxImgHeight()
+    public function getGdMaxImgHeight(): int
     {
         return $this->gdMaxImgHeight;
     }
 
-    /**
-     * @param int $gdMaxImgHeight
-     *
-     * @return $this
-     */
-    public function setGdMaxImgHeight($gdMaxImgHeight)
+    public function setGdMaxImgHeight(int $gdMaxImgHeight): self
     {
         $this->gdMaxImgHeight = $gdMaxImgHeight;
 
@@ -248,19 +150,22 @@ class FileUpload extends \Contao\FileUpload
     /**
      * @inheritdoc
      */
-    public function uploadTo($strTarget)
+    public function uploadTo($target): array
     {
-        $this->target = $strTarget;
+        $this->target = $target;
 
-        $uploadTypes = $GLOBALS['TL_CONFIG']['uploadTypes'];
-        $GLOBALS['TL_CONFIG']['uploadTypes'] = implode(',', $this->extensions);
+        // Preserve the configuration
+        $uploadTypes = Config::get('uploadTypes');
+        Config::set('uploadTypes', implode(',', $this->extensions));
 
         $filesizeLabel = $GLOBALS['TL_LANG']['ERR']['filesize'];
         $GLOBALS['TL_LANG']['ERR']['filesize'] = $GLOBALS['TL_LANG']['ERR']['maxFileSize'];
 
-        $result = parent::uploadTo($strTarget);
+        // Perform upload
+        $result = parent::uploadTo($target);
 
-        $GLOBALS['TL_CONFIG']['uploadTypes'] = $uploadTypes;
+        // Restore the configuration
+        Config::set('uploadTypes', $uploadTypes);
         $GLOBALS['TL_LANG']['ERR']['filesize'] = $filesizeLabel;
 
         return $result;
@@ -269,12 +174,12 @@ class FileUpload extends \Contao\FileUpload
     /**
      * @inheritdoc
      */
-    protected function getFilesFromGlobal()
+    protected function getFilesFromGlobal(): array
     {
-        if (is_array($_FILES[$this->strName]['name'])) {
+        if (is_array($_FILES[$this->strName]['name'] ?? null)) {
             $files = parent::getFilesFromGlobal();
         } else {
-            $files = array($_FILES[$this->strName]);
+            $files = [$_FILES[$this->strName]];
         }
 
         if ($this->doNotOverwrite) {
@@ -290,7 +195,6 @@ class FileUpload extends \Contao\FileUpload
             foreach ($files as $k => $file) {
                 if (!$file['error'] && $file['size'] < $this->minFileSize) {
                     Message::addError(sprintf($GLOBALS['TL_LANG']['ERR']['minFileSize'], $minlength_kb_readable));
-                    System::log('File "'.$file['name'].'" exceeds the minimum file size of '.$minlength_kb_readable, __METHOD__, TL_ERROR);
                     $this->blnHasError = true;
                     unset($files[$k]);
                 }
@@ -303,71 +207,60 @@ class FileUpload extends \Contao\FileUpload
     /**
      * @inheritdoc
      */
-    protected function getMaximumUploadSize()
-    {
-        $maxFileSize = $GLOBALS['TL_CONFIG']['maxFileSize'];
-        $GLOBALS['TL_CONFIG']['maxFileSize'] = $this->maxFileSize;
-
-        $return = parent::getMaximumUploadSize();
-
-        $GLOBALS['TL_CONFIG']['maxFileSize'] = $maxFileSize;
-
-        return $return;
-    }
-
-    /**
-     * @inheritdoc
-     */
     protected function resizeUploadedImage($strImage)
     {
-        $imageWidth     = $GLOBALS['TL_CONFIG']['imageWidth'];
-        $imageHeight    = $GLOBALS['TL_CONFIG']['imageHeight'];
-        $gdMaxImgWidth  = $GLOBALS['TL_CONFIG']['gdMaxImgWidth'];
-        $gdMaxImgHeight = $GLOBALS['TL_CONFIG']['gdMaxImgHeight'];
+        $imageWidth = Config::get('imageWidth');
+        $imageHeight = Config::get('imageHeight');
+        $gdMaxImgWidth = Config::get('gdMaxImgWidth');
+        $gdMaxImgHeight = Config::get('gdMaxImgHeight');
 
-        $GLOBALS['TL_CONFIG']['imageWidth']     = $this->imageWidth;
-        $GLOBALS['TL_CONFIG']['imageHeight']    = $this->imageHeight;
-        $GLOBALS['TL_CONFIG']['gdMaxImgWidth']  = $this->gdMaxImgWidth;
-        $GLOBALS['TL_CONFIG']['gdMaxImgHeight'] = $this->gdMaxImgHeight;
+        Config::set('imageWidth', $this->imageWidth);
+        Config::set('imageHeight', $this->imageHeight);
+        Config::set('gdMaxImgWidth', $this->gdMaxImgWidth);
+        Config::set('gdMaxImgHeight', $this->gdMaxImgHeight);
 
         $return = parent::resizeUploadedImage($strImage);
 
-        $GLOBALS['TL_CONFIG']['imageWidth']     = $imageWidth;
-        $GLOBALS['TL_CONFIG']['imageHeight']    = $imageHeight;
-        $GLOBALS['TL_CONFIG']['gdMaxImgWidth']  = $gdMaxImgWidth;
-        $GLOBALS['TL_CONFIG']['gdMaxImgHeight'] = $gdMaxImgHeight;
+        Config::set('imageWidth', $imageWidth);
+        Config::set('imageHeight', $imageHeight);
+        Config::set('gdMaxImgWidth', $gdMaxImgWidth);
+        Config::set('gdMaxImgHeight', $gdMaxImgHeight);
 
         return $return;
     }
 
     /**
-     * Get the new file name if it already exists in the folder
-     * @param string
-     * @param string
-     * @return string
+     * Get the new file name if it already exists in the folder.
      */
-    public static function getFileName($strFile, $strFolder)
+    public static function getFileName(string $uploadedFile, string $uploadFolder): string
     {
-        if (!file_exists(TL_ROOT . '/' . $strFolder . '/' . $strFile)) {
-            return $strFile;
+        $projectDir = System::getContainer()->getParameter('kernel.project_dir');
+
+        if (!file_exists($projectDir . '/' . $uploadFolder . '/' . $uploadedFile)) {
+            return $uploadedFile;
         }
 
         $offset = 1;
-        $pathinfo = pathinfo($strFile);
+        $pathinfo = pathinfo($uploadedFile);
         $name = $pathinfo['filename'];
 
-        $arrAll = scan(TL_ROOT . '/' . $strFolder);
-        $arrFiles = preg_grep('/^' . preg_quote($name, '/') . '.*\.' . preg_quote($pathinfo['extension'], '/') . '/', $arrAll);
+        /** @var SplFileInfo[] $files */
+        $files = Finder::create()
+            ->in($projectDir . '/' . $uploadFolder)
+            ->files()
+            ->name('/^' . preg_quote($name, '/') . '.*\.' . preg_quote($pathinfo['extension'], '/') . '/')
+        ;
 
-        foreach ($arrFiles as $file) {
-            if (preg_match('/__[0-9]+\.' . preg_quote($pathinfo['extension'], '/') . '$/', $file)) {
-                $file = str_replace('.' . $pathinfo['extension'], '', $file);
-                $intValue = (int) substr($file, (strrpos($file, '_') + 1));
+        foreach ($files as $file) {
+            $fileName = $file->getFilename();
 
-                $offset = max($offset, $intValue);
+            if (preg_match('/__[0-9]+\.' . preg_quote($pathinfo['extension'], '/') . '$/', $fileName)) {
+                $fileName = str_replace('.' . $pathinfo['extension'], '', $fileName);
+                $value = (int) substr($fileName, (strrpos($fileName, '_') + 1));
+                $offset = max($offset, $value);
             }
         }
 
-        return str_replace($name . '.', $name . '__' . ++$offset . '.', $strFile);
+        return str_replace($name . '.', $name . '__' . ++$offset . '.', $uploadedFile);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Codefog\HasteBundle\Model;
 
-use Codefog\HasteBundle\DcaRelations;
+use Codefog\HasteBundle\DcaRelationsManager;
 use Contao\Model;
 use Contao\Model\Collection;
 use Contao\Model\Registry;
@@ -185,7 +185,7 @@ abstract class DcaRelationsModel extends Model
 
     protected static function getRelation(string $table, string $field): array
     {
-        $relation = System::getContainer()->get(DcaRelations::class)->getRelation($table, $field);
+        $relation = System::getContainer()->get(DcaRelationsManager::class)->getRelation($table, $field);
 
         if ($relation === null) {
             throw new \InvalidArgumentException(sprintf('Field %s.%s is not related!', $table, $field));
