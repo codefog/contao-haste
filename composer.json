@@ -43,6 +43,13 @@
     "extra": {
         "contao-manager-plugin": "Codefog\\HasteBundle\\ContaoManager\\Plugin"
     },
+    "config": {
+        "allow-plugins": {
+            "contao-components/installer": true,
+            "contao-community-alliance/composer-plugin": true,
+            "contao/manager-plugin": true
+        }
+    },
     "scripts": {
         "cs-fixer": "tools/ecs/vendor/bin/ecs check src/ --fix --ansi",
         "unit-tests": "@php vendor/bin/phpunit --colors=always"
