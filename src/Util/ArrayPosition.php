@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Util;
 
 class ArrayPosition
@@ -31,7 +33,7 @@ class ArrayPosition
                 break;
 
             default:
-                throw new \InvalidArgumentException('Invalid position "' . $position . '"');
+                throw new \InvalidArgumentException('Invalid position "'.$position.'"');
         }
     }
 
@@ -48,23 +50,22 @@ class ArrayPosition
     public function addToArray(array $existing, array $new): array
     {
         switch ($this->position) {
-
             case static::FIRST:
                 $existing = array_merge($new, $existing);
                 break;
 
-            case static::LAST;
+            case static::LAST:
                 $existing = array_merge($existing, $new);
                 break;
 
-            case static::BEFORE;
-            case static::AFTER;
+            case static::BEFORE:
+            case static::AFTER:
                 if (!isset($existing[$this->fieldName])) {
-                    throw new \LogicException('Index "' . $this->fieldName . '" does not exist in array');
+                    throw new \LogicException('Index "'.$this->fieldName.'" does not exist in array');
                 }
 
                 $keys = array_keys($existing);
-                $pos = array_search($this->fieldName, $keys) + (int) ($this->position === static::AFTER);
+                $pos = array_search($this->fieldName, $keys, true) + (int) ($this->position === static::AFTER);
 
                 $arrBuffer = array_splice($existing, 0, $pos);
                 $existing = array_merge($arrBuffer, $new, $existing);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\EventListener;
 
 use Contao\Config;
@@ -20,28 +22,26 @@ class DcaDateRangeFilterListener
 {
     protected array $fieldsToFilter = [];
 
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly RequestStack $requestStack,
-        private readonly ScopeMatcher $scopeMatcher,
-    ) {}
+    public function __construct(private readonly Connection $connection, private readonly RequestStack $requestStack, private readonly ScopeMatcher $scopeMatcher,)
+    {
+    }
 
     #[AsHook('loadDataContainer')]
     public function onLoadDataContainer(string $table): void
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request === null || !$this->scopeMatcher->isBackendRequest($request) || !is_array($GLOBALS['TL_DCA'][$table]['fields'] ?? null)) {
+        if (null === $request || !$this->scopeMatcher->isBackendRequest($request) || !\is_array($GLOBALS['TL_DCA'][$table]['fields'] ?? null)) {
             return;
         }
 
         foreach ($GLOBALS['TL_DCA'][$table]['fields'] as $name => $config) {
-            if (!empty($config['rangeFilter']) && in_array($config['eval']['rgxp'] ?? null, ['date', 'time', 'datim'], true)) {
+            if (!empty($config['rangeFilter']) && \in_array($config['eval']['rgxp'] ?? null, ['date', 'time', 'datim'], true)) {
                 $this->fieldsToFilter[] = $name;
             }
         }
 
-        if (count($this->fieldsToFilter) > 0) {
+        if (\count($this->fieldsToFilter) > 0) {
             $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_dateRangeFilter;filter', $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
             $GLOBALS['TL_DCA'][$table]['list']['sorting']['panel_callback']['haste_dateRangeFilter'] = [static::class, 'onPanelCallback'];
             $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'onLoadCallback'];
@@ -53,17 +53,17 @@ class DcaDateRangeFilterListener
      */
     public function onPanelCallback(DataContainer $dc): string
     {
-        if (count($this->fieldsToFilter) === 0) {
+        if (0 === \count($this->fieldsToFilter)) {
             return '';
         }
 
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request === null || !$this->scopeMatcher->isBackendRequest($request)) {
+        if (null === $request || !$this->scopeMatcher->isBackendRequest($request)) {
             return '';
         }
 
-        $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT) ? $dc->table.'_'.$dc->currentPid : $dc->table;
+        $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
         /** @var AttributeBagInterface $session */
         $session = $request->getSession()->getBag('contao_backend');
@@ -72,9 +72,9 @@ class DcaDateRangeFilterListener
         // Set filter from user input
         if ('tl_filters' === Input::post('FORM_SUBMIT')) {
             foreach ($this->fieldsToFilter as $field) {
-                $key = 'haste_dateRangeFilter_' . $field;
-                $from = Input::post($key . '_from');
-                $to = Input::post($key . '_to');
+                $key = 'haste_dateRangeFilter_'.$field;
+                $from = Input::post($key.'_from');
+                $to = Input::post($key.'_to');
 
                 if ($from || $to) {
                     $sessionData['filter'][$filter][$key] = ['from' => $from, 'to' => $to];
@@ -89,19 +89,19 @@ class DcaDateRangeFilterListener
         $return = '';
 
         foreach ($this->fieldsToFilter as $field) {
-            $key = 'haste_dateRangeFilter_' . $field;
+            $key = 'haste_dateRangeFilter_'.$field;
 
             $return .= '<div class="tl_subpanel haste-date-range-filter">';
-            $return .= sprintf('<strong>%s: </strong>',$GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '');
+            $return .= sprintf('<strong>%s: </strong>', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '');
 
             $return .= $this->createDatepickerInputField(
-                'haste_dateRangeFilter_' . $field . '_from',
+                'haste_dateRangeFilter_'.$field.'_from',
                 $session['filter'][$filter][$key]['from'],
                 $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? ''
             );
 
             $return .= $this->createDatepickerInputField(
-                'haste_dateRangeFilter_' . $field . '_to',
+                'haste_dateRangeFilter_'.$field.'_to',
                 $session['filter'][$filter][$key]['to'],
                 $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? ''
             );
@@ -121,18 +121,18 @@ class DcaDateRangeFilterListener
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request === null || !$this->scopeMatcher->isBackendRequest($request)) {
+        if (null === $request || !$this->scopeMatcher->isBackendRequest($request)) {
             return;
         }
 
-        $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT) ? $dc->table.'_'.$dc->currentPid : $dc->table;
+        $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
         $sessionData = $request->getSession()->getBag('contao_backend')->all();
 
         $root = [];
         $filterRecords = false;
 
         foreach ($this->fieldsToFilter as $field) {
-            $key = 'haste_dateRangeFilter_' . $field;
+            $key = 'haste_dateRangeFilter_'.$field;
             $rgxp = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? '';
             $from = $sessionData['filter'][$filter][$key]['from'] ?? null;
             $to = $sessionData['filter'][$filter][$key]['to'] ?? null;
@@ -145,7 +145,7 @@ class DcaDateRangeFilterListener
                 $to = $this->validateAndGetTstamp($to, $rgxp, false);
             }
 
-            if ($from === null && $to === null) {
+            if (null === $from && null === $to) {
                 continue;
             }
 
@@ -154,7 +154,7 @@ class DcaDateRangeFilterListener
         }
 
         if ($filterRecords) {
-            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = (count($root) === 0) ? [0] : array_unique($root);
+            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = 0 === \count($root) ? [0] : array_unique($root);
         }
     }
 
@@ -166,14 +166,14 @@ class DcaDateRangeFilterListener
         $where = [];
 
         if ($from) {
-            $where[]  = $field . '>=' . $from;
+            $where[] = $field.'>='.$from;
         }
 
         if ($to) {
-            $where[]  = $field . '<=' . $to;
+            $where[] = $field.'<='.$to;
         }
 
-        if (count($where) === 0) {
+        if (0 === \count($where)) {
             return [];
         }
 
@@ -185,14 +185,14 @@ class DcaDateRangeFilterListener
      */
     private function validateAndGetTstamp(string $value, string $rgxp, bool $from = true): ?int
     {
-        $method = 'is' . ucfirst($rgxp);
+        $method = 'is'.ucfirst($rgxp);
 
         if (!Validator::$method($value)) {
             return null;
         }
 
         // Determine the correct key for time and date formats
-        if ($rgxp === 'time' || $rgxp === 'datim') {
+        if ('time' === $rgxp || 'datim' === $rgxp) {
             $key = 'tstamp';
         } else {
             $key = $from ? 'dayBegin' : 'dayEnd';
@@ -200,7 +200,7 @@ class DcaDateRangeFilterListener
 
         try {
             $date = new Date($value, Date::getFormatFromRgxp($rgxp));
-        } catch(\OutOfBoundsException $e) {
+        } catch (\OutOfBoundsException $e) {
             return null;
         }
 
@@ -209,11 +209,12 @@ class DcaDateRangeFilterListener
 
     /**
      * Creates a datepicker input field.
+     *
      * @see DataContainer::row()
      */
     private function createDatepickerInputField(string $name, string $value, string $rgxp): string
     {
-        $format = Date::formatToJs(Config::get($rgxp . 'Format'));
+        $format = Date::formatToJs(Config::get($rgxp.'Format'));
 
         switch ($rgxp) {
             case 'datim':
@@ -229,7 +230,8 @@ class DcaDateRangeFilterListener
                 break;
         }
 
-        return sprintf('<input id="ctrl_%s" name="%s" class="tl_text%s" value="%s" type="text">
+        return sprintf(
+            '<input id="ctrl_%s" name="%s" class="tl_text%s" value="%s" type="text">
             %s
             <script>
             window.addEvent("domready", function() {
@@ -249,7 +251,7 @@ class DcaDateRangeFilterListener
             $name,
             $value ? ' active' : '',
             $value,
-            Image::getHtml('assets/datepicker/images/icon.svg', '', 'title="' . StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['datepicker'] ?? '') . '" id="toggle_' . $name . '" style="vertical-align:-6px;cursor:pointer"'),
+            Image::getHtml('assets/datepicker/images/icon.svg', '', 'title="'.StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['datepicker'] ?? '').'" id="toggle_'.$name.'" style="vertical-align:-6px;cursor:pointer"'),
             $name,
             $name,
             $format,

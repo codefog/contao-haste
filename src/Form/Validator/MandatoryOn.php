@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Form\Validator;
 
-use Contao\Widget;
 use Codefog\HasteBundle\Form\Form;
+use Contao\Widget;
 
 class MandatoryOn implements ValidatorInterface
 {
@@ -18,11 +20,11 @@ class MandatoryOn implements ValidatorInterface
 
     public function validate(mixed $value, Widget $widget, Form $form): mixed
     {
-        foreach ($this->matches as $fieldName => $values) {
+        foreach (array_keys($this->matches) as $fieldName) {
             $targetWidget = $form->getWidget($fieldName);
             $targetWidgetValue = $targetWidget->value;
 
-            if (trim($value) === '' && $this->matches[$targetWidget->name] && in_array($targetWidgetValue, $this->matches[$targetWidget->name])) {
+            if ('' === trim($value) && $this->matches[$targetWidget->name] && \in_array($targetWidgetValue, $this->matches[$targetWidget->name], true)) {
                 throw new \RuntimeException($GLOBALS['TL_LANG']['MSC']['mandatory']);
             }
         }

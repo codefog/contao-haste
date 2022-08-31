@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\EventListener;
 
 use Codefog\HasteBundle\Formatter;
@@ -12,9 +14,9 @@ use Contao\StringUtil;
 #[AsHook('replaceInsertTags')]
 class InsertTagsListener
 {
-    public function __construct(
-        private readonly Formatter $formatter,
-    ) {}
+    public function __construct(private readonly Formatter $formatter,)
+    {
+    }
 
     public function __invoke(string $tag): mixed
     {
@@ -23,16 +25,22 @@ class InsertTagsListener
         switch ($chunks[0]) {
             case 'convert_dateformat':
                 return $this->replaceConvertedDateFormat($chunks);
+
             case 'dca_label':
                 return $this->replaceDcaLabel($chunks);
+
             case 'dca_value':
                 return $this->replaceDcaValue($chunks);
+
             case 'formatted_datetime':
                 return $this->replaceFormattedDateTime($chunks);
+
             case 'rand':
-                return (count($chunks) === 3) ? mt_rand((int) $chunks[1], (int) $chunks[2]) : mt_rand();
+                return 3 === \count($chunks) ? random_int((int) $chunks[1], (int) $chunks[2]) : mt_rand();
+
             case 'flag':
                 return (string) $chunks[1];
+
             case 'options_label':
                 return $this->replaceOptionsLabel($chunks);
         }
@@ -41,7 +49,7 @@ class InsertTagsListener
     }
 
     /**
-     * Replace {{convert_dateformat::*}} insert tag
+     * Replace {{convert_dateformat::*}} insert tag.
      *
      * Format:
      *
@@ -56,7 +64,7 @@ class InsertTagsListener
      * Possible use cases:
      *
      * {{convert_dateformat::2018-11-21 10:00::datim::date}} –> outputs 2018-11-21
-     * {{convert_dateformat::21.03.2018::d.m.Y::j. F Y}}     –> outputs 21. März 2018
+     * {{convert_dateformat::21.03.2018::d.m.Y::j. F Y}} –> outputs 21. März 2018
      */
     private function replaceConvertedDateFormat(array $chunks): string|false
     {
@@ -84,17 +92,17 @@ class InsertTagsListener
     }
 
     /**
-     * Replace {{formatted_datetime::*}} insert tag
+     * Replace {{formatted_datetime::*}} insert tag.
      *
      * 5 possible use cases:
      *
      * {{formatted_datetime::timestamp}}
      *      or
-     * {{formatted_datetime::timestamp::datim}}     - formats a given timestamp with the global date and time (datim) format
-     * {{formatted_datetime::timestamp::date}}      - formats a given timestamp with the global date format
-     * {{formatted_datetime::timestamp::time}}      - formats a given timestamp with the global time format
+     * {{formatted_datetime::timestamp::datim}} - formats a given timestamp with the global date and time (datim) format
+     * {{formatted_datetime::timestamp::date}} - formats a given timestamp with the global date format
+     * {{formatted_datetime::timestamp::time}} - formats a given timestamp with the global time format
      * {{formatted_datetime::timestamp::Y-m-d H:i}} - formats a given timestamp with the specified format
-     * {{formatted_datetime::+1 day::Y-m-d H:i}}    - formats a given php date/time format (see http://php.net/manual/en/function.strtotime.php) with the specified format
+     * {{formatted_datetime::+1 day::Y-m-d H:i}} - formats a given php date/time format (see http://php.net/manual/en/function.strtotime.php) with the specified format
      */
     private function replaceFormattedDateTime(array $chunks): string
     {
@@ -108,21 +116,20 @@ class InsertTagsListener
         $strFormat = $chunks[2];
 
         // Fallback
-        if ($strFormat === null) {
+        if (null === $strFormat) {
             $strFormat = 'datim';
         }
 
         // Custom format
-        if (!in_array($strFormat, ['datim', 'date', 'time'])) {
+        if (!\in_array($strFormat, ['datim', 'date', 'time'], true)) {
             return Date::parse($strFormat, $timestamp);
         }
 
         return $this->formatter->$strFormat($timestamp);
     }
 
-
     /**
-     * Replace {{dca_label::*}} insert tag
+     * Replace {{dca_label::*}} insert tag.
      *
      * use case:
      *
@@ -133,9 +140,8 @@ class InsertTagsListener
         return $this->formatter->dcaLabel($chunks[1], $chunks[2]);
     }
 
-
     /**
-     * Replace {{dca_value::*}} insert tag
+     * Replace {{dca_value::*}} insert tag.
      *
      * use case:
      *
@@ -147,7 +153,7 @@ class InsertTagsListener
     }
 
     /**
-     * Replace {{option_label::*}} insert tag
+     * Replace {{option_label::*}} insert tag.
      *
      * use case:
      *
@@ -163,7 +169,7 @@ class InsertTagsListener
 
         $options = StringUtil::deserialize($field->options);
 
-        if (!is_array($options) || count($options) === 0) {
+        if (!\is_array($options) || 0 === \count($options)) {
             return $value;
         }
 

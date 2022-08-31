@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Util;
 
 use Contao\Config;
@@ -21,7 +23,7 @@ class FileUpload extends \Contao\FileUpload
     protected int $gdMaxImgHeight;
 
     /**
-     * Temporary store target from uploadTo() to make it available to getFilesFromGlobal()
+     * Temporary store target from uploadTo() to make it available to getFilesFromGlobal().
      */
     private string $target;
 
@@ -172,11 +174,46 @@ class FileUpload extends \Contao\FileUpload
     }
 
     /**
+     * Get the new file name if it already exists in the folder.
+     */
+    public static function getFileName(string $uploadedFile, string $uploadFolder): string
+    {
+        $projectDir = System::getContainer()->getParameter('kernel.project_dir');
+
+        if (!file_exists($projectDir.'/'.$uploadFolder.'/'.$uploadedFile)) {
+            return $uploadedFile;
+        }
+
+        $offset = 1;
+        $pathinfo = pathinfo($uploadedFile);
+        $name = $pathinfo['filename'];
+
+        /** @var array<SplFileInfo> $files */
+        $files = Finder::create()
+            ->in($projectDir.'/'.$uploadFolder)
+            ->files()
+            ->name('/^'.preg_quote($name, '/').'.*\.'.preg_quote($pathinfo['extension'], '/').'/')
+        ;
+
+        foreach ($files as $file) {
+            $fileName = $file->getFilename();
+
+            if (preg_match('/__[0-9]+\.'.preg_quote($pathinfo['extension'], '/').'$/', $fileName)) {
+                $fileName = str_replace('.'.$pathinfo['extension'], '', $fileName);
+                $value = (int) substr($fileName, strrpos($fileName, '_') + 1);
+                $offset = max($offset, $value);
+            }
+        }
+
+        return str_replace($name.'.', $name.'__'.++$offset.'.', $uploadedFile);
+    }
+
+    /**
      * @inheritdoc
      */
     protected function getFilesFromGlobal(): array
     {
-        if (is_array($_FILES[$this->strName]['name'] ?? null)) {
+        if (\is_array($_FILES[$this->strName]['name'] ?? null)) {
             $files = parent::getFilesFromGlobal();
         } else {
             $files = [$_FILES[$this->strName]];
@@ -227,40 +264,5 @@ class FileUpload extends \Contao\FileUpload
         Config::set('gdMaxImgHeight', $gdMaxImgHeight);
 
         return $return;
-    }
-
-    /**
-     * Get the new file name if it already exists in the folder.
-     */
-    public static function getFileName(string $uploadedFile, string $uploadFolder): string
-    {
-        $projectDir = System::getContainer()->getParameter('kernel.project_dir');
-
-        if (!file_exists($projectDir . '/' . $uploadFolder . '/' . $uploadedFile)) {
-            return $uploadedFile;
-        }
-
-        $offset = 1;
-        $pathinfo = pathinfo($uploadedFile);
-        $name = $pathinfo['filename'];
-
-        /** @var SplFileInfo[] $files */
-        $files = Finder::create()
-            ->in($projectDir . '/' . $uploadFolder)
-            ->files()
-            ->name('/^' . preg_quote($name, '/') . '.*\.' . preg_quote($pathinfo['extension'], '/') . '/')
-        ;
-
-        foreach ($files as $file) {
-            $fileName = $file->getFilename();
-
-            if (preg_match('/__[0-9]+\.' . preg_quote($pathinfo['extension'], '/') . '$/', $fileName)) {
-                $fileName = str_replace('.' . $pathinfo['extension'], '', $fileName);
-                $value = (int) substr($fileName, (strrpos($fileName, '_') + 1));
-                $offset = max($offset, $value);
-            }
-        }
-
-        return str_replace($name . '.', $name . '__' . ++$offset . '.', $uploadedFile);
     }
 }

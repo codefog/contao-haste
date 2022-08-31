@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle;
 
 use Contao\ArrayUtil;
@@ -9,7 +11,7 @@ use Contao\System;
 class StringParser
 {
     /**
-     * Text filter options
+     * Text filter options.
      */
     public const NO_TAGS = 1;
     public const NO_BREAKS = 2;
@@ -54,7 +56,7 @@ class StringParser
      */
     public function convertToText(mixed $value, int $options): mixed
     {
-        if (is_array($value)) {
+        if (\is_array($value)) {
             foreach ($value as $k => $v) {
                 $value[$k] = $this->convertToText($v, $options);
             }
@@ -84,7 +86,7 @@ class StringParser
 
             if (!empty($emails[0])) {
                 foreach ($emails[0] as $k => $v) {
-                    $value = str_replace($v, '%email' . $k . '%', $value);
+                    $value = str_replace($v, '%email'.$k.'%', $value);
                 }
             }
         }
@@ -100,13 +102,13 @@ class StringParser
 
         // Remove line breaks (e.g. for subject)
         if ($options & static::NO_BREAKS) {
-            $value = str_replace(array("\r", "\n"), '', $value);
+            $value = str_replace(["\r", "\n"], '', $value);
         }
 
         // Restore friendly email after stripping tags
         if (!($options & static::NO_EMAILS) && !empty($emails[0])) {
             foreach ($emails[0] as $k => $v) {
-                $value = str_replace('%email' . $k . '%', $v, $value);
+                $value = str_replace('%email'.$k.'%', $v, $value);
             }
         }
 
@@ -116,14 +118,15 @@ class StringParser
     /**
      * Flatten input data, Simple Tokens can't handle arrays.
      */
-    public function flatten(mixed $value, string $key, array &$data, string $pattern = ', '): void
+    public function flatten(mixed $value, string $key, array & $data, string $pattern = ', '): void
     {
-        if (is_object($value)) {
+        if (\is_object($value)) {
             return;
         }
 
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             $data[$key] = $value;
+
             return;
         }
 
@@ -131,7 +134,7 @@ class StringParser
         $values = [];
 
         foreach ($value as $k => $v) {
-            if ($isAssoc || is_array($v)) {
+            if ($isAssoc || \is_array($v)) {
                 $this->flatten($v, $key.'_'.$k, $data);
             } else {
                 $data[$key.'_'.$v] = '1';

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle;
 
 use Contao\ArrayUtil;
@@ -15,10 +17,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class Formatter
 {
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly RequestStack $requestStack,
-    ) {}
+    public function __construct(private readonly Connection $connection, private readonly RequestStack $requestStack,)
+    {
+    }
 
     /**
      * Format date according to the system config.
@@ -68,9 +69,9 @@ class Formatter
     public function dcaLabelFromArray(array $fieldConfig): string
     {
         if (!empty($fieldConfig['label'])) {
-            $label = is_array($fieldConfig['label']) ? $fieldConfig['label'][0] : $fieldConfig['label'];
+            $label = \is_array($fieldConfig['label']) ? $fieldConfig['label'][0] : $fieldConfig['label'];
         } else {
-            $label = is_array($GLOBALS['TL_LANG']['MSC'][$fieldConfig['name']] ?? null) ? $GLOBALS['TL_LANG']['MSC'][$fieldConfig['name']][0] : $GLOBALS['TL_LANG']['MSC'][$fieldConfig['name']] ?? '';
+            $label = \is_array($GLOBALS['TL_LANG']['MSC'][$fieldConfig['name']] ?? null) ? $GLOBALS['TL_LANG']['MSC'][$fieldConfig['name']][0] : $GLOBALS['TL_LANG']['MSC'][$fieldConfig['name']] ?? '';
         }
 
         if (!$label) {
@@ -112,10 +113,10 @@ class Formatter
         $value = StringUtil::deserialize($value);
 
         // Options callback (array)
-        if (is_array($fieldConfig['options_callback'] ?? null) && $dc !== null) {
+        if (\is_array($fieldConfig['options_callback'] ?? null) && null !== $dc) {
             $callback = $fieldConfig['options_callback'];
             $fieldConfig['options'] = System::importStatic($callback[0])->{$callback[1]}($dc);
-        } elseif (is_callable($fieldConfig['options_callback'] ?? null) && $dc !== null) {
+        } elseif (\is_callable($fieldConfig['options_callback'] ?? null) && null !== $dc) {
             // Options callback (callable)
             $fieldConfig['options'] = $fieldConfig['options_callback']($dc);
         } elseif (isset($fieldConfig['foreignKey']) && $value) {
@@ -124,14 +125,14 @@ class Formatter
 
             $fieldConfig['options'] = [];
 
-            $options = $this->connection->fetchAllAssociative("SELECT id, " . $chunks[1] . " AS value FROM " . $chunks[0] . " WHERE id IN (" . implode(',', array_map('intval', (array) $value)) . ")");
+            $options = $this->connection->fetchAllAssociative('SELECT id, '.$chunks[1].' AS value FROM '.$chunks[0].' WHERE id IN ('.implode(',', array_map('intval', (array) $value)).')');
 
             foreach ($options as $option) {
                 $fieldConfig['options'][$option['id']] = $option['value'];
             }
         }
 
-        if (is_array($value)) {
+        if (\is_array($value)) {
             foreach ($value as $kk => $vv) {
                 $value[$kk] = $this->dcaValueFromArray($fieldConfig, $vv);
             }
@@ -147,7 +148,7 @@ class Formatter
             return $this->time($value);
         }
 
-        if ('datim' === ($fieldConfig['eval']['rgxp'] ?? null) || in_array(($fieldConfig['flag'] ?? null), [5, 6, 7, 8, 9, 10]) || 'tstamp' === ($fieldConfig['name'] ?? null)) {
+        if ('datim' === ($fieldConfig['eval']['rgxp'] ?? null) || \in_array(($fieldConfig['flag'] ?? null), [5, 6, 7, 8, 9, 10], true) || 'tstamp' === ($fieldConfig['name'] ?? null)) {
             return $this->datim($value);
         }
 
@@ -159,12 +160,12 @@ class Formatter
             return StringUtil::specialchars($value);
         }
 
-        if (is_array($fieldConfig['reference'] ?? null) && isset($fieldConfig['reference'][$value])) {
-            return is_array($fieldConfig['reference'][$value]) ? $fieldConfig['reference'][$value][0] : $fieldConfig['reference'][$value];
+        if (\is_array($fieldConfig['reference'] ?? null) && isset($fieldConfig['reference'][$value])) {
+            return \is_array($fieldConfig['reference'][$value]) ? $fieldConfig['reference'][$value][0] : $fieldConfig['reference'][$value];
         }
 
-        if ((($fieldConfig['eval']['isAssociative'] ?? null) || ArrayUtil::isAssoc($fieldConfig['options'] ?? null)) && isset($fieldConfig['options'][$value])) {
-            return is_array($fieldConfig['options'][$value]) ? $fieldConfig['options'][$value][0] : $fieldConfig['options'][$value];
+        if (($fieldConfig['eval']['isAssociative'] ?? null) || ArrayUtil::isAssoc($fieldConfig['options'] ?? null) && isset($fieldConfig['options'][$value])) {
+            return \is_array($fieldConfig['options'][$value]) ? $fieldConfig['options'][$value][0] : $fieldConfig['options'][$value];
         }
 
         return $value;

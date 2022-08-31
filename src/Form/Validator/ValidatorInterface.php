@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Form\Validator;
 
 use Codefog\HasteBundle\Form\Form;

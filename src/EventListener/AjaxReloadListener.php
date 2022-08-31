@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\EventListener;
 
 use Codefog\HasteBundle\AjaxReloadManager;
@@ -11,27 +13,25 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class AjaxReloadListener
 {
-    public function __construct(
-        private readonly AjaxReloadManager $manager,
-        private readonly Packages $packages,
-        private readonly RequestStack $requestStack,
-    ) {}
+    public function __construct(private readonly AjaxReloadManager $manager, private readonly Packages $packages, private readonly RequestStack $requestStack,)
+    {
+    }
 
     #[AsHook('getContentElement')]
     public function onGetContentElement(ContentModel $model, string $buffer): string
     {
         // Subscribe the content element if the included frontend module has subscribed itself
-        if ($model->type === 'module' && $this->manager->isRegistered(AjaxReloadManager::TYPE_MODULE, (int) $model->module)) {
+        if ('module' === $model->type && $this->manager->isRegistered(AjaxReloadManager::TYPE_MODULE, (int) $model->module)) {
             $this->manager->subscribe(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $this->manager->getEvents(AjaxReloadManager::TYPE_MODULE, (int) $model->module));
         }
 
         // Subscribe the content element if the included content element has subscribed itself
-        if ($model->type === 'alias' && $this->manager->isRegistered(AjaxReloadManager::TYPE_CONTENT, (int) $model->cteAlias)) {
+        if ('alias' === $model->type && $this->manager->isRegistered(AjaxReloadManager::TYPE_CONTENT, (int) $model->cteAlias)) {
             $this->manager->subscribe(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $this->manager->getEvents(AjaxReloadManager::TYPE_CONTENT, (int) $model->cteAlias));
         }
 
         $event = $this->getEventFromCurrentRequest();
-        $isAjax = $event !== null;
+        $isAjax = null !== $event;
         $buffer = $this->manager->updateBuffer(AjaxReloadManager::TYPE_CONTENT, (int) $model->id, $buffer, $isAjax);
 
         if ($isAjax) {
@@ -45,7 +45,7 @@ class AjaxReloadListener
     public function onGetFrontendModule(ModuleModel $model, string $buffer): string
     {
         $event = $this->getEventFromCurrentRequest();
-        $isAjax = $event !== null;
+        $isAjax = null !== $event;
         $buffer = $this->manager->updateBuffer(AjaxReloadManager::TYPE_MODULE, (int) $model->id, $buffer, $isAjax);
 
         if ($isAjax) {
@@ -56,7 +56,7 @@ class AjaxReloadListener
     }
 
     #[AsHook('modifyFrontendPage')]
-    public function onModifyFrontendPage(string $buffer,  string $template): string
+    public function onModifyFrontendPage(string $buffer, string $template): string
     {
         if (str_starts_with($template, 'fe_')) {
             if (($response = $this->manager->getResponse()) !== null) {
@@ -87,7 +87,7 @@ class AjaxReloadListener
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request === null || !$request->isXmlHttpRequest() || !$request->server->has('HTTP_HASTE_AJAX_RELOAD')) {
+        if (null === $request || !$request->isXmlHttpRequest() || !$request->server->has('HTTP_HASTE_AJAX_RELOAD')) {
             return null;
         }
 

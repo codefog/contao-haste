@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\EventListener;
 
 use Contao\Backend;
@@ -23,19 +25,14 @@ use Symfony\Component\Security\Core\Security;
 
 class DcaAjaxOperationsListener
 {
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly Packages $packages,
-        private readonly RequestStack $requestStack,
-        private readonly ScopeMatcher $scopeMatcher,
-        private readonly Security $security,
-    )
-    {}
+    public function __construct(private readonly Connection $connection, private readonly Packages $packages, private readonly RequestStack $requestStack, private readonly ScopeMatcher $scopeMatcher, private readonly Security $security,)
+    {
+    }
 
     #[AsHook('executePostActions')]
     public function onExecutePostActions(string $action, DataContainer $dc): void
     {
-        if ($action !== 'hasteAjaxOperation') {
+        if ('hasteAjaxOperation' !== $action) {
             return;
         }
 
@@ -64,7 +61,7 @@ class DcaAjaxOperationsListener
         $nextIndex = 0;
 
         foreach ($options as $k => $option) {
-            if ($option['value'] == $currentValue) {
+            if ($option['value'] === $currentValue) {
                 $nextIndex = $k + 1;
             }
         }
@@ -85,7 +82,7 @@ class DcaAjaxOperationsListener
 
         $response = new JsonResponse([
             'nextValue' => $options[$nextIndex]['value'],
-            'nextIcon'  => $options[$nextIndex]['icon']
+            'nextIcon' => $options[$nextIndex]['icon'],
         ]);
 
         throw new ResponseException($response);
@@ -96,7 +93,7 @@ class DcaAjaxOperationsListener
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request === null || !$this->scopeMatcher->isBackendRequest($request) || !is_array($GLOBALS['TL_DCA'][$table]['list']['operations'] ?? null)) {
+        if (null === $request || !$this->scopeMatcher->isBackendRequest($request) || !\is_array($GLOBALS['TL_DCA'][$table]['list']['operations'] ?? null)) {
             return;
         }
 
@@ -126,7 +123,7 @@ class DcaAjaxOperationsListener
     /**
      * Adds the "onclick" attribute to the operation DCA.
      */
-    private function addOnClickAttribute(array &$operation): void
+    private function addOnClickAttribute(array & $operation): void
     {
         $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
 
@@ -135,9 +132,9 @@ class DcaAjaxOperationsListener
         } else {
             // onclick attribute already present
             if (str_contains($operation['attributes'], 'onclick="')) {
-                $operation['attributes'] = str_replace('onclick="', 'onclick="' . $clickEventString, $operation['attributes']);
+                $operation['attributes'] = str_replace('onclick="', 'onclick="'.$clickEventString, $operation['attributes']);
             } else {
-                $operation['attributes'] = $clickEventString . $operation['attributes'];
+                $operation['attributes'] = $clickEventString.$operation['attributes'];
             }
         }
     }
@@ -150,15 +147,15 @@ class DcaAjaxOperationsListener
         $hasPermission = true;
 
         // Check the permissions
-        if (($GLOBALS['TL_DCA'][$table]['fields'][$settings['field']]['exclude'] ?? false) && $this->security->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $table . '::' . $settings['field'])) {
+        if (($GLOBALS['TL_DCA'][$table]['fields'][$settings['field']]['exclude'] ?? false) && $this->security->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $table.'::'.$settings['field'])) {
             $hasPermission = false;
         }
 
         $callback = $settings['check_permission_callback'] ?? null;
 
-        if (is_array($callback)) {
+        if (\is_array($callback)) {
             System::importStatic($callback[0])->{$callback[1]}($table, $settings, $hasPermission);
-        } elseif (is_callable($callback)) {
+        } elseif (\is_callable($callback)) {
             $callback($table, $settings, $hasPermission);
         }
 
@@ -173,11 +170,11 @@ class DcaAjaxOperationsListener
         $field = $settings['field'];
 
         // Trigger the save_callback
-        if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] ?? null)) {
+        if (\is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] ?? null)) {
             foreach ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['save_callback'] as $callback) {
-                if (is_array($callback)) {
+                if (\is_array($callback)) {
                     $value = System::importStatic($callback[0])->{$callback[1]}($value, $dc);
-                } elseif (is_callable($callback)) {
+                } elseif (\is_callable($callback)) {
                     $value = $callback($value, $dc);
                 }
             }
@@ -202,7 +199,7 @@ class DcaAjaxOperationsListener
             $icon = null;
 
             foreach ($options as $option) {
-                if ($option['value'] == $value) {
+                if ($option['value'] === $value) {
                     $icon = $option['icon'];
                 }
             }
@@ -212,7 +209,8 @@ class DcaAjaxOperationsListener
                 $icon = $options[0]['icon'];
             }
 
-            return sprintf('<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
+            return sprintf(
+                '<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
                 $value,
                 $name,
                 Backend::addToUrl($href),
@@ -228,14 +226,13 @@ class DcaAjaxOperationsListener
      */
     private function getVersionEditUrl(int $id, string $operation): ?string
     {
-        if ($operation !== 'toggle') {
+        if ('toggle' !== $operation) {
             return null;
         }
 
         $url = Environment::get('requestUri');
         $url = preg_replace('/&(amp;)?id=[^&]+/', '', $url);
-        $url .= sprintf('&act=edit&id=%s', $id);
 
-        return $url;
+        return $url.sprintf('&act=edit&id=%s', $id);
     }
 }

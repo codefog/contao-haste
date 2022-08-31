@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Util;
 
 use Contao\Config;
@@ -51,7 +53,7 @@ class Pagination
         return $this->perPage;
     }
 
-    public function setPerPage(int $perPage): Pagination
+    public function setPerPage(int $perPage): self
     {
         $this->currentState = self::STATE_DIRTY;
         $this->perPage = $perPage;
@@ -64,7 +66,7 @@ class Pagination
         return $this->urlParameter;
     }
 
-    public function setUrlParameter(string $urlParameter): Pagination
+    public function setUrlParameter(string $urlParameter): self
     {
         $this->currentState = self::STATE_DIRTY;
         $this->urlParameter = $urlParameter;
@@ -77,7 +79,7 @@ class Pagination
         return $this->maxPaginationLinks;
     }
 
-    public function setMaxPaginationLinks(int $maxPaginationLinks): Pagination
+    public function setMaxPaginationLinks(int $maxPaginationLinks): self
     {
         $this->currentState = self::STATE_DIRTY;
         $this->maxPaginationLinks = $maxPaginationLinks;
@@ -124,11 +126,11 @@ class Pagination
     }
 
     /**
-     * Compile the pagination
+     * Compile the pagination.
      */
     protected function compile(): void
     {
-        if ($this->getCurrentState() === self::STATE_CLEAN) {
+        if (self::STATE_CLEAN === $this->getCurrentState()) {
             return;
         }
 
@@ -156,8 +158,9 @@ class Pagination
         $this->outOfRange = false;
 
         // The pagination is not valid if the page number is outside the range
-        if ($page < 1
-            || ($this->getPerPage() == 0 && $page > 1)
+        if (
+            $page < 1
+            || (0 === $this->getPerPage() && $page > 1)
             || ($this->getPerPage() > 0 && $page > max(ceil($this->getTotal() / $this->getPerPage()), 1))
         ) {
             $this->outOfRange = true;

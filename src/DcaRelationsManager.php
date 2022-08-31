@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle;
 
 use Codefog\HasteBundle\Model\DcaRelationsModel;
@@ -22,16 +24,6 @@ use Symfony\Component\String\UnicodeString;
 
 class DcaRelationsManager
 {
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly Formatter $formatter,
-        private readonly RequestStack $requestStack,
-        private readonly ResourceFinderInterface $resourceFinder,
-        private readonly ScopeMatcher $scopeMatcher,
-        private readonly UndoManager $undoManager,
-    )
-    {}
-
     private array $relationsCache = [];
     private array $filterableFields = [];
     private array $searchableFields = [];
@@ -49,6 +41,10 @@ class DcaRelationsManager
      * does not allow the last record to be double-saved.
      */
     private array $overrideAllCache = [];
+
+    public function __construct(private readonly Connection $connection, private readonly Formatter $formatter, private readonly RequestStack $requestStack, private readonly ResourceFinderInterface $resourceFinder, private readonly ScopeMatcher $scopeMatcher, private readonly UndoManager $undoManager,)
+    {
+    }
 
     #[AsHook('loadDataContainer')]
     public function addRelationCallbacks(string $table): void
@@ -94,19 +90,19 @@ class DcaRelationsManager
 
         // Add filter and search callbacks for the backend only
         if (($request = $this->requestStack->getCurrentRequest()) !== null && $this->scopeMatcher->isBackendRequest($request)) {
-            if (count($this->filterableFields) > 0) {
+            if (\count($this->filterableFields) > 0) {
                 $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'filterByRelations'];
 
-                if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])){
+                if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])) {
                     $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_filter;filter', $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
                     $GLOBALS['TL_DCA'][$table]['list']['sorting']['panel_callback']['haste_filter'] = [static::class, 'addRelationFilters'];
                 }
             }
 
-            if (count($this->searchableFields) > 0) {
+            if (\count($this->searchableFields) > 0) {
                 $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'filterBySearch'];
 
-                if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])){
+                if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])) {
                     $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/search/', 'haste_search;search', $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
                     $GLOBALS['TL_DCA'][$table]['list']['sorting']['panel_callback']['haste_search'] = [static::class, 'addRelationSearch'];
                 }
@@ -123,7 +119,7 @@ class DcaRelationsManager
             return $value;
         }
 
-        $cacheKey = $relation['table'] . $dc->activeRecord->{$relation['reference']};
+        $cacheKey = $relation['table'].$dc->activeRecord->{$relation['reference']};
         $field = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field] ?? [];
 
         // Support for csv values
@@ -134,7 +130,7 @@ class DcaRelationsManager
         }
 
         // Check the purge cache
-        if (!in_array($cacheKey, $this->purgeCache, true)) {
+        if (!\in_array($cacheKey, $this->purgeCache, true)) {
             $this->purgeRelatedRecords($relation, $dc->activeRecord->{$relation['reference']});
             $this->purgeCache[] = $cacheKey;
         }
@@ -143,7 +139,7 @@ class DcaRelationsManager
 
         // Do not save the record again in "override all" mode if it has been saved already
         if ('overrideAll' === Input::get('act')) {
-            if (in_array($cacheKey, $this->overrideAllCache, true)) {
+            if (\in_array($cacheKey, $this->overrideAllCache, true)) {
                 $saveRecords = false;
             }
 
@@ -177,10 +173,10 @@ class DcaRelationsManager
         $undo = [];
 
         foreach ($GLOBALS['TL_DCA'] as $table => $dca) {
-            foreach ($dca['fields'] as $fieldName => $fieldConfig) {
+            foreach (array_keys($dca['fields']) as $fieldName) {
                 $relation = $this->getRelation($table, $fieldName);
 
-                if ($relation === null || ($relation['reference_table'] !== $dc->table && $relation['related_table'] !== $dc->table)) {
+                if (null === $relation || ($relation['reference_table'] !== $dc->table && $relation['related_table'] !== $dc->table)) {
                     continue;
                 }
 
@@ -191,7 +187,7 @@ class DcaRelationsManager
                         'relationTable' => $table,
                         'relationField' => $fieldName,
                         'reference' => $dc->{$relation['reference']},
-                        'values' => DcaRelationsModel::getRelatedValues($table, $fieldName, $dc->{$relation['reference']})
+                        'values' => DcaRelationsModel::getRelatedValues($table, $fieldName, $dc->{$relation['reference']}),
                     ];
 
                     $this->purgeRelatedRecords($relation, $dc->{$relation['reference']});
@@ -201,7 +197,7 @@ class DcaRelationsManager
                         'relationTable' => $table,
                         'relationField' => $fieldName,
                         'reference' => $dc->{$relation['field']},
-                        'values' => DcaRelationsModel::getReferenceValues($table, $fieldName, $dc->{$relation['field']})
+                        'values' => DcaRelationsModel::getReferenceValues($table, $fieldName, $dc->{$relation['field']}),
                     ];
 
                     $this->purgeRelatedRecords($relation, $dc->{$relation['field']});
@@ -210,7 +206,7 @@ class DcaRelationsManager
         }
 
         // Store the relations in the tl_undo table
-        if (count($undo) > 0) {
+        if (\count($undo) > 0) {
             $this->undoManager->add($undoId, 'haste_relations', $undo);
         }
     }
@@ -220,7 +216,7 @@ class DcaRelationsManager
      */
     public function undoRelations(array $data, int $id, string $table, array $row): void
     {
-        if (!is_array($data['haste_relations']) || count($data['haste_relations']) === 0) {
+        if (!\is_array($data['haste_relations']) || 0 === \count($data['haste_relations'])) {
             return;
         }
 
@@ -234,7 +230,7 @@ class DcaRelationsManager
             $fieldName = $isReferenceTable ? $relation['reference'] : $relation['field'];
 
             // Continue if there is no relation or reference value does not match
-            if ($relation === null || empty($relation['values']) || $relation['reference'] !== $row[$fieldName]) {
+            if (null === $relation || empty($relation['values']) || $relation['reference'] !== $row[$fieldName]) {
                 continue;
             }
 
@@ -244,27 +240,6 @@ class DcaRelationsManager
                     $relation['related_field'] => $isReferenceTable ? $value : $id,
                 ]);
             }
-        }
-    }
-
-    /**
-     * Load all data containers.
-     */
-    protected function loadDataContainers(): void
-    {
-        $processed = [];
-
-        /** @var SplFileInfo[] $files */
-        $files = $this->resourceFinder->findIn('dca')->depth(0)->files()->name('*.php');
-
-        foreach ($files as $file) {
-            if (\in_array($file->getBasename(), $processed, true)) {
-                continue;
-            }
-
-            $processed[] = $file->getBasename();
-
-            Controller::loadDataContainer($file->getBasename('.php'));
         }
     }
 
@@ -286,14 +261,14 @@ class DcaRelationsManager
 
             // Get the reference value (if not an ID)
             if ('id' !== $relation['reference']) {
-                $referenceRecord = $this->connection->fetchOne("SELECT " . $relation['reference'] . " FROM " . $dc->table . " WHERE id=?", [$id]);
+                $referenceRecord = $this->connection->fetchOne('SELECT '.$relation['reference'].' FROM '.$dc->table.' WHERE id=?', [$id]);
 
-                if ($referenceRecord !== false) {
+                if (false !== $referenceRecord) {
                     $reference = $referenceRecord;
                 }
             }
 
-            $values = $this->connection->fetchFirstColumn("SELECT " . $relation['related_field'] . " FROM " . $relation['table'] . " WHERE " . $relation['reference_field'] . "=?", [$dc->{$relation['reference']}]);
+            $values = $this->connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?', [$dc->{$relation['reference']}]);
 
             foreach ($values as $value) {
                 $this->connection->insert($relation['table'], [
@@ -312,28 +287,28 @@ class DcaRelationsManager
         $dc = null;
 
         // Try to find the \DataContainer instance (see #37)
-        foreach (func_get_args() as $arg) {
+        foreach (\func_get_args() as $arg) {
             if ($arg instanceof DataContainer) {
                 $dc = $arg;
                 break;
             }
         }
 
-        if ($dc === null) {
+        if (null === $dc) {
             throw new \RuntimeException('There seems to be no valid DataContainer instance!');
         }
 
         $this->loadDataContainers();
 
         foreach ($GLOBALS['TL_DCA'] as $table => $dca) {
-            if (!isset($GLOBALS['TL_DCA'][$table]['fields'])) {
+            if (!isset($dca['fields'])) {
                 continue;
             }
 
-            foreach ($GLOBALS['TL_DCA'][$table]['fields'] as $fieldName => $fieldConfig) {
+            foreach (array_keys($dca['fields']) as $fieldName) {
                 $relation = $this->getRelation($table, $fieldName);
 
-                if ($relation === null || $relation['related_table'] !== $dc->table) {
+                if (null === $relation || $relation['related_table'] !== $dc->table) {
                     continue;
                 }
 
@@ -349,12 +324,12 @@ class DcaRelationsManager
             return false;
         }
 
-        foreach ($GLOBALS['TL_DCA'][$table]['fields'] as $fieldName => $fieldConfig) {
+        foreach (array_keys($GLOBALS['TL_DCA'][$table]['fields']) as $fieldName) {
             if (($relation = $this->getRelation($table, $fieldName)) === null) {
                 continue;
             }
 
-            $values = $this->connection->fetchFirstColumn("SELECT " . $relation['reference'] . "FROM " . $table . " WHERE id IN (" . implode(',', array_map('intval', $ids)) . ") AND tstamp=0");
+            $values = $this->connection->fetchFirstColumn('SELECT '.$relation['reference'].'FROM '.$table.' WHERE id IN ('.implode(',', array_map('intval', $ids)).') AND tstamp=0');
 
             foreach ($values as $value) {
                 $this->purgeRelatedRecords($relation, $value);
@@ -376,20 +351,12 @@ class DcaRelationsManager
         return $value;
     }
 
-    /**
-     * Purge the related records.
-     */
-    protected function purgeRelatedRecords(array $relation, mixed $reference): void
-    {
-        $this->connection->delete($relation['table'], [$relation['reference_field'] => $reference]);
-    }
-
     #[AsHook('sqlGetFromFile')]
     public function addRelationTables(array $definitions): array
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request !== null && !$this->scopeMatcher->isFrontendRequest($request)) {
+        if (null !== $request && !$this->scopeMatcher->isFrontendRequest($request)) {
             foreach ($this->connection->createSchemaManager()->listTables() as $table) {
                 $tableName = $table->getName();
 
@@ -403,15 +370,15 @@ class DcaRelationsManager
                     continue;
                 }
 
-                foreach ($GLOBALS['TL_DCA'][$tableName]['fields'] as $fieldName => $fieldConfig) {
+                foreach (array_keys($GLOBALS['TL_DCA'][$tableName]['fields']) as $fieldName) {
                     $relation = $this->getRelation($tableName, $fieldName);
 
-                    if ($relation === null || $relation['skipInstall']) {
+                    if (null === $relation || $relation['skipInstall']) {
                         continue;
                     }
 
-                    $definitions[$relation['table']]['TABLE_FIELDS'][$relation['reference_field']] = "`" . $relation['reference_field'] . "` " . $relation['reference_sql'];
-                    $definitions[$relation['table']]['TABLE_FIELDS'][$relation['related_field']] = "`" . $relation['related_field'] . "` " . $relation['related_sql'];
+                    $definitions[$relation['table']]['TABLE_FIELDS'][$relation['reference_field']] = '`'.$relation['reference_field'].'` '.$relation['reference_sql'];
+                    $definitions[$relation['table']]['TABLE_FIELDS'][$relation['related_field']] = '`'.$relation['related_field'].'` '.$relation['related_sql'];
 
                     if ($relation['related_tableSql']) {
                         $definitions[$relation['table']]['TABLE_OPTIONS'] = $relation['related_tableSql'];
@@ -419,7 +386,7 @@ class DcaRelationsManager
 
                     // Add the index only if there is no other (avoid duplicate keys)
                     if (empty($definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'])) {
-                        $definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'][$relation['reference_field'] . "_" . $relation['related_field']] = "UNIQUE KEY `" . $relation['reference_field'] . "_" . $relation['related_field'] . "` (`" . $relation['reference_field'] . "`, `" . $relation['related_field'] . "`)";
+                        $definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'][$relation['reference_field'].'_'.$relation['related_field']] = 'UNIQUE KEY `'.$relation['reference_field'].'_'.$relation['related_field'].'` (`'.$relation['reference_field'].'`, `'.$relation['related_field'].'`)';
                     }
                 }
             }
@@ -433,31 +400,31 @@ class DcaRelationsManager
      */
     public function filterByRelations(DataContainer $dc): void
     {
-        if (count($this->filterableFields) === 0 || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->filterableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return;
         }
 
         $rootIds = isset($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) && \is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root']) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
 
         // Include the child records in tree view
-        if (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_TREE && count($rootIds) > 0) {
+        if (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_TREE && \count($rootIds) > 0) {
             $rootIds = Database::getInstance()->getChildRecords($rootIds, $dc->table, false, $rootIds);
         }
 
         $doFilter = false;
         $sessionData = $request->getSession()->getBag('contao_backend')->all();
-        $filterId = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT) ? $dc->table.'_'.$dc->currentPid : $dc->table;
+        $filterId = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
         foreach (array_keys($this->filterableFields) as $field) {
             if (isset($sessionData['filter'][$filterId][$field])) {
                 $doFilter = true;
                 $ids = DcaRelationsModel::getReferenceValues($dc->table, $field, $sessionData['filter'][$filterId][$field]);
-                $rootIds = (count($rootIds) === 0) ? $ids : array_intersect($rootIds, $ids);
+                $rootIds = 0 === \count($rootIds) ? $ids : array_intersect($rootIds, $ids);
             }
         }
 
         if ($doFilter) {
-            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = (count($rootIds) === 0) ? [0] : array_unique($rootIds);
+            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = 0 === \count($rootIds) ? [0] : array_unique($rootIds);
         }
     }
 
@@ -466,11 +433,11 @@ class DcaRelationsManager
      */
     public function filterBySearch(DataContainer $dc): void
     {
-        if (count($this->searchableFields) === 0 || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->searchableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return;
         }
 
-        $rootIds = is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] ?? null) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
+        $rootIds = \is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] ?? null) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
         $doFilter = false;
         $sessionData = $request->getSession()->getBag('contao_backend')->all();
 
@@ -479,13 +446,15 @@ class DcaRelationsManager
 
             Controller::loadDataContainer($relatedTable);
 
-            if (isset($sessionData['haste_search'][$dc->table])
+            if (
+                isset($sessionData['haste_search'][$dc->table])
                 && '' !== $sessionData['haste_search'][$dc->table]['searchValue']
-                && $relatedTable == $sessionData['haste_search'][$dc->table]['table']
-                && $field == $sessionData['haste_search'][$dc->table]['field']
+                && $relatedTable === $sessionData['haste_search'][$dc->table]['table']
+                && $field === $sessionData['haste_search'][$dc->table]['field']
             ) {
                 $doFilter = true;
-                $query = sprintf('SELECT %s.%s AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
+                $query = sprintf(
+                    'SELECT %s.%s AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
                     $dc->table,
                     $relation['reference'],
                     $dc->table,
@@ -504,17 +473,17 @@ class DcaRelationsManager
                 $procedure = [];
                 $values = [];
 
-                $strPattern = "CAST(%s AS CHAR) REGEXP ?";
+                $strPattern = 'CAST(%s AS CHAR) REGEXP ?';
 
                 if (str_ends_with(Config::get('dbCollation'), '_ci')) {
-                    $strPattern = "LOWER(CAST(%s AS CHAR)) REGEXP LOWER(?)";
+                    $strPattern = 'LOWER(CAST(%s AS CHAR)) REGEXP LOWER(?)';
                 }
 
-                $fld = $relation['related_table'] . '.' . $sessionData['haste_search'][$dc->table]['searchField'];
+                $fld = $relation['related_table'].'.'.$sessionData['haste_search'][$dc->table]['searchField'];
 
                 if (isset($GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey'])) {
                     [$t, $f] = explode('.', $GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey']);
-                    $procedure[] = "(" . sprintf($strPattern, $fld) . " OR " . sprintf($strPattern, "(SELECT $f FROM $t WHERE $t.id={$relatedTable}.$fld)") . ")";
+                    $procedure[] = '('.sprintf($strPattern, $fld).' OR '.sprintf($strPattern, "(SELECT $f FROM $t WHERE $t.id={$relatedTable}.$fld)").')';
                     $values[] = $sessionData['haste_search'][$dc->table]['searchValue'];
                 } else {
                     $procedure[] = sprintf($strPattern, $fld);
@@ -522,17 +491,17 @@ class DcaRelationsManager
 
                 $values[] = $sessionData['haste_search'][$dc->table]['searchValue'];
 
-                $query .= ' WHERE ' . implode(' AND ', $procedure);
+                $query .= ' WHERE '.implode(' AND ', $procedure);
 
                 $ids = $this->connection->fetchAllAssociative($query, $values);
                 $ids = array_column($ids, 'sourceId');
 
-                $rootIds = (count($rootIds) === 0) ? $ids : array_intersect($rootIds, $ids);
+                $rootIds = 0 === \count($rootIds) ? $ids : array_intersect($rootIds, $ids);
             }
         }
 
         if ($doFilter) {
-            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = (count($rootIds) === 0) ? [0] : array_unique($rootIds);
+            $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] = 0 === \count($rootIds) ? [0] : array_unique($rootIds);
         }
     }
 
@@ -541,11 +510,11 @@ class DcaRelationsManager
      */
     public function addRelationFilters(DataContainer $dc): string
     {
-        if (count($this->filterableFields) === 0 || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->filterableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return '';
         }
 
-        $filter = (($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT) ? $dc->table.'_'.$dc->currentPid : $dc->table;
+        $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
         /** @var AttributeBagInterface $session */
         $session = $request->getSession()->getBag('contao_backend');
@@ -554,7 +523,7 @@ class DcaRelationsManager
         // Set filter from user input
         if ('tl_filters' === Input::post('FORM_SUBMIT')) {
             foreach (array_keys($this->filterableFields) as $field) {
-                if (Input::post($field, true) !== 'tl_' . $field) {
+                if (Input::post($field, true) !== 'tl_'.$field) {
                     $sessionData['filter'][$filter][$field] = Input::post($field, true);
                 } else {
                     unset($sessionData['filter'][$filter][$field]);
@@ -566,20 +535,20 @@ class DcaRelationsManager
 
         $count = 0;
         $return = '<div class="tl_filter tl_subpanel">
-<strong>' . $GLOBALS['TL_LANG']['HST']['advanced_filter'] . '</strong> ';
+<strong>'.$GLOBALS['TL_LANG']['HST']['advanced_filter'].'</strong> ';
 
         foreach ($this->filterableFields as $field => $relation) {
-            $return .= '<select name="' . $field . '" class="tl_select tl_chosen' . (isset($session['filter'][$filter][$field]) ? ' active' : '') . '">
-    <option value="tl_' . $field . '">' . ($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '') . '</option>
-    <option value="tl_' . $field . '">---</option>';
+            $return .= '<select name="'.$field.'" class="tl_select tl_chosen'.(isset($session['filter'][$filter][$field]) ? ' active' : '').'">
+    <option value="tl_'.$field.'">'.($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '').'</option>
+    <option value="tl_'.$field.'">---</option>';
 
             $ids = DcaRelationsModel::getRelatedValues($relation['reference_table'], $field);
 
-            if (count($ids) === 0) {
+            if (0 === \count($ids)) {
                 $return .= '</select> ';
 
                 // Add the line-break after 5 elements
-                if ((++$count % 5) == 0) {
+                if (0 === ++$count % 5) {
                     $return .= '<br>';
                 }
 
@@ -593,13 +562,13 @@ class DcaRelationsManager
             $dc->field = $field;
 
             // Call the options_callback
-            if ((is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null) || is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) && !($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'] ?? null)) {
-                if (is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
+            if ((\is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null) || \is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) && !($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'] ?? null)) {
+                if (\is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
                     $class = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][0];
                     $method = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'][1];
 
                     $options_callback = System::importStatic($class)->$method($dc);
-                } elseif (is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
+                } elseif (\is_callable($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback'] ?? null)) {
                     $options_callback = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options_callback']($dc);
                 }
 
@@ -614,15 +583,15 @@ class DcaRelationsManager
                 $value = $vv;
 
                 // Options callback
-                if (!empty($options_callback) && is_array($options_callback)) {
+                if (!empty($options_callback) && \is_array($options_callback)) {
                     $vv = $options_callback[$vv];
                 } elseif (isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'])) {
                     // Replace the ID with the foreign key
                     $key = explode('.', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'], 2);
 
-                    $parent = $this->connection->fetchOne("SELECT " . $key[1] . " FROM " . $key[0] . " WHERE id=?", [$vv]);
+                    $parent = $this->connection->fetchOne('SELECT '.$key[1].' FROM '.$key[0].' WHERE id=?', [$vv]);
 
-                    if ($parent !== false) {
+                    if (false !== $parent) {
                         $vv = $parent;
                     }
                 }
@@ -631,30 +600,30 @@ class DcaRelationsManager
 
                 // Use reference array
                 if (isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'])) {
-                    $option_label = is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv]) ? $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv][0] : $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv];
+                    $option_label = \is_array($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv]) ? $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv][0] : $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['reference'][$vv];
                 } elseif (($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['isAssociative'] ?? false) || ArrayUtil::isAssoc($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options'] ?? null)) {
                     // Associative array
                     $option_label = $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['options'][$vv] ?? '';
                 }
 
                 // No empty options allowed
-                if (!strlen($option_label)) {
+                if (!\strlen($option_label)) {
                     $option_label = $vv ?: '-';
                 }
 
-                $options_sorter['  <option value="' . StringUtil::specialchars($value) . '"' . ((isset($session['filter'][$filter][$field]) && $value === $session['filter'][$filter][$field]) ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString($option_label))->ascii()->toString();
+                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.(isset($session['filter'][$filter][$field]) && $value === $session['filter'][$filter][$field] ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString($option_label))->ascii()->toString();
             }
 
-            $return .= "\n" . implode("\n", array_keys($options_sorter));
+            $return .= "\n".implode("\n", array_keys($options_sorter));
             $return .= '</select> ';
 
             // Add the line-break after 5 elements
-            if ((++$count % 5) === 0) {
+            if (0 === ++$count % 5) {
                 $return .= '<br>';
             }
         }
 
-        return $return . '</div>';
+        return $return.'</div>';
     }
 
     /**
@@ -662,7 +631,7 @@ class DcaRelationsManager
      */
     public function addRelationSearch(DataContainer $dc): string
     {
-        if (count($this->searchableFields) === 0 || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->searchableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return '';
         }
 
@@ -674,26 +643,26 @@ class DcaRelationsManager
 
         // Search field per relation
         foreach ($this->searchableFields as $field => $relation) {
-
             // Get searchable fields from related table
             $relatedSearchFields = [];
             $relTable = $relation['related_table'];
 
             Controller::loadDataContainer($relTable);
+
             foreach ((array) $GLOBALS['TL_DCA'][$relTable]['fields'] as $relatedField => $dca) {
                 if (isset($dca['search']) && true === $dca['search']) {
                     $relatedSearchFields[] = $relatedField;
                 }
             }
 
-            if (0 === count($relatedSearchFields)) {
+            if (0 === \count($relatedSearchFields)) {
                 continue;
             }
 
             // Store search value in the current session
-            if (Input::post('FORM_SUBMIT') == 'tl_filters') {
-                $fieldName = Input::post('tl_field_' . $field, true);
-                $keyword = ltrim(Input::postRaw('tl_value_' . $field), '*');
+            if ('tl_filters' === Input::post('FORM_SUBMIT')) {
+                $fieldName = Input::post('tl_field_'.$field, true);
+                $keyword = ltrim(Input::postRaw('tl_value_'.$field), '*');
 
                 if ($fieldName && !\in_array($fieldName, $relatedSearchFields, true)) {
                     $fieldName = '';
@@ -703,7 +672,7 @@ class DcaRelationsManager
                 // Make sure the regular expression is valid
                 if ($fieldName && $keyword) {
                     try {
-                        $this->connection->fetchOne("SELECT id FROM " . $relTable . " WHERE " . $fieldName . " REGEXP ? LIMIT 1", [$keyword]);
+                        $this->connection->fetchOne('SELECT id FROM '.$relTable.' WHERE '.$fieldName.' REGEXP ? LIMIT 1', [$keyword]);
                     } catch (\Exception $e) {
                         $keyword = '';
                     }
@@ -721,23 +690,24 @@ class DcaRelationsManager
             $return .= '<strong>'.sprintf($GLOBALS['TL_LANG']['HST']['advanced_search'], $this->formatter->dcaLabel($dc->table, $field)).'</strong> ';
 
             $options_sorter = [];
+
             foreach ($relatedSearchFields as $relatedSearchField) {
                 $option_label = $GLOBALS['TL_DCA'][$relTable]['fields'][$relatedSearchField]['label'][0] ?: (\is_array($GLOBALS['TL_LANG']['MSC'][$relatedSearchField] ?? null) ? $GLOBALS['TL_LANG']['MSC'][$relatedSearchField][0] : ($GLOBALS['TL_LANG']['MSC'][$relatedSearchField] ?? ''));
-                $options_sorter[(new UnicodeString($option_label))->ascii()->toString().'_'.$relatedSearchField] = '  <option value="'.StringUtil::specialchars($relatedSearchField).'"'.(($relatedSearchField === $sessionValues[$dc->table]['searchField'] && $sessionValues[$dc->table]['table'] === $relTable) ? ' selected="selected"' : '').'>'.$option_label.'</option>';
+                $options_sorter[(new UnicodeString($option_label))->ascii()->toString().'_'.$relatedSearchField] = '  <option value="'.StringUtil::specialchars($relatedSearchField).'"'.($relatedSearchField === $sessionValues[$dc->table]['searchField'] && $sessionValues[$dc->table]['table'] === $relTable ? ' selected="selected"' : '').'>'.$option_label.'</option>';
             }
 
             // Sort by option values
             uksort($options_sorter, 'strnatcasecmp');
             $active = $sessionValues[$dc->table]['searchValue'] && $sessionValues[$dc->table]['table'] === $relTable;
 
-            $return .= '<select name="tl_field_' . $field . '" class="tl_select tl_chosen' . ($active ? ' active' : '') . '">
+            $return .= '<select name="tl_field_'.$field.'" class="tl_select tl_chosen'.($active ? ' active' : '').'">
             '.implode("\n", $options_sorter).'
             </select>
             <span>=</span>
-            <input type="search" name="tl_value_' . $field . '" class="tl_text' . ($active ? ' active' : '') . '" value="'.StringUtil::specialchars($sessionValues[$dc->table]['searchValue']).'"></div>';
+            <input type="search" name="tl_value_'.$field.'" class="tl_text'.($active ? ' active' : '').'" value="'.StringUtil::specialchars($sessionValues[$dc->table]['searchValue']).'"></div>';
         }
 
-        return $return . '</div>';
+        return $return.'</div>';
     }
 
     /**
@@ -747,9 +717,9 @@ class DcaRelationsManager
     {
         Controller::loadDataContainer($table);
 
-        $cacheKey = $table . '_' . $fieldName;
+        $cacheKey = $table.'_'.$fieldName;
 
-        if (!array_key_exists($cacheKey, $this->relationsCache)) {
+        if (!\array_key_exists($cacheKey, $this->relationsCache)) {
             $relation = null;
 
             if (isset($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation'])) {
@@ -796,7 +766,7 @@ class DcaRelationsManager
     /**
      * Get the relations table name in the following format (sorted alphabetically):
      * Parameters: tl_table_one, tl_table_two
-     * Returned value: tl_table_one_table_two
+     * Returned value: tl_table_one_table_two.
      */
     public function getTableName(string $tableOne, string $tableTwo): string
     {
@@ -804,6 +774,35 @@ class DcaRelationsManager
         natcasesort($tables);
         $tables = array_values($tables);
 
-        return $tables[0] . '_' . str_replace('tl_', '', $tables[1]);
+        return $tables[0].'_'.str_replace('tl_', '', $tables[1]);
+    }
+
+    /**
+     * Load all data containers.
+     */
+    protected function loadDataContainers(): void
+    {
+        $processed = [];
+
+        /** @var array<SplFileInfo> $files */
+        $files = $this->resourceFinder->findIn('dca')->depth(0)->files()->name('*.php');
+
+        foreach ($files as $file) {
+            if (\in_array($file->getBasename(), $processed, true)) {
+                continue;
+            }
+
+            $processed[] = $file->getBasename();
+
+            Controller::loadDataContainer($file->getBasename('.php'));
+        }
+    }
+
+    /**
+     * Purge the related records.
+     */
+    protected function purgeRelatedRecords(array $relation, mixed $reference): void
+    {
+        $this->connection->delete($relation['table'], [$relation['reference_field'] => $reference]);
     }
 }

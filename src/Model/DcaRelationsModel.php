@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Model;
 
 use Codefog\HasteBundle\DcaRelationsManager;
@@ -15,9 +17,9 @@ abstract class DcaRelationsModel extends Model
     /**
      * {@inheritdoc}
      */
-    public function __set($key, $value)
+    public function __set($key, $value): void
     {
-        if (($this->arrRelations[$key]['type'] ?? null) === 'haste-ManyToMany' && !is_array($value)) {
+        if (($this->arrRelations[$key]['type'] ?? null) === 'haste-ManyToMany' && !\is_array($value)) {
             throw new \InvalidArgumentException('Values set on many-to-many relation fields have to be an array');
         }
 
@@ -35,27 +37,27 @@ abstract class DcaRelationsModel extends Model
             $relation = null;
         }
 
-        if ($relation !== null) {
+        if (null !== $relation) {
             $strClass = static::getClassFromTable($relation['related_table']);
 
             if (class_exists($strClass)) {
                 /** @var Connection $connection */
                 $connection = System::getContainer()->get('database_connection');
 
-                $ids = $connection->fetchFirstColumn("SELECT " . $relation['related_field'] . " FROM " . $relation['table'] . " WHERE " . $relation['reference_field'] . "=?", [$this->{$relation['reference']}]);
+                $ids = $connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?', [$this->{$relation['reference']}]);
 
-                if (count($ids) === 0) {
+                if (0 === \count($ids)) {
                     return null;
                 }
 
                 $collection = [];
 
                 // Fetch from registry first (only possible if no options and the relation field is the PK)
-                if (count($options) === 0 && $relation['field'] === $strClass::getPk()) {
+                if (0 === \count($options) && $relation['field'] === $strClass::getPk()) {
                     foreach ($ids as $k => $id) {
                         $model = Registry::getInstance()->fetch($relation['related_table'], $id);
 
-                        if ($model !== null) {
+                        if (null !== $model) {
                             unset($ids[$k]);
                         }
 
@@ -64,8 +66,8 @@ abstract class DcaRelationsModel extends Model
                 }
 
                 // Fetch remaining
-                if (count($ids) > 0) {
-                    $remainingModels = $strClass::findBy([$relation['related_table'].".".$relation['field']." IN('".implode("','", $ids)."')"], null, $options);
+                if (\count($ids) > 0) {
+                    $remainingModels = $strClass::findBy([$relation['related_table'].'.'.$relation['field']." IN('".implode("','", $ids)."')"], null, $options);
 
                     foreach ($remainingModels as $remaining) {
                         $collection[$remaining->{$relation['field']}] = $remaining;
@@ -84,10 +86,10 @@ abstract class DcaRelationsModel extends Model
      */
     public function save()
     {
-        $values = array();
+        $values = [];
 
         foreach ($this->arrRelations as $field => $relation) {
-            if ($relation['type'] === 'haste-ManyToMany') {
+            if ('haste-ManyToMany' === $relation['type']) {
                 $values[$field] = $this->$field;
             }
         }
@@ -96,7 +98,7 @@ abstract class DcaRelationsModel extends Model
 
         foreach ($values as $field => $value) {
             // Check if $value is an array, otherwise don't change the relation table.
-            if (is_array($value)) {
+            if (\is_array($value)) {
                 static::setRelatedValues(static::$strTable, $field, $this->id, $value);
             }
         }
@@ -111,22 +113,22 @@ abstract class DcaRelationsModel extends Model
     {
         $relation = static::getRelation($table, $field);
         $values = (array) $value;
-        $order = "";
+        $order = '';
 
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
         // Preserve the values order by using the force saved values in the table in the ORDER BY statement
-        if (count($values) === 1 && $relation['forceSave'] && array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['related_table']))) {
-            $recordValues = $connection->fetchOne("SELECT " . $field . " FROM " . $relation['related_table'] . " WHERE " . $relation['field'] . "=? LIMIT 1", [$values[0]]);
+        if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['related_table']))) {
+            $recordValues = $connection->fetchOne('SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1', [$values[0]]);
             $recordValues = StringUtil::deserialize($recordValues);
 
-            if (is_array($recordValues) && count($recordValues) > 0) {
-                $order = " ORDER BY FIND_IN_SET(" . $connection->quoteIdentifier($relation['reference_field']) . ", " . implode(',', $recordValues) . ")";
+            if (\is_array($recordValues) && \count($recordValues) > 0) {
+                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', '.implode(',', $recordValues).')';
             }
         }
 
-        return $connection->fetchFirstColumn("SELECT " . $relation['reference_field'] . " FROM " . $relation['table'] . (!empty($values) ? (" WHERE " . $relation['related_field'] . " IN ('" . implode("','", $values) . "')") : "") . $order);
+        return $connection->fetchFirstColumn('SELECT '.$relation['reference_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['related_field']." IN ('".implode("','", $values)."')") : '').$order);
     }
 
     /**
@@ -136,22 +138,22 @@ abstract class DcaRelationsModel extends Model
     {
         $relation = static::getRelation($table, $field);
         $values = (array) $value;
-        $order = "";
+        $order = '';
 
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
         // Preserve the values order by using the force saved values in the table in the ORDER BY statement
-        if (count($values) === 1 && $relation['forceSave'] && array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['reference_table']))) {
-            $recordValues = $connection->fetchOne("SELECT " . $field . " FROM " . $relation['reference_table'] . " WHERE " . $relation['reference'] . "=? LIMIT 1", [$values[0]]);
+        if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['reference_table']))) {
+            $recordValues = $connection->fetchOne('SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1', [$values[0]]);
             $recordValues = StringUtil::deserialize($recordValues);
 
-            if (is_array($recordValues) && count($recordValues) > 0) {
-                $order = " ORDER BY FIND_IN_SET(" . $connection->quoteIdentifier($relation['reference_field']) . ", " . implode(',', $recordValues) . ")";
+            if (\is_array($recordValues) && \count($recordValues) > 0) {
+                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', '.implode(',', $recordValues).')';
             }
         }
 
-        return $connection->fetchFirstColumn("SELECT " . $relation['related_field'] . " FROM " . $relation['table'] . (!empty($values) ? (" WHERE " . $relation['reference_field'] . " IN ('" . implode("','", $values) . "')") : "") . $order);
+        return $connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['reference_field']." IN ('".implode("','", $values)."')") : '').$order);
     }
 
     /**
@@ -187,7 +189,7 @@ abstract class DcaRelationsModel extends Model
     {
         $relation = System::getContainer()->get(DcaRelationsManager::class)->getRelation($table, $field);
 
-        if ($relation === null) {
+        if (null === $relation) {
             throw new \InvalidArgumentException(sprintf('Field %s.%s is not related!', $table, $field));
         }
 

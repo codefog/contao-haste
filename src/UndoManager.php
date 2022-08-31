@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle;
 
 use Codefog\HasteBundle\Event\UndoEvent;
@@ -14,11 +16,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class UndoManager
 {
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly EventDispatcherInterface $eventDispatcher,
-    )
-    {}
+    public function __construct(private readonly Connection $connection, private readonly EventDispatcherInterface $eventDispatcher,)
+    {
+    }
 
     /**
      * Undo the record manually triggered in the backend.
@@ -47,9 +47,9 @@ class UndoManager
      */
     public function add(int $undoId, string $key, mixed $data): bool
     {
-        $undoData = $this->connection->fetchOne("SELECT haste_data FROM tl_undo WHERE id=?", [$undoId]);
+        $undoData = $this->connection->fetchOne('SELECT haste_data FROM tl_undo WHERE id=?', [$undoId]);
 
-        if ($undoData === false) {
+        if (false === $undoData) {
             return false;
         }
 
@@ -66,15 +66,15 @@ class UndoManager
      */
     public function undo(int $undoId, DataContainer $dc = null): bool
     {
-        $record = $this->connection->fetchAssociative("SELECT * FROM tl_undo WHERE id=?", [$undoId]);
+        $record = $this->connection->fetchAssociative('SELECT * FROM tl_undo WHERE id=?', [$undoId]);
         $data = StringUtil::deserialize($record['data']);
 
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             return false;
         }
 
         $error = false;
-        $fieldsMapper = array();
+        $fieldsMapper = [];
         $hasteData = json_decode($record['haste_data'], true);
         $schemaManager = $this->connection->createSchemaManager();
 
@@ -87,8 +87,8 @@ class UndoManager
 
             foreach ($fields as $row) {
                 // Unset fields that no longer exist in the database
-                foreach ($row as $field => $value) {
-                    if (!in_array(strtolower($field), $fieldsMapper[$table], true)) {
+                foreach (array_keys($row) as $field) {
+                    if (!\in_array(strtolower($field), $fieldsMapper[$table], true)) {
                         unset($row[$field]);
                     }
                 }
@@ -106,11 +106,11 @@ class UndoManager
                 Controller::loadDataContainer($table);
 
                 // Trigger the undo_callback
-                if (is_array($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] ?? null)) {
+                if (\is_array($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] ?? null)) {
                     foreach ($GLOBALS['TL_DCA'][$table]['config']['onundo_callback'] as $callback) {
-                        if (is_array($callback)) {
+                        if (\is_array($callback)) {
                             System::importStatic($callback[0])->{$callback[1]}($table, $row, $dc);
-                        } elseif (is_callable($callback)) {
+                        } elseif (\is_callable($callback)) {
                             $callback($table, $row, $dc);
                         }
                     }
@@ -135,12 +135,12 @@ class UndoManager
     {
         $undoData = $this->connection->fetchOne('SELECT haste_data FROM tl_undo WHERE id=? LIMIT 1', [$undoId]);
 
-        if ($undoData === false) {
+        if (false === $undoData) {
             return false;
         }
 
         $undoData = json_decode($undoData, true);
 
-        return is_array($undoData) && count($undoData) > 0;
+        return \is_array($undoData) && \count($undoData) > 0;
     }
 }

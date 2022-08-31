@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Form;
 
+use Codefog\HasteBundle\Form\Validator\ValidatorInterface;
+use Codefog\HasteBundle\Util\ArrayPosition;
 use Contao\ArrayUtil;
 use Contao\Controller;
 use Contao\Date;
@@ -16,8 +20,6 @@ use Contao\System;
 use Contao\TemplateLoader;
 use Contao\UploadableWidgetInterface;
 use Contao\Widget;
-use Codefog\HasteBundle\Form\Validator\ValidatorInterface;
-use Codefog\HasteBundle\Util\ArrayPosition;
 
 class Form
 {
@@ -36,7 +38,7 @@ class Form
     protected bool $isValid = true;
 
     /**
-     * True if the HTML5 validation should be ignored
+     * True if the HTML5 validation should be ignored.
      */
     protected bool $disableHtmlValidation = false;
 
@@ -46,12 +48,13 @@ class Form
     protected array $formFields = [];
 
     /**
-     * @var Widget[]
+     * @var array<Widget>
      */
     protected array $widgets = [];
 
     /**
-     * Input callback
+     * Input callback.
+     *
      * @var callable
      */
     protected $inputCallback;
@@ -64,17 +67,17 @@ class Form
 
         $this->formId = $formId;
 
-        if (!in_array($httpMethod, ['GET', 'POST'], true)) {
+        if (!\in_array($httpMethod, ['GET', 'POST'], true)) {
             throw new \InvalidArgumentException('The method has to be either GET or POST.');
         }
 
         // Set the default submit check callback for POST forms
-        if ($submitCheckCallback === null && $httpMethod === 'POST') {
+        if (null === $submitCheckCallback && 'POST' === $httpMethod) {
             $submitCheckCallback = static fn (Form $form) => $form->getFormId() === Input::post('FORM_SUBMIT');
         }
 
         $this->httpMethod = $httpMethod;
-        $this->isSubmitted = call_user_func($submitCheckCallback, $this);
+        $this->isSubmitted = $submitCheckCallback($this);
 
         // The form action can be set using several helper methods but by default it's just pointing to the current page
         $this->action = Environment::get('requestUri');
@@ -100,7 +103,7 @@ class Form
         return $this->disableHtmlValidation;
     }
 
-    public function setDisableHtmlValidation(bool $disableHtmlValidation): Form
+    public function setDisableHtmlValidation(bool $disableHtmlValidation): self
     {
         $this->disableHtmlValidation = $disableHtmlValidation;
 
@@ -112,7 +115,7 @@ class Form
         return $this->isSubmitted;
     }
 
-    public function setIsSubmitted(bool $isSubmitted): Form
+    public function setIsSubmitted(bool $isSubmitted): self
     {
         $this->isSubmitted = $isSubmitted;
 
@@ -137,7 +140,7 @@ class Form
     /**
      * Binds a model instance to the form. If there is data, haste form will add the present values as default values.
      */
-    public function setBoundModel(Model $boundModel): Form
+    public function setBoundModel(Model $boundModel): self
     {
         $this->boundModel = $boundModel;
 
@@ -181,7 +184,7 @@ class Form
     }
 
     /**
-     * Check if there are uploads
+     * Check if there are uploads.
      */
     public function hasUploads(): bool
     {
@@ -197,11 +200,11 @@ class Form
     }
 
     /**
-     * Check if form has form fields
+     * Check if form has form fields.
      */
     public function hasFormFields(): bool
     {
-        return count($this->formFields) > 0;
+        return \count($this->formFields) > 0;
     }
 
     /**
@@ -236,7 +239,7 @@ class Form
      */
     public function hasFormField(string $fieldName): bool
     {
-        return array_key_exists($fieldName, $this->formFields);
+        return \array_key_exists($fieldName, $this->formFields);
     }
 
     /**
@@ -246,7 +249,7 @@ class Form
     {
         $this->createWidgets();
 
-        if (!array_key_exists($fieldName, $this->widgets)) {
+        if (!\array_key_exists($fieldName, $this->widgets)) {
             throw new \InvalidArgumentException(sprintf('Widget "%s" does not exist!', $fieldName));
         }
 
@@ -265,12 +268,12 @@ class Form
      */
     public function preserveGetParameters(array $exclude = []): self
     {
-        foreach ($_GET as $k => $v) {
-            if (in_array($k, $exclude, false) || array_key_exists($k, $this->formFields)) {
+        foreach (array_keys($_GET) as $key) {
+            if (\in_array($key, $exclude, false) || \array_key_exists($key, $this->formFields)) {
                 continue;
             }
 
-            $this->addFormField($k, ['inputType' => 'hidden', 'value' => Input::get($k)]);
+            $this->addFormField($key, ['inputType' => 'hidden', 'value' => Input::get($key)]);
         }
 
         return $this;
@@ -307,7 +310,7 @@ class Form
             }
 
             // Try to load the default value from bound Model
-            if (!($fieldConfig['ignoreModelValue'] ?? false) && $this->boundModel !== null) {
+            if (!($fieldConfig['ignoreModelValue'] ?? false) && null !== $this->boundModel) {
                 $fieldConfig['value'] = $this->boundModel->$fieldName;
             }
         }
@@ -325,23 +328,26 @@ class Form
         $rgxp = $fieldConfig['eval']['rgxp'] ?? null;
 
         // Convert date formats into timestamps
-        if (in_array($rgxp, array('date', 'time', 'datim'), true)) {
-            $this->addValidator($fieldName, static function(mixed $value) use ($rgxp) {
-                if ($value) {
-                    $value = (new Date($value, Date::getFormatFromRgxp($rgxp)))->tstamp;
-                }
+        if (\in_array($rgxp, ['date', 'time', 'datim'], true)) {
+            $this->addValidator(
+                $fieldName,
+                static function (mixed $value) use ($rgxp) {
+                    if ($value) {
+                        $value = (new Date($value, Date::getFormatFromRgxp($rgxp)))->tstamp;
+                    }
 
-                return $value;
-            });
+                    return $value;
+                }
+            );
         }
 
         // Set the save_callback as validator
-        if (is_array($fieldConfig['save_callback'] ?? null)) {
+        if (\is_array($fieldConfig['save_callback'] ?? null)) {
             $this->addValidator(
                 $fieldName,
-                static function(mixed $value, Widget $widget, Form $form) use ($fieldConfig, $fieldName) {
+                static function (mixed $value, Widget $widget, self $form) use ($fieldConfig, $fieldName) {
                     $model = $form->getBoundModel();
-                    $dc = (object)[
+                    $dc = (object) [
                         'id' => $model ? $model->id : 0,
                         'table' => $model ? $model::getTable() : '',
                         'value' => $value,
@@ -351,9 +357,9 @@ class Form
                     ];
 
                     foreach ($fieldConfig['save_callback'] as $callback) {
-                        if (is_array($callback)) {
+                        if (\is_array($callback)) {
                             $value = System::importStatic($callback[0])->{$callback[1]}($value, $dc);
-                        } elseif (is_callable($callback)) {
+                        } elseif (\is_callable($callback)) {
                             $value = $callback($value, $dc);
                         }
                     }
@@ -364,7 +370,7 @@ class Form
         }
 
         $model = $this->getBoundModel();
-        $dc = (object)[
+        $dc = (object) [
             'id' => $model ? $model->id : 0,
             'table' => $model ? $model::getTable() : '',
             'value' => $fieldConfig['value'] ?? null,
@@ -388,7 +394,7 @@ class Form
         }
 
         // Convert optgroups so they work with FormSelectMenu
-        if (is_array($fieldConfig['options'] ?? null) && ArrayUtil::isAssoc($fieldConfig['options'])) {
+        if (\is_array($fieldConfig['options'] ?? null) && ArrayUtil::isAssoc($fieldConfig['options'])) {
             $options = $fieldConfig['options'];
             $fieldConfig['options'] = [];
 
@@ -409,7 +415,7 @@ class Form
             }
         }
 
-        $this->formFields = $position->addToArray($this->formFields, array($fieldName=>$fieldConfig));
+        $this->formFields = $position->addToArray($this->formFields, [$fieldName => $fieldConfig]);
         $this->currentState = self::STATE_DIRTY;
 
         return $this;
@@ -420,7 +426,7 @@ class Form
      */
     public function addFormFields(array $formFields, ArrayPosition $position = null): self
     {
-        if (null !== $position && ($position->position() === ArrayPosition::FIRST || $position->position() === ArrayPosition::BEFORE)) {
+        if (null !== $position && (ArrayPosition::FIRST === $position->position() || ArrayPosition::BEFORE === $position->position())) {
             $formFields = array_reverse($formFields, true);
         }
 
@@ -496,7 +502,7 @@ class Form
         $fieldConfigs = &$GLOBALS['TL_DCA'][$table]['fields'];
 
         foreach (($fieldConfigs ?? []) as $k => $v) {
-            if (is_callable($callback) && !call_user_func_array($callback, array(&$k, &$v))) {
+            if (\is_callable($callback) && !$callback(...[&$k, &$v])) {
                 continue;
             }
 
@@ -507,7 +513,7 @@ class Form
     }
 
     /**
-     * Return true if the field has "inputType" set, false otherwise
+     * Return true if the field has "inputType" set, false otherwise.
      *
      * This is a default callback that can be used with addFieldsFromDca() method. It prevents from adding fields
      * that do not have inputType specified which would result in an exception. The fields you typically would
@@ -519,17 +525,17 @@ class Form
     }
 
     /**
-     * Add form fields from a back end form generator form ID
+     * Add form fields from a back end form generator form ID.
      */
     public function addFieldsFromFormGenerator(int $formId, callable $callback = null): self
     {
         if (($objFields = FormFieldModel::findPublishedByPid($formId)) === null) {
-            throw new \InvalidArgumentException('Form ID "' . $formId . '" does not exist or has no published fields.');
+            throw new \InvalidArgumentException('Form ID "'.$formId.'" does not exist or has no published fields.');
         }
 
         while ($objFields->next()) {
             // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
-            $fieldName = $objFields->name ?: 'field_' . $objFields->id;
+            $fieldName = $objFields->name ?: 'field_'.$objFields->id;
 
             $this->checkFormFieldNameIsValid($fieldName);
 
@@ -540,7 +546,7 @@ class Form
                 $fieldConfig['name'] = $fieldName;
             }
 
-            if (is_callable($callback) && !call_user_func_array($callback, [&$fieldName, &$fieldConfig])) {
+            if (\is_callable($callback) && !$callback(...[&$fieldName, &$fieldConfig])) {
                 continue;
             }
 
@@ -564,7 +570,7 @@ class Form
         }
 
         // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
-        $fieldName = $fieldConfig['name'] ?: 'field_' . $fieldConfig['id'];
+        $fieldName = $fieldConfig['name'] ?: 'field_'.$fieldConfig['id'];
 
         // Make sure it has a "name" attribute because it is mandatory
         if (!isset($fieldConfig['name'])) {
@@ -582,7 +588,7 @@ class Form
      */
     public function addValidator(string $fieldName, callable $validator): self
     {
-        if ($validator instanceof ValidatorInterface || is_callable($validator)) {
+        if ($validator instanceof ValidatorInterface || \is_callable($validator)) {
             $this->validators[$fieldName][] = $validator;
         } else {
             throw new \InvalidArgumentException(sprintf('Validator must be an instance of %s or a callable.', ValidatorInterface::class));
@@ -596,11 +602,9 @@ class Form
      */
     public function createWidgets(): self
     {
-        if ($this->currentState === self::STATE_CLEAN) {
+        if (self::STATE_CLEAN === $this->currentState) {
             return $this;
         }
-
-        $i = 0;
 
         // Reset to initial values
         $this->widgets = [];
@@ -626,7 +630,6 @@ class Form
             }
 
             $this->widgets[$fieldName] = $widget;
-            $i++;
         }
 
         $this->currentState = self::STATE_CLEAN;
@@ -672,11 +675,10 @@ class Form
                 if (isset($this->validators[$fieldName])) {
                     try {
                         foreach ($this->validators[$fieldName] as $validator) {
-
                             if ($validator instanceof ValidatorInterface) {
                                 $value = $validator->validate($value, $widget, $this);
                             } else {
-                                $value = call_user_func($validator, $value, $widget, $this);
+                                $value = $validator($value, $widget, $this);
                             }
                         }
                     } catch (\Exception $e) {
@@ -689,9 +691,9 @@ class Form
                 if ($widget->hasErrors()) {
                     // Re-check the status in case a custom validator has added an error
                     $this->isValid = false;
-                } elseif ($this->boundModel !== null) {
+                } elseif (null !== $this->boundModel) {
                     // Bind to Model instance
-                    $this->boundModel->$fieldName =  $value;
+                    $this->boundModel->$fieldName = $value;
                 }
             }
         }
@@ -720,12 +722,12 @@ class Form
         $objObject->hasUploads = $this->hasUploads();
         $objObject->novalidate = $this->generateNoValidateAttribute();
 
-        /** @type Widget $widget */
+        /** @var Widget $widget */
         $widgets = [];
 
         // Split hidden and visigle widgets
         foreach ($this->widgets as $k => $widget) {
-            $widgets[($widget instanceof FormHidden) ? 'hidden' : 'visible'][$k] = $widget;
+            $widgets[$widget instanceof FormHidden ? 'hidden' : 'visible'][$k] = $widget;
         }
 
         $objObject->hidden = '';
@@ -742,7 +744,7 @@ class Form
             $objObject->fields .= $widget->parse();
         }
 
-        $objObject->hiddenWidgets  = $widgets['hidden'] ?? [];
+        $objObject->hiddenWidgets = $widgets['hidden'] ?? [];
         $objObject->visibleWidgets = $widgets['visible'] ?? [];
 
         $objObject->hasteFormInstance = $this;
@@ -755,13 +757,14 @@ class Form
      */
     public function getHelperObject(): \stdClass
     {
-        $this->addToObject($helper = new \stdClass());
+        $helper = new \stdClass();
+        $this->addToObject($helper);
 
         return $helper;
     }
 
     /**
-     * Generate a form and return it as HTML string
+     * Generate a form and return it as HTML string.
      */
     public function generate(string $templateName = null): string
     {
@@ -776,7 +779,7 @@ class Form
         }
 
         $template = new FrontendTemplate($templateName);
-        $template->class = 'hasteform_' . $this->getFormId();
+        $template->class = 'hasteform_'.$this->getFormId();
         $template->formSubmit = $this->getFormId();
 
         $this->addToObject($template);
@@ -793,12 +796,12 @@ class Form
             throw new \BadMethodCallException('The has been not submitted');
         }
 
-        if ($this->getHttpMethod() !== 'POST') {
+        if ('POST' !== $this->getHttpMethod()) {
             throw new \BadMethodCallException('Widgets only support fetching POST values. Use the \Contao\Input class for other purposes.');
         }
 
         if (!isset($this->widgets[$fieldName])) {
-            throw new \InvalidArgumentException('The widget with name "' . $fieldName . '" does not exist.');
+            throw new \InvalidArgumentException('The widget with name "'.$fieldName.'" does not exist.');
         }
 
         $widget = $this->widgets[$fieldName];
@@ -820,8 +823,8 @@ class Form
 
         foreach ($this->widgets as $fieldName => $widget) {
             // Do not check $widget->submitInput() here because the callback could handle it differently
-            if (is_callable($callback)) {
-                $value = call_user_func($callback, $fieldName, $widget);
+            if (\is_callable($callback)) {
+                $value = $callback($fieldName, $widget);
             } else {
                 $value = $this->fetch($fieldName);
             }
@@ -843,7 +846,7 @@ class Form
             throw new \InvalidArgumentException('You cannot use a numeric form field name.');
         }
 
-        if (in_array($fieldName, array_keys($this->formFields), true)) {
+        if (\in_array($fieldName, array_keys($this->formFields), true)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $fieldName));
         }
     }

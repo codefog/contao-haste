@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\ContaoManager;
 
 use Codefog\HasteBundle\CodefogHasteBundle;

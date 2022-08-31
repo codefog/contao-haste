@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle;
 
 use Contao\StringUtil;
@@ -23,20 +25,20 @@ class AjaxReloadManager implements ResetInterface
         $uniqid = $this->getUniqid($type, $id);
 
         foreach ($events as $event) {
-            if (!isset($this->listeners[$event]) || !in_array($uniqid, $this->listeners[$event], true)) {
+            if (!isset($this->listeners[$event]) || !\in_array($uniqid, $this->listeners[$event], true)) {
                 $this->listeners[$event][] = $uniqid;
             }
         }
     }
 
     /**
-     * Store the buffer if applicable
+     * Store the buffer if applicable.
      */
     public function storeBuffer(string $type, int $id, string $event, string $buffer): void
     {
         $uniqid = $this->getUniqid($type, $id);
 
-        if (isset($this->listeners[$event]) && !isset($this->buffers[$uniqid]) && in_array($uniqid, $this->listeners[$event], true)) {
+        if (isset($this->listeners[$event]) && !isset($this->buffers[$uniqid]) && \in_array($uniqid, $this->listeners[$event], true)) {
             $this->buffers[$uniqid] = $buffer;
         }
     }
@@ -50,12 +52,12 @@ class AjaxReloadManager implements ResetInterface
         $uniqid = $this->getUniqid($type, $id);
 
         foreach ($this->listeners as $event => $entries) {
-            if (in_array($uniqid, $entries, true)) {
+            if (\in_array($uniqid, $entries, true)) {
                 $events[] = $event;
             }
         }
 
-        if (count($events) > 0) {
+        if (\count($events) > 0) {
             $buffer = static::addDataAttributes($buffer, $uniqid, $events, $isAjax);
         }
 
@@ -63,19 +65,19 @@ class AjaxReloadManager implements ResetInterface
     }
 
     /**
-     * Return true if there are listeners
+     * Return true if there are listeners.
      */
     public function hasListeners(): bool
     {
-        return count($this->listeners) > 0;
+        return \count($this->listeners) > 0;
     }
 
     /**
-     * Get the response
+     * Get the response.
      */
     public function getResponse(): ?Response
     {
-        if (count($this->buffers) === 0) {
+        if (0 === \count($this->buffers)) {
             return null;
         }
 
@@ -86,14 +88,14 @@ class AjaxReloadManager implements ResetInterface
     }
 
     /**
-     * Return true if the listener is registered
+     * Return true if the listener is registered.
      */
     public function isRegistered(string $type, int $id): bool
     {
         $uniqid = $this->getUniqid($type, $id);
 
         foreach ($this->listeners as $entries) {
-            if (in_array($uniqid, $entries, true)) {
+            if (\in_array($uniqid, $entries, true)) {
                 return true;
             }
         }
@@ -110,7 +112,7 @@ class AjaxReloadManager implements ResetInterface
         $uniqid = $this->getUniqid($type, $id);
 
         foreach ($this->listeners as $event => $entries) {
-            if (in_array($uniqid, $entries, true)) {
+            if (\in_array($uniqid, $entries, true)) {
                 $events[] = $event;
             }
         }
@@ -128,11 +130,11 @@ class AjaxReloadManager implements ResetInterface
     }
 
     /**
-     * Get the unique ID
+     * Get the unique ID.
      */
     private function getUniqid(string $type, int $id): string
     {
-        if (!in_array($type, [self::TYPE_CONTENT, self::TYPE_MODULE], true)) {
+        if (!\in_array($type, [self::TYPE_CONTENT, self::TYPE_MODULE], true)) {
             throw new \InvalidArgumentException(sprintf('The type "%s" is not supported', $type));
         }
 

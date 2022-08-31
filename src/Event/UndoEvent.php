@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
