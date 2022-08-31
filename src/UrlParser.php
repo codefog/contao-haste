@@ -13,11 +13,6 @@ class UrlParser
     public function addQueryString(string $query, string $url = null): string
     {
         $url = $this->prepareUrl($url);
-
-        if ($query === '') {
-            return $url;
-        }
-
         $query = trim(StringUtil::ampersand($query, false), '&');
 
         [$script, $queryString] = explode('?', $url, 2) + ['', ''];

@@ -25,24 +25,26 @@
     },
     "require-dev": {
         "contao/manager-plugin": "^2.0",
-        "phpoffice/phpexcel": "^1.6",
-        "phpoffice/phpspreadsheet": "^1.6"
+        "phpunit/phpunit": "^9.5"
     },
     "conflict": {
         "contao/manager-plugin": "<2.0 || >=3.0"
-    },
-    "suggest": {
-        "phpoffice/phpspreadsheet": "Required for the Haste\\IO\\ExcelFileWriter component."
     },
     "autoload": {
         "psr-4": {
             "Codefog\\HasteBundle\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Codefog\\Hastebundle\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "contao-manager-plugin": "Codefog\\HasteBundle\\ContaoManager\\Plugin"
     },
     "scripts": {
-        "cs-fixer": "tools/ecs/vendor/bin/ecs check src/ --fix --ansi"
+        "cs-fixer": "tools/ecs/vendor/bin/ecs check src/ --fix --ansi",
+        "unit-tests": "@php vendor/bin/phpunit --colors=always"
     }
 }
