@@ -1,5 +1,6 @@
 # Haste bundle for Contao Open Source CMS
 
+[![CI](https://github.com/codefog/contao-haste/actions/workflows/ci.yml/badge.svg)](https://github.com/codefog/contao-haste/actions/workflows/ci.yml)
 [![](https://img.shields.io/packagist/v/codefog/contao-haste.svg)](https://packagist.org/packages/codefog/contao-haste)
 [![](https://img.shields.io/packagist/l/codefog/contao-haste.svg)](https://github.com/codefog/contao-haste/blob/master/LICENSE)
 [![](https://img.shields.io/packagist/dt/codefog/contao-haste.svg)](https://packagist.org/packages/codefog/contao-haste)
