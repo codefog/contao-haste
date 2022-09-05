@@ -318,9 +318,9 @@ class DcaRelationsManager
     }
 
     #[AsHook('reviseTable')]
-    public function reviseRelatedRecords(string $table, array $ids): bool
+    public function reviseRelatedRecords(string $table, array $ids = null): bool
     {
-        if (empty($ids) || !isset($GLOBALS['TL_DCA'][$table]['fields'])) {
+        if ($ids === null || count($ids) === 0 || !isset($GLOBALS['TL_DCA'][$table]['fields'])) {
             return false;
         }
 
