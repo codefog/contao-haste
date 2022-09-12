@@ -4,7 +4,9 @@ services:
         autoconfigure: true
 
     # AjaxReload
-    Codefog\HasteBundle\AjaxReloadManager: ~
+    Codefog\HasteBundle\AjaxReloadManager:
+        public: true
+
     Codefog\HasteBundle\EventListener\AjaxReloadListener: ~
 
     # DcaAjaxOperations
@@ -14,7 +16,8 @@ services:
     Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
 
     # Formatter
-    Codefog\HasteBundle\Formatter: ~
+    Codefog\HasteBundle\Formatter:
+        public: true
 
     # Relations
     Codefog\HasteBundle\EventListener\DcaRelationsListener: ~
@@ -22,10 +25,13 @@ services:
         public: true
 
     # StringParser
-    Codefog\HasteBundle\StringParser: ~
+    Codefog\HasteBundle\StringParser:
+        public: true
 
     # UndoManager
-    Codefog\HasteBundle\UndoManager: ~
+    Codefog\HasteBundle\UndoManager:
+        public: true
 
     # UrlParser
-    Codefog\HasteBundle\UrlParser: ~
+    Codefog\HasteBundle\UrlParser:
+        public: true
