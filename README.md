@@ -31,7 +31,6 @@ Then, run the Contao install tool to update the database.
 - [Undo](docs/Undo.md)
 - [UrlParser](docs/UrlParser.md)
 - [Util/ArrayPosition](docs/Util/ArrayPosition.md)
-- [Util/FileUpload](docs/Util/FileUpload.md)
 - [Util/Pagination](docs/Util/Pagination.md)
 
 ### Insert tags

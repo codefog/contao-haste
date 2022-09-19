@@ -123,6 +123,7 @@ dispatcher instead with the `haste.undo` event.
 - `Haste\Dca\SortingMode` – it is a part of Contao core now.
 - `Haste\Data` – obsolete stuff.
 - `Haste\DateTime` – use an alternative, for example [nesbot/carbon](https://github.com/briannesbitt/Carbon).
+- `Haste\FileUpload` – obsolete stuff. The class itself has been moved to [terminal42/contao-fineuploader](https://github.com/terminal42/contao-fineuploader).
 - `Haste\Frontend` – obsolete stuff.
 - `Haste\Geodesy` – obsolete stuff, use an alternative.
 - `Haste\Generator` – obsolete stuff.
