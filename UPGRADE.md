@@ -73,7 +73,7 @@ The `\Haste\Form\Form` class has been reworked and contains some BC breaks:
 - The `getMethod()` method has been renamed to `getHttpMethod()`.
 - The `isNoValidate()` method has been renamed to `isDisableHtmlValidation()`.
 - The `setNoValidate()` method has been renamed to `setDisableHtmlValidation()`.
-- The `setIsSubmitted()` method has been renamed to `setIsSubmitted()`.
+- The `setIsSubmitted()` method has been renamed to `setSubmitted()`.
 - The `bindModel()` method has been renamed to `setBoundModel()`.
 - The `getFormAction()` method has been renamed to `getAction()`.
 - The `setFormActionFromUri()` method has been renamed to `setAction()`.
