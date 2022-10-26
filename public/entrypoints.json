@@ -1,0 +1,14 @@
+{
+  "entrypoints": {
+    "ajax-reload": {
+      "js": [
+        "/bundles/codefoghaste/ajax-reload.1bd492e2.js"
+      ]
+    },
+    "dca-ajax-operations": {
+      "js": [
+        "/bundles/codefoghaste/dca-ajax-operations.f1fc43fe.js"
+      ]
+    }
+  }
+}

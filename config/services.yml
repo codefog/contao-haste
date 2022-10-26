@@ -1,0 +1,37 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # AjaxReload
+    Codefog\HasteBundle\AjaxReloadManager:
+        public: true
+
+    Codefog\HasteBundle\EventListener\AjaxReloadListener: ~
+
+    # DcaAjaxOperations
+    Codefog\HasteBundle\EventListener\DcaAjaxOperationsListener: ~
+
+    # DcaDateRangeFilter
+    Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
+
+    # Formatter
+    Codefog\HasteBundle\Formatter:
+        public: true
+
+    # Relations
+    Codefog\HasteBundle\EventListener\DcaRelationsListener: ~
+    Codefog\HasteBundle\DcaRelationsManager:
+        public: true
+
+    # StringParser
+    Codefog\HasteBundle\StringParser:
+        public: true
+
+    # UndoManager
+    Codefog\HasteBundle\UndoManager:
+        public: true
+
+    # UrlParser
+    Codefog\HasteBundle\UrlParser:
+        public: true
