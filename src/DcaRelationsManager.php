@@ -329,7 +329,7 @@ class DcaRelationsManager
                 continue;
             }
 
-            $values = $this->connection->fetchFirstColumn('SELECT '.$relation['reference'].'FROM '.$table.' WHERE id IN ('.implode(',', array_map('intval', $ids)).') AND tstamp=0');
+            $values = $this->connection->fetchFirstColumn('SELECT '.$relation['reference'].' FROM '.$table.' WHERE id IN ('.implode(',', array_map('intval', $ids)).') AND tstamp=0');
 
             foreach ($values as $value) {
                 $this->purgeRelatedRecords($relation, $value);
