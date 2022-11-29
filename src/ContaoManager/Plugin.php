@@ -15,7 +15,9 @@ class Plugin implements BundlePluginInterface
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create(CodefogHasteBundle::class)->setLoadAfter([ContaoCoreBundle::class]),
+            BundleConfig::create(CodefogHasteBundle::class)
+                ->setReplace(['haste'])
+                ->setLoadAfter([ContaoCoreBundle::class]),
         ];
     }
 }
