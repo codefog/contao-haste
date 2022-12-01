@@ -56,7 +56,7 @@ The class with static methods has been converted to a service.
 The DCA configurations did not change, but the class changes are BC breaks:
 
 1. The `\Haste\Model\Relations` class has been converted to the `\Codefog\HasteBundle\DcaRelationsManager` service.
-2. The model class has been renamed from `\Haste\Model\Model` to `\Haste\Model\DcaRelationsModel`. 
+2. The model class has been renamed from `\Haste\Model\Model` to `\Codefog\HasteBundle\Model\DcaRelationsModel`. 
 
 
 ## Form component
