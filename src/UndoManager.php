@@ -135,7 +135,7 @@ class UndoManager
     {
         $undoData = $this->connection->fetchOne('SELECT haste_data FROM tl_undo WHERE id=? LIMIT 1', [$undoId]);
 
-        if (false === $undoData) {
+        if (null === $undoData) {
             return false;
         }
 
