@@ -8,6 +8,7 @@ use Codefog\HasteBundle\Form\Validator\ValidatorInterface;
 use Codefog\HasteBundle\Util\ArrayPosition;
 use Contao\ArrayUtil;
 use Contao\Controller;
+use Contao\DataContainer;
 use Contao\Date;
 use Contao\Environment;
 use Contao\FormFieldModel;
@@ -345,16 +346,8 @@ class Form
         if (\is_array($fieldConfig['save_callback'] ?? null)) {
             $this->addValidator(
                 $fieldName,
-                static function (mixed $value, Widget $widget, self $form) use ($fieldConfig, $fieldName) {
-                    $model = $form->getBoundModel();
-                    $dc = (object) [
-                        'id' => $model ? $model->id : 0,
-                        'table' => $model ? $model::getTable() : '',
-                        'value' => $value,
-                        'field' => $fieldName,
-                        'inputName' => $widget->name,
-                        'activeRecord' => $model,
-                    ];
+                function (mixed $value, Widget $widget) use ($fieldConfig, $fieldName) {
+                    $dc = $this->createDataContainerMock($value, $fieldName, $widget->name);
 
                     foreach ($fieldConfig['save_callback'] as $callback) {
                         if (\is_array($callback)) {
@@ -369,15 +362,7 @@ class Form
             );
         }
 
-        $model = $this->getBoundModel();
-        $dc = (object) [
-            'id' => $model ? $model->id : 0,
-            'table' => $model ? $model::getTable() : '',
-            'value' => $fieldConfig['value'] ?? null,
-            'field' => $fieldName,
-            'inputName' => $fieldConfig['name'],
-            'activeRecord' => $model,
-        ];
+        $dc = $this->createDataContainerMock($fieldConfig['value'] ?? null, $fieldName, $fieldConfig['name']);
 
         // Preserve the label
         $label = $fieldConfig['label'] ?? null;
@@ -419,6 +404,36 @@ class Form
         $this->currentState = self::STATE_DIRTY;
 
         return $this;
+    }
+
+    /**
+     * Create the data container mock.
+     */
+    private function createDataContainerMock(mixed $value, string $field, string $name): DataContainer
+    {
+        return new class($this->getBoundModel(), $value, $field, $name) extends DataContainer {
+            public function __construct($model, $value, $field, $name)
+            {
+                $this->id = $model ? $model->id : 0;
+                $this->table = $model ? $model::getTable() : '';
+                $this->value = $value;
+                $this->field = $field;
+                $this->inputName = $name;
+                $this->activeRecord = $model;
+
+                parent::__construct();
+            }
+
+            public function getPalette()
+            {
+                // noop
+            }
+
+            protected function save($varValue)
+            {
+                // noop
+            }
+        };
     }
 
     /**
