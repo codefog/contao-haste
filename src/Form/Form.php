@@ -412,8 +412,6 @@ class Form
     private function createDataContainerMock(mixed $value, string $field, string $name): DataContainer
     {
         return new class($this->getBoundModel(), $value, $field, $name) extends DataContainer {
-            private ?Model $model;
-
             public function __construct($model, $value, $field, $name)
             {
                 $this->id = $model ? $model->id : 0;
@@ -423,14 +421,22 @@ class Form
                 $this->inputName = $name;
                 $this->activeRecord = $model; // BC
 
-                $this->model = $model;
-
                 parent::__construct();
             }
 
             public function getCurrentRecord(int|string $id = null, string $table = null): ?array
             {
-                return $this->model?->row();
+                if (!$id) {
+                    return null;
+                }
+
+                $record = $this->Database
+                    ->prepare("SELECT * FROM $table WHERE id=?")
+                    ->limit(1)
+                    ->execute($id)
+                ;
+
+                return $record->numRows ? $record->row() : null;
             }
 
             public function getPalette()
