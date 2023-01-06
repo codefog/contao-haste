@@ -15,6 +15,9 @@ services:
     # DcaDateRangeFilter
     Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
 
+    # InsertTagsListener
+    Codefog\HasteBundle\EventListener\InsertTagsListener: ~
+
     # Formatter
     Codefog\HasteBundle\Formatter:
         public: true
