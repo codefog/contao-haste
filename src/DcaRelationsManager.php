@@ -354,40 +354,36 @@ class DcaRelationsManager
     #[AsHook('sqlGetFromFile')]
     public function addRelationTables(array $definitions): array
     {
-        $request = $this->requestStack->getCurrentRequest();
+        foreach ($this->connection->createSchemaManager()->listTables() as $table) {
+            $tableName = $table->getName();
 
-        if (null !== $request && !$this->scopeMatcher->isFrontendRequest($request)) {
-            foreach ($this->connection->createSchemaManager()->listTables() as $table) {
-                $tableName = $table->getName();
+            if (!str_starts_with($tableName, 'tl_')) {
+                continue;
+            }
 
-                if (!str_starts_with($tableName, 'tl_')) {
+            Controller::loadDataContainer($tableName);
+
+            if (!isset($GLOBALS['TL_DCA'][$tableName]['fields'])) {
+                continue;
+            }
+
+            foreach (array_keys($GLOBALS['TL_DCA'][$tableName]['fields']) as $fieldName) {
+                $relation = $this->getRelation($tableName, $fieldName);
+
+                if (null === $relation || $relation['skipInstall']) {
                     continue;
                 }
 
-                Controller::loadDataContainer($tableName);
+                $definitions[$relation['table']]['TABLE_FIELDS'][$relation['reference_field']] = '`'.$relation['reference_field'].'` '.$relation['reference_sql'];
+                $definitions[$relation['table']]['TABLE_FIELDS'][$relation['related_field']] = '`'.$relation['related_field'].'` '.$relation['related_sql'];
 
-                if (!isset($GLOBALS['TL_DCA'][$tableName]['fields'])) {
-                    continue;
+                if ($relation['related_tableSql']) {
+                    $definitions[$relation['table']]['TABLE_OPTIONS'] = $relation['related_tableSql'];
                 }
 
-                foreach (array_keys($GLOBALS['TL_DCA'][$tableName]['fields']) as $fieldName) {
-                    $relation = $this->getRelation($tableName, $fieldName);
-
-                    if (null === $relation || $relation['skipInstall']) {
-                        continue;
-                    }
-
-                    $definitions[$relation['table']]['TABLE_FIELDS'][$relation['reference_field']] = '`'.$relation['reference_field'].'` '.$relation['reference_sql'];
-                    $definitions[$relation['table']]['TABLE_FIELDS'][$relation['related_field']] = '`'.$relation['related_field'].'` '.$relation['related_sql'];
-
-                    if ($relation['related_tableSql']) {
-                        $definitions[$relation['table']]['TABLE_OPTIONS'] = $relation['related_tableSql'];
-                    }
-
-                    // Add the index only if there is no other (avoid duplicate keys)
-                    if (empty($definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'])) {
-                        $definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'][$relation['reference_field'].'_'.$relation['related_field']] = 'UNIQUE KEY `'.$relation['reference_field'].'_'.$relation['related_field'].'` (`'.$relation['reference_field'].'`, `'.$relation['related_field'].'`)';
-                    }
+                // Add the index only if there is no other (avoid duplicate keys)
+                if (empty($definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'])) {
+                    $definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'][$relation['reference_field'].'_'.$relation['related_field']] = 'UNIQUE KEY `'.$relation['reference_field'].'_'.$relation['related_field'].'` (`'.$relation['reference_field'].'`, `'.$relation['related_field'].'`)';
                 }
             }
         }
