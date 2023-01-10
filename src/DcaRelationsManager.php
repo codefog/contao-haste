@@ -17,6 +17,8 @@ use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -351,9 +353,46 @@ class DcaRelationsManager
         return $value;
     }
 
-    #[AsHook('sqlGetFromFile')]
+    public function appendToSchema(Schema $schema): void
+    {
+        foreach ($this->connection->createSchemaManager()->listTables() as $table) {
+            $tableName = $table->getName();
+
+            if (!str_starts_with($tableName, 'tl_')) {
+                continue;
+            }
+
+            Controller::loadDataContainer($tableName);
+
+            if (!isset($GLOBALS['TL_DCA'][$tableName]['fields'])) {
+                continue;
+            }
+
+            foreach (array_keys($GLOBALS['TL_DCA'][$tableName]['fields']) as $fieldName) {
+                $relation = $this->getRelation($tableName, $fieldName);
+
+                if (null === $relation || $relation['skipInstall']) {
+                    continue;
+                }
+
+                $schemaTable = $schema->hasTable($relation['table']) ? $schema->getTable($relation['table']) : $schema->createTable($relation['table']);
+                $schemaTable->addColumn($relation['reference_field'], $relation['reference_definition']['type'], $relation['reference_definition']);
+                $schemaTable->addColumn($relation['related_field'], $relation['related_definition']['type'], $relation['related_definition']);
+
+                $indexName = $relation['reference_field'].'_'.$relation['related_field'];
+
+                // Add the index only if there is no other (avoid duplicate keys)
+                if (!$schemaTable->hasIndex($indexName)) {
+                    $schemaTable->addUniqueIndex([$relation['reference_field'], $relation['related_field']], $indexName);
+                }
+            }
+        }
+    }
+
     public function addRelationTables(array $definitions): array
     {
+        trigger_deprecation('codefog/contao-haste', '5.1', 'Using addRelationTables() method has been deprecated and will be removed in version 6. Use the appendToSchema() method instead.');
+
         foreach ($this->connection->createSchemaManager()->listTables() as $table) {
             $tableName = $table->getName();
 
@@ -734,13 +773,27 @@ class DcaRelationsManager
                     // Current table data
                     $relation['reference_table'] = $table;
                     $relation['reference_field'] = $fieldConfig['referenceColumn'] ?? (str_replace('tl_', '', $table).'_'.$relation['reference']);
-                    $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? "int(10) unsigned NOT NULL default '0'";
+                    $relation['reference_definition'] = $fieldConfig['referenceDefinition'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
+                    $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? "int(10) unsigned NOT NULL default '0'"; // deprecated
+
+                    if (isset($fieldConfig['referenceSql'])) {
+                        trigger_deprecation('codefog/contao-haste', '5.1', 'Setting "referenceSql" in relation has been deprecated and will be removed in version 6. Use the "referenceDefinition" instead.');
+                    }
 
                     // Related table data
                     $relation['related_table'] = $fieldConfig['table'];
-                    $relation['related_tableSql'] = $fieldConfig['tableSql'] ?? null;
+                    $relation['related_tableSql'] = $fieldConfig['tableSql'] ?? null; // deprecated
                     $relation['related_field'] = $fieldConfig['fieldColumn'] ?? (str_replace('tl_', '', $fieldConfig['table']).'_'.$relation['field']);
-                    $relation['related_sql'] = $fieldConfig['fieldSql'] ?? "int(10) unsigned NOT NULL default '0'";
+                    $relation['related_definition'] = $fieldConfig['fieldDefinition'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
+                    $relation['related_sql'] = $fieldConfig['fieldSql'] ?? "int(10) unsigned NOT NULL default '0'"; // deprecated
+
+                    if (isset($fieldConfig['tableSql'])) {
+                        trigger_deprecation('codefog/contao-haste', '5.1', 'Setting "related_tableSql" in relation has been deprecated and will be removed in version 6.');
+                    }
+
+                    if (isset($fieldConfig['fieldSql'])) {
+                        trigger_deprecation('codefog/contao-haste', '5.1', 'Setting "fieldSql" in relation has been deprecated and will be removed in version 6. Use the "fieldDefinition" instead.');
+                    }
 
                     // Force save
                     $relation['forceSave'] = $fieldConfig['forceSave'] ?? null;
