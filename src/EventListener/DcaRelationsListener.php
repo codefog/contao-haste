@@ -21,8 +21,8 @@ class DcaRelationsListener
         $this->dcaRelations->undoRelations($event->getHasteData(), $event->getId(), $event->getTable(), $event->getRow());
     }
 
-    #[AsEventListener(event: 'doctrine.event_listener')]
-    public function onPostGenerateSchema(GenerateSchemaEventArgs $event): void
+    #[AsEventListener]
+    public function postGenerateSchema(GenerateSchemaEventArgs $event): void
     {
         $this->dcaRelations->appendToSchema($event->getSchema());
     }

@@ -375,9 +375,15 @@ class DcaRelationsManager
                     continue;
                 }
 
+                $referenceType = $relation['reference_definition']['type'];
+                unset($relation['reference_definition']['type']);
+
+                $relatedType = $relation['related_definition']['type'];
+                unset($relation['related_definition']['type']);
+
                 $schemaTable = $schema->hasTable($relation['table']) ? $schema->getTable($relation['table']) : $schema->createTable($relation['table']);
-                $schemaTable->addColumn($relation['reference_field'], $relation['reference_definition']['type'], $relation['reference_definition']);
-                $schemaTable->addColumn($relation['related_field'], $relation['related_definition']['type'], $relation['related_definition']);
+                $schemaTable->addColumn($relation['reference_field'], $referenceType, $relation['reference_definition']);
+                $schemaTable->addColumn($relation['related_field'], $relatedType, $relation['related_definition']);
 
                 $indexName = $relation['reference_field'].'_'.$relation['related_field'];
 

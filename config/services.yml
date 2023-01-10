@@ -23,7 +23,10 @@ services:
         public: true
 
     # Relations
-    Codefog\HasteBundle\EventListener\DcaRelationsListener: ~
+    Codefog\HasteBundle\EventListener\DcaRelationsListener:
+        tags:
+            - { name: doctrine.event_listener, event: postGenerateSchema }
+
     Codefog\HasteBundle\DcaRelationsManager:
         public: true
 
