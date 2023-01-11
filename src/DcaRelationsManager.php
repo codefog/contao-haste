@@ -740,14 +740,18 @@ class DcaRelationsManager
                     $relation['reference_field'] = $fieldConfig['referenceColumn'] ?? (str_replace('tl_', '', $table).'_'.$relation['reference']);
                     $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
 
-                    if (!is_array($fieldConfig['referenceSql'] ?? [])) {
-                        throw new \RuntimeException();
+                    if (!is_array($relation['reference_sql'])) {
+                        throw new \RuntimeException('The relation key "referenceSql" must be an array!');
                     }
 
                     // Related table data
                     $relation['related_table'] = $fieldConfig['table'];
                     $relation['related_field'] = $fieldConfig['fieldColumn'] ?? (str_replace('tl_', '', $fieldConfig['table']).'_'.$relation['field']);
                     $relation['related_sql'] = $fieldConfig['fieldSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
+
+                    if (!is_array($relation['related_sql'])) {
+                        throw new \RuntimeException('The relation key "fieldSql" must be an array!');
+                    }
 
                     // Force save
                     $relation['forceSave'] = $fieldConfig['forceSave'] ?? null;
