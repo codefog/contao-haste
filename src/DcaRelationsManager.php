@@ -375,15 +375,15 @@ class DcaRelationsManager
                     continue;
                 }
 
-                $referenceType = $relation['reference_definition']['type'];
-                unset($relation['reference_definition']['type']);
+                $referenceType = $relation['reference_sql']['type'];
+                unset($relation['reference_sql']['type']);
 
-                $relatedType = $relation['related_definition']['type'];
-                unset($relation['related_definition']['type']);
+                $relatedType = $relation['related_sql']['type'];
+                unset($relation['related_sql']['type']);
 
                 $schemaTable = $schema->hasTable($relation['table']) ? $schema->getTable($relation['table']) : $schema->createTable($relation['table']);
-                $schemaTable->addColumn($relation['reference_field'], $referenceType, $relation['reference_definition']);
-                $schemaTable->addColumn($relation['related_field'], $relatedType, $relation['related_definition']);
+                $schemaTable->addColumn($relation['reference_field'], $referenceType, $relation['reference_sql']);
+                $schemaTable->addColumn($relation['related_field'], $relatedType, $relation['related_sql']);
 
                 $indexName = $relation['reference_field'].'_'.$relation['related_field'];
 
@@ -738,27 +738,16 @@ class DcaRelationsManager
                     // Current table data
                     $relation['reference_table'] = $table;
                     $relation['reference_field'] = $fieldConfig['referenceColumn'] ?? (str_replace('tl_', '', $table).'_'.$relation['reference']);
-                    $relation['reference_definition'] = $fieldConfig['referenceDefinition'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
-                    $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? "int(10) unsigned NOT NULL default '0'"; // deprecated
+                    $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
 
-                    if (isset($fieldConfig['referenceSql'])) {
-                        trigger_deprecation('codefog/contao-haste', '5.1', 'Setting "referenceSql" in relation has been deprecated and will be removed in version 6. Use the "referenceDefinition" instead.');
+                    if (!is_array($fieldConfig['referenceSql'] ?? [])) {
+                        throw new \RuntimeException();
                     }
 
                     // Related table data
                     $relation['related_table'] = $fieldConfig['table'];
-                    $relation['related_tableSql'] = $fieldConfig['tableSql'] ?? null; // deprecated
                     $relation['related_field'] = $fieldConfig['fieldColumn'] ?? (str_replace('tl_', '', $fieldConfig['table']).'_'.$relation['field']);
-                    $relation['related_definition'] = $fieldConfig['fieldDefinition'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
-                    $relation['related_sql'] = $fieldConfig['fieldSql'] ?? "int(10) unsigned NOT NULL default '0'"; // deprecated
-
-                    if (isset($fieldConfig['tableSql'])) {
-                        trigger_deprecation('codefog/contao-haste', '5.1', 'Setting "related_tableSql" in relation has been deprecated and will be removed in version 6.');
-                    }
-
-                    if (isset($fieldConfig['fieldSql'])) {
-                        trigger_deprecation('codefog/contao-haste', '5.1', 'Setting "fieldSql" in relation has been deprecated and will be removed in version 6. Use the "fieldDefinition" instead.');
-                    }
+                    $relation['related_sql'] = $fieldConfig['fieldSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
 
                     // Force save
                     $relation['forceSave'] = $fieldConfig['forceSave'] ?? null;
