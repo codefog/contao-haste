@@ -116,7 +116,7 @@ class UndoManager
                     }
                 }
 
-                $this->eventDispatcher->dispatch(new UndoEvent($hasteData, $insertId, $table, $row), UndoEvent::NAME);
+                $this->eventDispatcher->dispatch(new UndoEvent($hasteData, $insertId, $table, $row));
             }
         }
 

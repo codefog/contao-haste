@@ -15,7 +15,7 @@ class DcaRelationsListener
     {
     }
 
-    #[AsEventListener(event: UndoEvent::NAME)]
+    #[AsEventListener]
     public function onUndo(UndoEvent $event): void
     {
         $this->dcaRelations->undoRelations($event->getHasteData(), $event->getId(), $event->getTable(), $event->getRow());

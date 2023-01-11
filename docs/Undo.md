@@ -30,7 +30,7 @@ Then, to manually restore the data you have to subscribe to the event listener:
 use Codefog\HasteBundle\Event\UndoEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-#[AsEventListener(event: UndoEvent::NAME)]
+#[AsEventListener]
 class MyListener
 {
     public function __invoke(UndoEvent $event)
