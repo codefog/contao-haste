@@ -395,47 +395,6 @@ class DcaRelationsManager
         }
     }
 
-    public function addRelationTables(array $definitions): array
-    {
-        trigger_deprecation('codefog/contao-haste', '5.1', 'Using addRelationTables() method has been deprecated and will be removed in version 6. Use the appendToSchema() method instead.');
-
-        foreach ($this->connection->createSchemaManager()->listTables() as $table) {
-            $tableName = $table->getName();
-
-            if (!str_starts_with($tableName, 'tl_')) {
-                continue;
-            }
-
-            Controller::loadDataContainer($tableName);
-
-            if (!isset($GLOBALS['TL_DCA'][$tableName]['fields'])) {
-                continue;
-            }
-
-            foreach (array_keys($GLOBALS['TL_DCA'][$tableName]['fields']) as $fieldName) {
-                $relation = $this->getRelation($tableName, $fieldName);
-
-                if (null === $relation || $relation['skipInstall']) {
-                    continue;
-                }
-
-                $definitions[$relation['table']]['TABLE_FIELDS'][$relation['reference_field']] = '`'.$relation['reference_field'].'` '.$relation['reference_sql'];
-                $definitions[$relation['table']]['TABLE_FIELDS'][$relation['related_field']] = '`'.$relation['related_field'].'` '.$relation['related_sql'];
-
-                if ($relation['related_tableSql']) {
-                    $definitions[$relation['table']]['TABLE_OPTIONS'] = $relation['related_tableSql'];
-                }
-
-                // Add the index only if there is no other (avoid duplicate keys)
-                if (empty($definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'])) {
-                    $definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'][$relation['reference_field'].'_'.$relation['related_field']] = 'UNIQUE KEY `'.$relation['reference_field'].'_'.$relation['related_field'].'` (`'.$relation['reference_field'].'`, `'.$relation['related_field'].'`)';
-                }
-            }
-        }
-
-        return $definitions;
-    }
-
     /**
      * Filter records by relations set in custom filter.
      */

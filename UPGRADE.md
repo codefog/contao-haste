@@ -58,7 +58,7 @@ The DCA configurations did not change, but the class changes are BC breaks:
 1. The `\Haste\Model\Relations` class has been converted to the `\Codefog\HasteBundle\DcaRelationsManager` service.
 2. The model class has been renamed from `\Haste\Model\Model` to `\Codefog\HasteBundle\Model\DcaRelationsModel`.
 3. The following relation DCA keys have been deprecated as of 5.1: `referenceSql`, `fieldSql`, `tableSql`.
-4. The `\Codefog\HasteBundle\DcaRelationsManager::addRelationTables()` method has been deprecated as of 5.1.
+4. The `\Codefog\HasteBundle\DcaRelationsManager::addRelationTables()` method has been removed as of 5.1 in favor of `\Codefog\HasteBundle\DcaRelationsManager::appendToSchema()`.
 
 
 ## Form component
