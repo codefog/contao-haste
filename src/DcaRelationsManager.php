@@ -17,6 +17,8 @@ use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -351,8 +353,7 @@ class DcaRelationsManager
         return $value;
     }
 
-    #[AsHook('sqlGetFromFile')]
-    public function addRelationTables(array $definitions): array
+    public function appendToSchema(Schema $schema): void
     {
         foreach ($this->connection->createSchemaManager()->listTables() as $table) {
             $tableName = $table->getName();
@@ -374,21 +375,24 @@ class DcaRelationsManager
                     continue;
                 }
 
-                $definitions[$relation['table']]['TABLE_FIELDS'][$relation['reference_field']] = '`'.$relation['reference_field'].'` '.$relation['reference_sql'];
-                $definitions[$relation['table']]['TABLE_FIELDS'][$relation['related_field']] = '`'.$relation['related_field'].'` '.$relation['related_sql'];
+                $referenceType = $relation['reference_sql']['type'];
+                unset($relation['reference_sql']['type']);
 
-                if ($relation['related_tableSql']) {
-                    $definitions[$relation['table']]['TABLE_OPTIONS'] = $relation['related_tableSql'];
-                }
+                $relatedType = $relation['related_sql']['type'];
+                unset($relation['related_sql']['type']);
+
+                $schemaTable = $schema->hasTable($relation['table']) ? $schema->getTable($relation['table']) : $schema->createTable($relation['table']);
+                $schemaTable->addColumn($relation['reference_field'], $referenceType, $relation['reference_sql']);
+                $schemaTable->addColumn($relation['related_field'], $relatedType, $relation['related_sql']);
+
+                $indexName = $relation['reference_field'].'_'.$relation['related_field'];
 
                 // Add the index only if there is no other (avoid duplicate keys)
-                if (empty($definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'])) {
-                    $definitions[$relation['table']]['TABLE_CREATE_DEFINITIONS'][$relation['reference_field'].'_'.$relation['related_field']] = 'UNIQUE KEY `'.$relation['reference_field'].'_'.$relation['related_field'].'` (`'.$relation['reference_field'].'`, `'.$relation['related_field'].'`)';
+                if (!$schemaTable->hasIndex($indexName)) {
+                    $schemaTable->addUniqueIndex([$relation['reference_field'], $relation['related_field']], $indexName);
                 }
             }
         }
-
-        return $definitions;
     }
 
     /**
@@ -734,13 +738,20 @@ class DcaRelationsManager
                     // Current table data
                     $relation['reference_table'] = $table;
                     $relation['reference_field'] = $fieldConfig['referenceColumn'] ?? (str_replace('tl_', '', $table).'_'.$relation['reference']);
-                    $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? "int(10) unsigned NOT NULL default '0'";
+                    $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
+
+                    if (!is_array($relation['reference_sql'])) {
+                        throw new \RuntimeException('The relation key "referenceSql" must be an array!');
+                    }
 
                     // Related table data
                     $relation['related_table'] = $fieldConfig['table'];
-                    $relation['related_tableSql'] = $fieldConfig['tableSql'] ?? null;
                     $relation['related_field'] = $fieldConfig['fieldColumn'] ?? (str_replace('tl_', '', $fieldConfig['table']).'_'.$relation['field']);
-                    $relation['related_sql'] = $fieldConfig['fieldSql'] ?? "int(10) unsigned NOT NULL default '0'";
+                    $relation['related_sql'] = $fieldConfig['fieldSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
+
+                    if (!is_array($relation['related_sql'])) {
+                        throw new \RuntimeException('The relation key "fieldSql" must be an array!');
+                    }
 
                     // Force save
                     $relation['forceSave'] = $fieldConfig['forceSave'] ?? null;
