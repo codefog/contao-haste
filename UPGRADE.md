@@ -85,7 +85,7 @@ Please refer to the [manual](docs/Form.md) for new code examples.
 
 ## Formatter component
 
-The `\Haste\Util\Format` class has been reworked and is now a `\Codefog\HateBundle\Formatter` service.
+The `\Haste\Util\Format` class has been reworked and is now a `\Codefog\HasteBundle\Formatter` service.
 
 
 ## Pagination component
@@ -98,12 +98,12 @@ The `\Haste\Util\Pagination` class has been reworked and contains some BC breaks
 
 ## StringParser component
 
-The `\Haste\Util\StringUtil` class has been reworked and is now a `\Codefog\HateBundle\StringParser` service.
+The `\Haste\Util\StringUtil` class has been reworked and is now a `\Codefog\HasteBundle\StringParser` service.
 
 
 ## UrlParser component
 
-The `\Haste\Util\Url` class has been reworked and is now a `\Codefog\HateBundle\UrlParser` service.
+The `\Haste\Util\Url` class has been reworked and is now a `\Codefog\HasteBundle\UrlParser` service.
 
 Furthermore, it no longer accepts the page ID as a second argument. Please provide the URL on your own instead.
 
