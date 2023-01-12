@@ -78,7 +78,7 @@ class Form
         }
 
         $this->httpMethod = $httpMethod;
-        $this->isSubmitted = $submitCheckCallback($this);
+        $this->isSubmitted = is_callable($submitCheckCallback) ? $submitCheckCallback($this) : true;
 
         // The form action can be set using several helper methods but by default it's just pointing to the current page
         $this->action = Environment::get('requestUri');
