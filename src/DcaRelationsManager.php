@@ -382,8 +382,13 @@ class DcaRelationsManager
                 unset($relation['related_sql']['type']);
 
                 $schemaTable = $schema->hasTable($relation['table']) ? $schema->getTable($relation['table']) : $schema->createTable($relation['table']);
-                $schemaTable->addColumn($relation['reference_field'], $referenceType, $relation['reference_sql']);
-                $schemaTable->addColumn($relation['related_field'], $relatedType, $relation['related_sql']);
+
+                if (!$schemaTable->hasColumn($relation['reference_field'])) {
+                    $schemaTable->addColumn($relation['reference_field'], $referenceType, $relation['reference_sql']);
+                }
+                if (!$schemaTable->hasColumn($relation['related_field'])) {
+                    $schemaTable->addColumn($relation['related_field'], $relatedType, $relation['related_sql']);
+                }
 
                 $indexName = $relation['reference_field'].'_'.$relation['related_field'];
 
