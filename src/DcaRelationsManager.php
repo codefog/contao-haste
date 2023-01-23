@@ -616,7 +616,7 @@ class DcaRelationsManager
                     $option_label = $vv ?: '-';
                 }
 
-                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.(isset($session['filter'][$filter][$field]) && $value === $session['filter'][$filter][$field] ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString($option_label))->ascii()->toString();
+                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.(isset($session['filter'][$filter][$field]) && $value === $session['filter'][$filter][$field] ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString((string) $option_label))->ascii()->toString();
             }
 
             $return .= "\n".implode("\n", array_keys($options_sorter));
