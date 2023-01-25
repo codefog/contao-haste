@@ -49,11 +49,11 @@ class UndoManager
     {
         $undoData = $this->connection->fetchOne('SELECT haste_data FROM tl_undo WHERE id=?', [$undoId]);
 
-        if (!$undoData) {
+        if ($undoData === false) {
             return false;
         }
 
-        $undoData = json_decode($undoData, true);
+        $undoData = $undoData ? json_decode($undoData, true) : [];
         $undoData[$key] = $data;
 
         $affectedRows = $this->connection->update('tl_undo', ['haste_data' => json_encode($undoData)], ['id' => $undoId]);
