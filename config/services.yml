@@ -15,6 +15,10 @@ services:
     # DcaDateRangeFilter
     Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
 
+    # DoctrineOrm
+    Codefog\HasteBundle\DoctrineOrmHelper: ~
+    Codefog\HasteBundle\EventListener\DoctrineOrmListener: ~
+
     # InsertTagsListener
     Codefog\HasteBundle\EventListener\InsertTagsListener: ~
 
