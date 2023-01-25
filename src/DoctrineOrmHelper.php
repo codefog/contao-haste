@@ -2,7 +2,6 @@
 
 namespace Codefog\HasteBundle;
 
-use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
 use Codefog\HasteBundle\Attribute\DoctrineOrmVersion;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Versions;
@@ -44,7 +43,7 @@ class DoctrineOrmHelper
     {
         $reflection = new \ReflectionClass($object);
 
-        if (count($reflection->getAttributes(DoctrineOrmVersion::class)) === 0) {
+        if (count($reflection->getAttributes(DoctrineOrmUndo::class)) === 0) {
             return;
         }
 
