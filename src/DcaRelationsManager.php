@@ -222,21 +222,21 @@ class DcaRelationsManager
             return;
         }
 
-        foreach ($data['haste_relations'] as $relation) {
-            if ($relation['table'] !== $table) {
+        foreach ($data['haste_relations'] as $relationData) {
+            if ($relationData['table'] !== $table) {
                 continue;
             }
 
-            $relation = $this->getRelation($relation['relationTable'], $relation['relationField']);
+            $relation = $this->getRelation($relationData['relationTable'], $relationData['relationField']);
             $isReferenceTable = $relation['reference_table'] === $table;
             $fieldName = $isReferenceTable ? $relation['reference'] : $relation['field'];
 
             // Continue if there is no relation or reference value does not match
-            if (null === $relation || empty($relation['values']) || $relation['reference'] !== $row[$fieldName]) {
+            if (null === $relation || empty($relationData['values']) || (string) $relationData['reference'] !== (string) $row[$fieldName]) {
                 continue;
             }
 
-            foreach ($relation['values'] as $value) {
+            foreach ($relationData['values'] as $value) {
                 $this->connection->insert($relation['table'], [
                     $relation['reference_field'] => $isReferenceTable ? $id : $value,
                     $relation['related_field'] => $isReferenceTable ? $value : $id,

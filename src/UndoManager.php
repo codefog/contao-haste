@@ -25,7 +25,7 @@ class UndoManager
      */
     public function onUndoCallback(DataContainer $dc): void
     {
-        $this->undo($dc->id, $dc);
+        $this->undo((int) $dc->id, $dc);
 
         Backend::redirect(System::getReferer());
     }
@@ -116,7 +116,7 @@ class UndoManager
                     }
                 }
 
-                $this->eventDispatcher->dispatch(new UndoEvent($hasteData, $insertId, $table, $row));
+                $this->eventDispatcher->dispatch(new UndoEvent($hasteData, (int) $insertId, $table, $row));
             }
         }
 
