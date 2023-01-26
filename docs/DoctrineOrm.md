@@ -97,11 +97,15 @@ class Company
 
 #### Proper relations handling
 
-To remove the child records while adding them to the "undo" tables, you have to add the `cascade: ['remove']` attribute
+To remove the child records while adding them to the `tl_undo` table, you have to add the `cascade: ['remove']` attribute
 property on the parent entity. You also have to set the `DoctrineOrmUndo` attribute on the child entity.
 
-Make sure you do not set the `onDelete: 'CASCADE'` on the child entity, as it will cause the records to be removed
-on the database level and they won't be added to the "undo" tables.
+> Known limitation is that the deleted related records will be stored as separate `tl_undo` entries, as it's not yet
+> clear how to determine the entity (e.g. `Parent`) that triggered the remove process. The Doctrine ORM starts
+> removing records from child records. 
+
+> Make sure you do not set the `onDelete: 'CASCADE'` on the child entity, as it will cause the records to be removed
+> on the database level and they won't be added to the `tl_undo` table.
 
 ```php
 <?php
