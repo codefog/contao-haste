@@ -94,3 +94,34 @@ class Company
 {
 }
 ```
+
+#### Proper relations handling
+
+To remove the child records while adding them to the "undo" tables, you have to add the `cascade: ['remove']` attribute
+property on the parent entity. You also have to set the `DoctrineOrmUndo` attribute on the child entity.
+
+Make sure you do not set the `onDelete: 'CASCADE'` on the child entity, as it will cause the records to be removed
+on the database level and they won't be added to the "undo" tables.
+
+```php
+<?php
+
+namespace App\Entity;
+
+use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
+
+#[DoctrineOrmUndo]
+class Parent
+{
+    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: Child::class, cascade: ['remove'])]
+    private Collection $childs;
+}
+
+#[DoctrineOrmUndo]
+class Child 
+{
+    #[ORM\ManyToOne(targetEntity: Parent::class, inversedBy: 'childs')]
+    #[ORM\JoinColumn(name: 'pid', referencedColumnName: 'id', options: ['default' => 0])]
+    private Parent|null $parent = null;
+}
+```
