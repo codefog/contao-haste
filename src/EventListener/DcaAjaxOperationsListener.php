@@ -18,6 +18,7 @@ use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Versions;
+use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -81,6 +82,11 @@ class DcaAjaxOperationsListener
 
         $value = $options[$nextIndex]['value'];
         $value = $this->executeSaveCallback($dc, $value, $settings);
+
+        // Set the correct empty value
+        if (!\is_array($value) && '' === (string) $value ) {
+            $value = Widget::getEmptyValueByFieldType($GLOBALS['TL_DCA'][$dc->table]['fields'][$settings['field']]['sql'] ?? []);
+        }
 
         // Update the database
         $this->connection->update($dc->table, [$settings['field'] => $value], ['id' => $id]);
