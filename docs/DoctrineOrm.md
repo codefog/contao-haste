@@ -15,7 +15,7 @@ namespace App\Entity;
 
 use Codefog\HasteBundle\Attribute\DoctrineOrmVersion;
 
-#[DoctrineOrmVersion]
+#[DoctrineOrmVersion(editRouteParams: ['do' => 'app_companies'])]
 class Company
 {
 }

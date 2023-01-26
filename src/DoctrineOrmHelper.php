@@ -2,11 +2,13 @@
 
 namespace Codefog\HasteBundle;
 
-use Codefog\HasteBundle\Attribute\DoctrineOrmVersion;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\FrontendUser;
 use Contao\Versions;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Security;
 
 class DoctrineOrmHelper
 {
@@ -14,26 +16,46 @@ class DoctrineOrmHelper
         private readonly ContaoFramework $framework,
         private readonly Connection $connection,
         private readonly DcaRelationsManager $dcaRelationsManager,
-    ) {}
+        private readonly RouterInterface $router,
+        private readonly Security $security,
+    )
+    {}
 
     /**
-     * Store the version "undo" data for the given object.
+     * Create the object version "undo" data for the given object.
      */
-    public function storeObjectVersion(ObjectManager $objectManager, object $object): void
+    public function createObjectVersion(ObjectManager $objectManager, object $object, array $editRouteParams = []): ?Versions
     {
-        $reflection = new \ReflectionClass($object);
-
-        if (count($reflection->getAttributes(DoctrineOrmVersion::class)) === 0) {
-            return;
-        }
-
-        $table = $objectManager->getClassMetadata($object::class)->getTableName();
-
         $this->framework->initialize();
 
-        $versions = new Versions($table, $object->getId());
+        $versions = new Versions($objectManager->getClassMetadata($object::class)->getTableName(), $object->getId());
+
+        // Set the frontend user, if any
+        if (($user = $this->security->getUser()) instanceof FrontendUser) {
+            $versions->setUsername($user->username);
+            $versions->setUserId(0);
+        }
+
+        // Set the edit URL, if any
+        if (count($editRouteParams) > 0) {
+            $editRouteParams['id'] ??= '%s';
+            $editRouteParams['act'] ??= 'edit';
+            $editRouteParams['rt'] ??= '1';
+
+            $versions->setEditUrl($this->router->generate('contao_backend', $editRouteParams));
+        }
+
         $versions->initialize();
-        $versions->create(true);
+
+        return $versions;
+    }
+
+    /**
+     * Save the object version.
+     */
+    public function saveObjectVersion(Versions $versions): void
+    {
+        $versions->create();
     }
 
     /**
@@ -41,12 +63,6 @@ class DoctrineOrmHelper
      */
     public function storeObjectUndo(ObjectManager $objectManager, object $object): void
     {
-        $reflection = new \ReflectionClass($object);
-
-        if (count($reflection->getAttributes(DoctrineOrmUndo::class)) === 0) {
-            return;
-        }
-
         $table = $objectManager->getClassMetadata($object::class)->getTableName();
 
         $this->connection->insert('tl_undo', [
