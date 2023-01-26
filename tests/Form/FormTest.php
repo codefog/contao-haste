@@ -3,6 +3,7 @@
 namespace Codefog\Hastebundle\Tests\Form;
 
 use Codefog\HasteBundle\Form\Form;
+use Codefog\Hastebundle\Tests\Fixtures\Entity;
 use Codefog\Hastebundle\Tests\Fixtures\FormTextField;
 use Contao\Input;
 use Contao\PageModel;
@@ -32,6 +33,58 @@ class FormTest extends TestCase
     {
         $this->assertTrue($this->createForm()->isSubmitted());
         $this->assertFalse($this->createForm(false)->isSubmitted());
+    }
+
+    public function testBoundEntity()
+    {
+        $form = $this->createForm();
+
+        $form
+            ->addFormField('pageTitle', [
+                'inputType' => 'text',
+            ])
+            ->addFormField('jumpTo', [
+                'inputType' => 'text',
+            ])
+        ;
+
+        $entity = new Entity();
+        $form->setBoundEntity($entity);
+
+        Input::setPost('pageTitle', 'My page title test');
+        Input::setPost('jumpTo', 42);
+
+        if ($form->validate()) {
+            $boundEntity = $form->getBoundEntity();
+
+            $this->assertTrue(spl_object_hash($entity) === spl_object_hash($boundEntity));
+            $this->assertEquals('My page title test', $boundEntity->getPageTitle());
+            $this->assertEquals(42, $boundEntity->getJumpTo());
+        }
+    }
+
+    public function testBoundEntityDefaultValues()
+    {
+        $form = $this->createForm(false);
+
+        $entity = new Entity();
+        $entity->setPageTitle('My page');
+        $entity->setJumpTo(11);
+        $form->setBoundEntity($entity);
+
+        $form
+            ->addFormField('pageTitle', [
+                'inputType' => 'text',
+            ])
+            ->addFormField('jumpTo', [
+                'inputType' => 'text',
+            ])
+        ;
+
+        $form->createWidgets();
+
+        $this->assertEquals('My page', $form->getWidget('pageTitle')->value);
+        $this->assertEquals(11, $form->getWidget('jumpTo')->value);
     }
 
     public function testBoundModel()

@@ -5,16 +5,12 @@ namespace Codefog\HasteBundle\EventListener;
 use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
 use Codefog\HasteBundle\Attribute\DoctrineOrmVersion;
 use Codefog\HasteBundle\DoctrineOrmHelper;
-use Contao\Versions;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class DoctrineOrmListener implements EventSubscriberInterface
 {
-    /** @var array|Versions[] */
-    private array $objectWithVersions = [];
-
     public function __construct(
         private readonly DoctrineOrmHelper $helper,
     ) {}
@@ -30,57 +26,71 @@ class DoctrineOrmListener implements EventSubscriberInterface
 
     public function postUpdate(LifecycleEventArgs $args): void
     {
-        if (!$this->hasAttribute($args->getObject(), DoctrineOrmVersion::class)) {
-            return;
-        }
-
-        $uniqueId = $this->getObjectUniqueId($args);
-
-        if (isset($this->objectWithVersions[$uniqueId])) {
-            $this->helper->saveObjectVersion($this->objectWithVersions[$uniqueId]);
-        }
+        $this->handlePostUpdateRelations($args);
+        $this->handlePostUpdateVersions($args);
     }
 
     public function preRemove(LifecycleEventArgs $args): void
     {
-        if (!$this->hasAttribute($args->getObject(), DoctrineOrmUndo::class)) {
+        $this->handlePreRemoveUndo($args);
+    }
+
+    public function preUpdate(LifecycleEventArgs $args): void
+    {
+        $this->handlePreUpdateVersions($args);
+    }
+
+    private function handlePostUpdateRelations(LifecycleEventArgs $args): void
+    {
+        if (!$this->helper->hasEntityRelatedValues($args->getObject())) {
+            return;
+        }
+
+        $relatedFields = $args->getObjectManager()->getClassMetadata(get_class($args->getObject()))->getAssociationNames();
+
+        foreach ($relatedFields as $relatedField) {
+            $this->helper->updateRelatedValues($args->getObjectManager(), $args->getObject(), $relatedField);
+        }
+    }
+
+    private function handlePreRemoveUndo(LifecycleEventArgs $args): void
+    {
+        if ($this->getAttribute($args->getObject(), DoctrineOrmUndo::class) === null) {
             return;
         }
 
         $this->helper->storeObjectUndo($args->getObjectManager(), $args->getObject());
     }
 
-    public function preUpdate(LifecycleEventArgs $args): void
+    private function handlePreUpdateVersions(LifecycleEventArgs $args): void
     {
-        $reflection = new \ReflectionClass($args->getObject());
-        $attributes = $reflection->getAttributes(DoctrineOrmVersion::class);
-
-        if (count($attributes) === 0) {
+        if (($attribute = $this->getAttribute($args->getObject(), DoctrineOrmVersion::class)) === null) {
             return;
         }
 
-        $attributeArguments = $attributes[0]->getArguments();
+        $attributeArguments = $attribute->getArguments();
 
-        $version = $this->helper->createObjectVersion(
+        $this->helper->createObjectVersion(
             $args->getObjectManager(),
             $args->getObject(),
             $attributeArguments['editRouteParams'] ?? [],
         );
-
-        if ($version !== null) {
-            $this->objectWithVersions[$this->getObjectUniqueId($args)] = $version;
-        }
     }
 
-    private function hasAttribute(object $object, string $attribute): bool
+    private function handlePostUpdateVersions(LifecycleEventArgs $args): void
+    {
+        if ($this->getAttribute($args->getObject(), DoctrineOrmVersion::class) === null) {
+            return;
+        }
+
+        $this->helper->saveObjectVersion($args->getObject());
+    }
+
+    private function getAttribute(object $object, string $attribute): ?\ReflectionAttribute
     {
         $reflection = new \ReflectionClass($object);
+        $reflectionAttributes = $reflection->getAttributes($attribute);
 
-        return count($reflection->getAttributes($attribute)) > 0;
-    }
-
-    private function getObjectUniqueId(LifecycleEventArgs $args): string
-    {
-        return $args->getObjectManager()->getClassMetadata(get_class($args->getObject()))->getTableName() . '.' . $args->getObject()->getId();
+        return $reflectionAttributes[0] ?? null;
     }
 }

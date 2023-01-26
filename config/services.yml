@@ -16,7 +16,9 @@ services:
     Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
 
     # DoctrineOrm
-    Codefog\HasteBundle\DoctrineOrmHelper: ~
+    Codefog\HasteBundle\DoctrineOrmHelper:
+        public: true
+
     Codefog\HasteBundle\EventListener\DoctrineOrmListener: ~
 
     # InsertTagsListener
