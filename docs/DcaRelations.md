@@ -74,3 +74,5 @@ $GLOBALS['TL_DCA']['tl_table_one']['fields']['my_field']['relation'] = [
     'skipInstall' => true, // false by default. Do not add relation table. Useful if you use Doctrine relations on the same tables.
 ];
 ```
+
+You can also define the relation using Doctrine ORM entities, [read more about it here](DoctrineOrm.md).

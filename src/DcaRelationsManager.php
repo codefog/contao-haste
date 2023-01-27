@@ -20,6 +20,7 @@ use Contao\System;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -53,6 +54,7 @@ class DcaRelationsManager
         private readonly ResourceFinderInterface $resourceFinder,
         private readonly ScopeMatcher $scopeMatcher,
         private readonly UndoManager $undoManager,
+        private readonly ?EntityManager $entityManager = null,
     )
     {
     }
@@ -746,10 +748,44 @@ class DcaRelationsManager
         if (!\array_key_exists($cacheKey, $this->relationsCache)) {
             $relation = null;
 
-            if (isset($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation'])) {
+            if (($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
                 $fieldConfig = &$GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation'];
 
-                if (isset($fieldConfig['table']) && 'haste-ManyToMany' === $fieldConfig['type']) {
+                // Load from entity
+                if (isset($fieldConfig['entity'])) {
+                    if ($this->entityManager === null) {
+                        throw new \RuntimeException(sprintf('The entity has been defined in the relation for %s.%s, but there is no entity manager service!', $table, $fieldName));
+                    }
+
+                    $metaData = $this->entityManager->getClassMetadata($fieldConfig['entity']);
+
+                    if ($metaData->hasAssociation($fieldName)) {
+                        $association = $metaData->getAssociationMapping($fieldConfig['property'] ?? $fieldName);
+
+                        $relation = [
+                            // The relations table
+                            'table' => $association['joinTable']['name'],
+
+                            // The related field
+                            'reference' => $association['joinTable']['joinColumns'][0]['referencedColumnName'],
+                            'field' => $association['joinTable']['inverseJoinColumns'][0]['referencedColumnName'],
+
+                            // Current table data
+                            'reference_table' => $table,
+                            'reference_field' => $association['joinTable']['joinColumns'][0]['name'],
+
+                            // Related table data
+                            'related_table' => $this->entityManager->getClassMetadata($association['targetEntity'])->getTableName(),
+                            'related_field' => $association['joinTable']['inverseJoinColumns'][0]['name'],
+
+                            // Force save
+                            'forceSave' => $fieldConfig['forceSave'] ?? null,
+
+                            // Skip installation
+                            'skipInstall' => true,
+                        ];
+                    }
+                } elseif (isset($fieldConfig['table'])) {
                     $relation = [];
 
                     // The relations table

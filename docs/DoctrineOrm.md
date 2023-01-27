@@ -6,9 +6,9 @@ This component provides methods to integrate Contao and Haste with Doctrine more
 
 ### Enable relations
 
-#### Using relations in queries
+Let's assume the example, where one `company` can have multiple `industries`.
 
-Let's assume the following `Haste-ManyToMany` relation:
+To define the `Haste-ManyToMany` relation using Doctrine ORM entities, edit your DCA file:
 
 ```php
 $GLOBALS['TL_DCA']['tl_app_company']['fields']['industries'] = [
@@ -18,35 +18,40 @@ $GLOBALS['TL_DCA']['tl_app_company']['fields']['industries'] = [
     'flag' => 1,
     'foreignKey' => 'tl_app_industry.name',
     'eval' => ['multiple' => true, 'tl_class' => 'clr'],
+    
+    // Define the relation
     'relation' => [
-        'type' => 'haste-ManyToMany',
-        'table' => 'tl_app_industry',
-        'relationTable' => 'tl_app_rel_company_industry',
-        'fieldColumn' => 'industry_id',
-        'referenceColumn' => 'company_id',
-        'skipInstall' => true,
+        'type' => 'haste-ManyToMany', 
+        'entity' => \App\Entity\Company::class,
+        'property' => 'foobar' // (optional) if the entity property is different than the field name
     ],
 ];
 ```
 
-To ease working with the Doctrine ORM, you should specify the `industries` property like below: 
+Then, define the relation in Doctrine itself:
 
 ```php
 <?php
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 class Company
 {
-    #[ORM\ManyToMany(Industry::class)]
+    #[ORM\ManyToMany(\App\Entity\Industry::class)]
     #[ORM\JoinTable('tl_app_rel_company_industry')]
     #[ORM\JoinColumn('company_id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn('industry_id', onDelete: 'CASCADE')]
     private $industries;
 }
-```
+``` 
 
-This will allow you to use the relation in the Doctrine query builder, for example:
+
+### Using relations in queries
+
+If you defined the relation like in the above example, you will bea ble to use the relation in the Doctrine 
+query builder, for example:
 
 ```php
 $qb = $this->createQueryBuilder('c');
@@ -113,6 +118,7 @@ property on the parent entity. You also have to set the `DoctrineOrmUndo` attrib
 namespace App\Entity;
 
 use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
+use Doctrine\ORM\Mapping as ORM;
 
 #[DoctrineOrmUndo]
 class Parent
