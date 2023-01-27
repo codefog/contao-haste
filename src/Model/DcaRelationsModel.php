@@ -149,7 +149,7 @@ abstract class DcaRelationsModel extends Model
             $recordValues = StringUtil::deserialize($recordValues);
 
             if (\is_array($recordValues) && \count($recordValues) > 0) {
-                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', '.$connection->getDatabasePlatform()->quoteStringLiteral(implode(',', $recordValues)).')';
+                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['related_field']).', '.$connection->getDatabasePlatform()->quoteStringLiteral(implode(',', $recordValues)).')';
             }
         }
 
