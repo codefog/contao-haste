@@ -9,6 +9,7 @@ If you have a boolean field with a specific icon naming (e.g. `featured.svg` and
 to use the Contao core features:
 
 ```php
+// list -> operations
 'toggle' => [
     'href' => 'act=toggle&amp;field=published',
     'icon' => 'visible.svg',
@@ -17,6 +18,14 @@ to use the Contao core features:
 'feature' => [
     'href' => 'act=toggle&amp;field=featured',
     'icon' => 'featured.svg',
+],
+
+// do not forget to add the "toggle" property to the fields
+'published' => [
+    'toggle' => true,
+],
+'featured' => [
+    'toggle' => true,
 ],
 ```
 
