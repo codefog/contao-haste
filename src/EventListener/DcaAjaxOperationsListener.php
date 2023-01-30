@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codefog\HasteBundle\EventListener;
 
 use Contao\Backend;
+use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\ResponseException;
@@ -25,7 +26,14 @@ use Symfony\Component\Security\Core\Security;
 
 class DcaAjaxOperationsListener
 {
-    public function __construct(private readonly Connection $connection, private readonly Packages $packages, private readonly RequestStack $requestStack, private readonly ScopeMatcher $scopeMatcher, private readonly Security $security,)
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly Packages $packages,
+        private readonly RequestStack $requestStack,
+        private readonly ScopeMatcher $scopeMatcher,
+        private readonly Security $security,
+        private readonly ContaoCsrfTokenManager $tokenManager,
+    )
     {
     }
 
@@ -233,6 +241,6 @@ class DcaAjaxOperationsListener
         $url = Environment::get('requestUri');
         $url = preg_replace('/&(amp;)?id=[^&]+/', '', $url);
 
-        return $url.sprintf('&act=edit&id=%s', $id);
+        return $url . sprintf('&act=edit&id=%s&rt=%s', $id, $this->tokenManager->getDefaultTokenValue());
     }
 }
