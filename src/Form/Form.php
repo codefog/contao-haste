@@ -25,6 +25,7 @@ use Contao\TemplateLoader;
 use Contao\UploadableWidgetInterface;
 use Contao\Widget;
 use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class Form
@@ -339,14 +340,14 @@ class Form
                 if (($fieldConfig['relation']['type'] ?? null) === 'haste-ManyToMany') {
                     $entityId = $this->boundEntity->getId();
 
-                    if ($entityId > 0) {
-                        $fieldConfig['value'] = DcaRelationsModel::getRelatedValues($this->getTableNameFromEntity($this->boundEntity), $fieldName, $entityId);
+                    if ($entityId > 0 && ($table = $this->getTableNameForEntity($this->boundEntity)) !== null) {
+                        $fieldConfig['value'] = DcaRelationsModel::getRelatedValues($table, $fieldName, $entityId);
                     }
                 } elseif ($this->propertyAccessor->isReadable($this->boundEntity, $fieldName)) {
                     $value = $this->propertyAccessor->getValue($this->boundEntity, $fieldName);
 
                     // This might be a related object
-                    if (is_object($value) && method_exists($value, 'getId')) {
+                    if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
                         $value = $value->getId();
                     }
 
@@ -784,9 +785,7 @@ class Form
                 }
 
                 // Bind to Entity instance
-                if (null !== $this->boundEntity) {
-                    $table = $this->getTableNameFromEntity($this->boundEntity);
-
+                if (null !== $this->boundEntity && null !== ($table = $this->getTableNameForEntity($this->boundEntity))) {
                     // If the field is a relation, store the value in the helper which will be processed by doctrine events later on
                     if (($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
                         /** @var DoctrineOrmHelper $doctrineHelper */
@@ -798,6 +797,11 @@ class Form
 
                     // Set the regular value, if writable
                     if ($this->propertyAccessor->isWritable($this->boundEntity, $fieldName)) {
+                        // This might be a related object
+                        if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
+                            $value = $this->getEntityManager()->getRepository($this->getMetaDataForEntity($this->boundEntity)->getAssociationTargetClass($fieldName))->find($value);
+                        }
+
                         $this->propertyAccessor->setValue($this->boundEntity, $fieldName, $value);
                     }
                 }
@@ -963,26 +967,55 @@ class Form
     }
 
     /**
-     * Get the table name from entity.
+     * Get the table name for entity.
      */
-    protected function getTableNameFromEntity(object $entity): string
+    private function getTableNameForEntity(object $entity): string
+    {
+        return $this->getMetaDataForEntity($entity)?->getTableName();
+    }
+
+    /**
+     * Return true if the entity has a single valued relation for the given field.
+     */
+    private function hasEntitySingleValuedRelation(object $entity, string $field): bool
+    {
+        if (($metaData = $this->getMetaDataForEntity($entity)) === null) {
+            return false;
+        }
+
+        return $metaData->isSingleValuedAssociation($field);
+    }
+
+    /**
+     * Get the meta data for entity.
+     */
+    private function getMetaDataForEntity(object $entity): ?ClassMetadata
     {
         static $cache = [];
+
         $className = get_class($entity);
 
         if (!array_key_exists($className, $cache)) {
-            $service = 'doctrine.orm.entity_manager';
-
-            if (!System::getContainer()?->has($service)) {
-                return '';
-            }
-
-            /** @var EntityManager $entityManager */
-            $entityManager = System::getContainer()->get($service);
-
-            $cache[$className] = $entityManager->getClassMetadata(get_class($entity))->getTableName();
+            $cache[$className] = $this->getEntityManager()->getClassMetadata(get_class($entity));
         }
 
         return $cache[$className];
+    }
+
+    /**
+     * Get the entity manager.
+     */
+    private function getEntityManager(): ?EntityManager
+    {
+        $service = 'doctrine.orm.entity_manager';
+
+        if (!System::getContainer()?->has($service)) {
+            return null;
+        }
+
+        /** @var EntityManager $entityManager */
+        $entityManager = System::getContainer()->get($service);
+
+        return $entityManager;
     }
 }
