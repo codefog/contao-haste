@@ -785,9 +785,9 @@ class Form
                 }
 
                 // Bind to Entity instance
-                if (null !== $this->boundEntity && null !== ($table = $this->getTableNameForEntity($this->boundEntity))) {
+                if (null !== $this->boundEntity) {
                     // If the field is a relation, store the value in the helper which will be processed by doctrine events later on
-                    if (($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
+                    if (null !== ($table = $this->getTableNameForEntity($this->boundEntity)) && ($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
                         /** @var DoctrineOrmHelper $doctrineHelper */
                         $doctrineHelper = System::getContainer()->get(DoctrineOrmHelper::class);
                         $doctrineHelper->addEntityRelatedValues($this->boundEntity, $fieldName, (array) $value);
@@ -969,7 +969,7 @@ class Form
     /**
      * Get the table name for entity.
      */
-    private function getTableNameForEntity(object $entity): string
+    private function getTableNameForEntity(object $entity): ?string
     {
         return $this->getMetaDataForEntity($entity)?->getTableName();
     }
@@ -996,7 +996,7 @@ class Form
         $className = get_class($entity);
 
         if (!array_key_exists($className, $cache)) {
-            $cache[$className] = $this->getEntityManager()->getClassMetadata(get_class($entity));
+            $cache[$className] = $this->getEntityManager()?->getClassMetadata(get_class($entity));
         }
 
         return $cache[$className];

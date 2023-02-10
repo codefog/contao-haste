@@ -47,7 +47,8 @@
         "allow-plugins": {
             "contao-components/installer": true,
             "contao-community-alliance/composer-plugin": true,
-            "contao/manager-plugin": true
+            "contao/manager-plugin": true,
+            "php-http/discovery": true
         }
     },
     "scripts": {
