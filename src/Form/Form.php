@@ -343,8 +343,15 @@ class Form
                         $fieldConfig['value'] = DcaRelationsModel::getRelatedValues($this->getTableNameFromEntity($this->boundEntity), $fieldName, $entityId);
                     }
                 } elseif ($this->propertyAccessor->isReadable($this->boundEntity, $fieldName)) {
+                    $value = $this->propertyAccessor->getValue($this->boundEntity, $fieldName);
+
+                    // This might be a related object
+                    if (is_object($value) && method_exists($value, 'getId')) {
+                        $value = $value->getId();
+                    }
+
                     // Set the regular value
-                    $fieldConfig['value'] = $this->propertyAccessor->getValue($this->boundEntity, $fieldName);
+                    $fieldConfig['value'] = $value;
                 }
             }
 
