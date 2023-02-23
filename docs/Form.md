@@ -8,7 +8,7 @@ This component is designed to ease working with Contao forms in the front end.
 The simplest copy-paste form example can be found below. For more detailed explanations, see examples below.
 
 ```php
-use Codefog\HasteBundle\Form;
+use Codefog\HasteBundle\Form\Form;
 
 $form = new Form('my-form-' . $model->id, 'POST');
 $form->addContaoHiddenFields();
@@ -117,7 +117,7 @@ $this->Template->form = $form->getHelperObject();
 ### Add the form fields directly from a DCA
 
 ```php
-// Uou can exclude or modify certain fields by passing a callable as second parameter
+// You can exclude or modify certain fields by passing a callable as second parameter
 $form->addFieldsFromDca('tl_content', static function(string &$fieldName, array &$fieldConfig) {
     // make sure to skip elements without inputType, or you will get an exception
     if (!isset($fieldConfig['inputType'])) {
