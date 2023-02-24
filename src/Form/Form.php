@@ -348,7 +348,7 @@ class Form
 
                     // This might be a related object
                     if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
-                        $value = $value->getId();
+                        $value = $value?->getId();
                     }
 
                     // Set the regular value
