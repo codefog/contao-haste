@@ -169,6 +169,35 @@ $form->addFormField('mandatory', [
 ```
 
 
+### Bind entity to the form
+
+You can easily bind a Doctrine entity instance to the form to ease working with them.
+The form will try to load and preset the data from the entity if there is already some and will also store
+the values to the entity. However, it will *not* persist the entity, so you can still do with it whatever you like.
+
+To modify the reading/writing of data from/to entity, you can provide your custom `PropertyAccessor` instance
+as the second argument of the `setBoundEntity()` method.
+
+Please note that the `Haste-ManyToMany` relations will be updated automatically!
+
+Read more on [DoctrineOrm](DoctrineOrm.md) feature.
+
+```php
+$companyEntity = new \App\Entity\Company();
+
+// Bind the entity to the form
+$form->setBoundEntity($companyEntity);
+
+// Add the form fields directly from DCA
+$form->addFieldsFromDca('tl_app_company');
+
+if ($form->validate()) {
+    // The entity will now contain the changes, so you can save it
+    $this->companyRepository->myPersistMethod($companyEntity);
+}
+```
+
+
 ### Bind model to the form
 
 You can easily bind a Contao Model instance to the form to ease working with them. 

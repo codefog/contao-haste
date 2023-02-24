@@ -10,6 +10,7 @@ use Contao\Config;
 use Contao\Controller;
 use Contao\CoreBundle\Config\ResourceFinderInterface;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Routing\ScopeMatcher;
 use Contao\Database;
 use Contao\DataContainer;
@@ -19,6 +20,7 @@ use Contao\System;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -44,7 +46,16 @@ class DcaRelationsManager
      */
     private array $overrideAllCache = [];
 
-    public function __construct(private readonly Connection $connection, private readonly Formatter $formatter, private readonly RequestStack $requestStack, private readonly ResourceFinderInterface $resourceFinder, private readonly ScopeMatcher $scopeMatcher, private readonly UndoManager $undoManager,)
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly ContaoFramework $framework,
+        private readonly Formatter $formatter,
+        private readonly RequestStack $requestStack,
+        private readonly ResourceFinderInterface $resourceFinder,
+        private readonly ScopeMatcher $scopeMatcher,
+        private readonly UndoManager $undoManager,
+        private readonly ?EntityManager $entityManager = null,
+    )
     {
     }
 
@@ -171,38 +182,48 @@ class DcaRelationsManager
      */
     public function deleteRelatedRecords(DataContainer $dc, int $undoId): void
     {
+        $this->deleteRelatedRecordsWithUndo($dc->table, $dc->id, $undoId);
+    }
+
+    /**
+     * Delete the related records with keeping the "undo" data.
+     */
+    public function deleteRelatedRecordsWithUndo(string $sourceTable, int|string $sourceId, int $undoId): void
+    {
+        $this->framework->initialize();
         $this->loadDataContainers();
+
         $undo = [];
 
         foreach ($GLOBALS['TL_DCA'] as $table => $dca) {
             foreach (array_keys($dca['fields']) as $fieldName) {
                 $relation = $this->getRelation($table, $fieldName);
 
-                if (null === $relation || ($relation['reference_table'] !== $dc->table && $relation['related_table'] !== $dc->table)) {
+                if (null === $relation || ($relation['reference_table'] !== $sourceTable && $relation['related_table'] !== $sourceTable)) {
                     continue;
                 }
 
                 // Store the related values for further save in tl_undo table
-                if ($relation['reference_table'] === $dc->table) {
+                if ($relation['reference_table'] === $sourceTable) {
                     $undo[] = [
-                        'table' => $dc->table,
+                        'table' => $sourceTable,
                         'relationTable' => $table,
                         'relationField' => $fieldName,
-                        'reference' => $dc->{$relation['reference']},
-                        'values' => DcaRelationsModel::getRelatedValues($table, $fieldName, $dc->{$relation['reference']}),
+                        'reference' => $sourceId,
+                        'values' => DcaRelationsModel::getRelatedValues($table, $fieldName, $sourceId),
                     ];
 
-                    $this->purgeRelatedRecords($relation, $dc->{$relation['reference']});
+                    $this->purgeRelatedRecords($relation, $sourceId);
                 } else {
                     $undo[] = [
-                        'table' => $dc->table,
+                        'table' => $sourceTable,
                         'relationTable' => $table,
                         'relationField' => $fieldName,
-                        'reference' => $dc->{$relation['field']},
-                        'values' => DcaRelationsModel::getReferenceValues($table, $fieldName, $dc->{$relation['field']}),
+                        'reference' => $sourceId,
+                        'values' => DcaRelationsModel::getReferenceValues($table, $fieldName, $sourceId),
                     ];
 
-                    $this->purgeRelatedRecords($relation, $dc->{$relation['field']});
+                    $this->purgeRelatedRecords($relation, $sourceId);
                 }
             }
         }
@@ -727,10 +748,44 @@ class DcaRelationsManager
         if (!\array_key_exists($cacheKey, $this->relationsCache)) {
             $relation = null;
 
-            if (isset($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation'])) {
+            if (($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
                 $fieldConfig = &$GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation'];
 
-                if (isset($fieldConfig['table']) && 'haste-ManyToMany' === $fieldConfig['type']) {
+                // Load from entity
+                if (isset($fieldConfig['entity'])) {
+                    if ($this->entityManager === null) {
+                        throw new \RuntimeException(sprintf('The entity has been defined in the relation for %s.%s, but there is no entity manager service!', $table, $fieldName));
+                    }
+
+                    $metaData = $this->entityManager->getClassMetadata($fieldConfig['entity']);
+
+                    if ($metaData->hasAssociation($fieldName)) {
+                        $association = $metaData->getAssociationMapping($fieldConfig['property'] ?? $fieldName);
+
+                        $relation = [
+                            // The relations table
+                            'table' => $association['joinTable']['name'],
+
+                            // The related field
+                            'reference' => $association['joinTable']['joinColumns'][0]['referencedColumnName'],
+                            'field' => $association['joinTable']['inverseJoinColumns'][0]['referencedColumnName'],
+
+                            // Current table data
+                            'reference_table' => $table,
+                            'reference_field' => $association['joinTable']['joinColumns'][0]['name'],
+
+                            // Related table data
+                            'related_table' => $this->entityManager->getClassMetadata($association['targetEntity'])->getTableName(),
+                            'related_field' => $association['joinTable']['inverseJoinColumns'][0]['name'],
+
+                            // Force save
+                            'forceSave' => $fieldConfig['forceSave'] ?? null,
+
+                            // Skip installation
+                            'skipInstall' => true,
+                        ];
+                    }
+                } elseif (isset($fieldConfig['table'])) {
                     $relation = [];
 
                     // The relations table

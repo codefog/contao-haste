@@ -25,6 +25,7 @@ Then, run the Contao install tool to update the database.
 - [DcaAjaxOperations](docs/DcaAjaxOperations.md)
 - [DcaDateRangeFilter](docs/DcaDateRangeFilter.md)
 - [DcaRelations](docs/DcaRelations.md)
+- [DoctrineOrm](docs/DoctrineOrm.md)
 - [Form](docs/Form.md)
 - [Formatter](docs/Formatter.md)
 - [StringParser](docs/StringParser.md)

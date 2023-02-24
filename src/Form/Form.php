@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Codefog\HasteBundle\Form;
 
+use Codefog\HasteBundle\DcaRelationsManager;
+use Codefog\HasteBundle\DoctrineOrmHelper;
 use Codefog\HasteBundle\Form\Validator\ValidatorInterface;
+use Codefog\HasteBundle\Model\DcaRelationsModel;
 use Codefog\HasteBundle\Util\ArrayPosition;
 use Contao\ArrayUtil;
 use Contao\Controller;
@@ -21,6 +24,9 @@ use Contao\System;
 use Contao\TemplateLoader;
 use Contao\UploadableWidgetInterface;
 use Contao\Widget;
+use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\Mapping\ClassMetadata;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class Form
 {
@@ -33,6 +39,8 @@ class Form
     protected string $enctype = 'application/x-www-form-urlencoded';
     protected bool $isSubmitted = false;
     protected bool $hasUploads = false;
+    protected object|null $boundEntity = null;
+    protected PropertyAccessor|null $propertyAccessor = null;
     protected Model|null $boundModel = null;
     protected array $validators = [];
     protected int $currentState = self::STATE_CLEAN;
@@ -131,6 +139,22 @@ class Form
     public function getCurrentState(): int
     {
         return $this->currentState;
+    }
+
+    public function getBoundEntity(): ?object
+    {
+        return $this->boundEntity;
+    }
+
+    /**
+     * Binds a Doctrine entity to the form. If there is data, haste form will add the present values as default values.
+     */
+    public function setBoundEntity(object $boundEntity, PropertyAccessor $propertyAccessor = null): self
+    {
+        $this->boundEntity = $boundEntity;
+        $this->propertyAccessor = $propertyAccessor ?? new PropertyAccessor();
+
+        return $this;
     }
 
     public function getBoundModel(): ?Model
@@ -310,6 +334,28 @@ class Form
                 $fieldConfig['value'] = $fieldConfig['default'];
             }
 
+            // Try to load the default value from bound Entity
+            if (!($fieldConfig['ignoreEntityValue'] ?? false) && null !== $this->boundEntity) {
+                // If the field is a relation, store the value in the helper which will be processed by Doctrine events later on
+                if (($fieldConfig['relation']['type'] ?? null) === 'haste-ManyToMany') {
+                    $entityId = $this->boundEntity->getId();
+
+                    if ($entityId > 0 && ($table = $this->getTableNameForEntity($this->boundEntity)) !== null) {
+                        $fieldConfig['value'] = DcaRelationsModel::getRelatedValues($table, $fieldName, $entityId);
+                    }
+                } elseif ($this->propertyAccessor->isReadable($this->boundEntity, $fieldName)) {
+                    $value = $this->propertyAccessor->getValue($this->boundEntity, $fieldName);
+
+                    // This might be a related object
+                    if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
+                        $value = $value->getId();
+                    }
+
+                    // Set the regular value
+                    $fieldConfig['value'] = $value;
+                }
+            }
+
             // Try to load the default value from bound Model
             if (!($fieldConfig['ignoreModelValue'] ?? false) && null !== $this->boundModel) {
                 $fieldConfig['value'] = $this->boundModel->$fieldName;
@@ -340,6 +386,19 @@ class Form
                     return $value;
                 }
             );
+        }
+
+        // If the field is a relation, remove the default load/save callbacks
+        if (!($fieldConfig['ignoreEntityValue'] ?? false) && null !== $this->boundEntity && ($fieldConfig['relation']['type'] ?? null) === 'haste-ManyToMany') {
+            // Remove the load callbacks
+            if (is_array($fieldConfig['load_callback'] ?? null)) {
+                $fieldConfig['load_callback'] = array_values(array_filter($fieldConfig['load_callback'], fn (array $callback) => $callback[0] !== DcaRelationsManager::class));
+            }
+
+            // Remove the save callbacks
+            if (is_array($fieldConfig['save_callback'] ?? null)) {
+                $fieldConfig['save_callback'] = array_values(array_filter($fieldConfig['save_callback'], fn (array $callback) => $callback[0] !== DcaRelationsManager::class));
+            }
         }
 
         // Set the save_callback as validator
@@ -721,8 +780,34 @@ class Form
                 if ($widget->hasErrors()) {
                     // Re-check the status in case a custom validator has added an error
                     $this->isValid = false;
-                } elseif (null !== $this->boundModel) {
-                    // Bind to Model instance
+
+                    continue;
+                }
+
+                // Bind to Entity instance
+                if (null !== $this->boundEntity) {
+                    // If the field is a relation, store the value in the helper which will be processed by doctrine events later on
+                    if (null !== ($table = $this->getTableNameForEntity($this->boundEntity)) && ($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
+                        /** @var DoctrineOrmHelper $doctrineHelper */
+                        $doctrineHelper = System::getContainer()->get(DoctrineOrmHelper::class);
+                        $doctrineHelper->addEntityRelatedValues($this->boundEntity, $fieldName, (array) $value);
+
+                        continue;
+                    }
+
+                    // Set the regular value, if writable
+                    if ($this->propertyAccessor->isWritable($this->boundEntity, $fieldName)) {
+                        // This might be a related object
+                        if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
+                            $value = $this->getEntityManager()->getRepository($this->getMetaDataForEntity($this->boundEntity)->getAssociationTargetClass($fieldName))->find($value);
+                        }
+
+                        $this->propertyAccessor->setValue($this->boundEntity, $fieldName, $value);
+                    }
+                }
+
+                // Bind to Model instance
+                if (null !== $this->boundModel) {
                     $this->boundModel->$fieldName = $value;
                 }
             }
@@ -879,5 +964,58 @@ class Form
         if (\in_array($fieldName, array_keys($this->formFields), true)) {
             throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $fieldName));
         }
+    }
+
+    /**
+     * Get the table name for entity.
+     */
+    private function getTableNameForEntity(object $entity): ?string
+    {
+        return $this->getMetaDataForEntity($entity)?->getTableName();
+    }
+
+    /**
+     * Return true if the entity has a single valued relation for the given field.
+     */
+    private function hasEntitySingleValuedRelation(object $entity, string $field): bool
+    {
+        if (($metaData = $this->getMetaDataForEntity($entity)) === null) {
+            return false;
+        }
+
+        return $metaData->isSingleValuedAssociation($field);
+    }
+
+    /**
+     * Get the meta data for entity.
+     */
+    private function getMetaDataForEntity(object $entity): ?ClassMetadata
+    {
+        static $cache = [];
+
+        $className = get_class($entity);
+
+        if (!array_key_exists($className, $cache)) {
+            $cache[$className] = $this->getEntityManager()?->getClassMetadata(get_class($entity));
+        }
+
+        return $cache[$className];
+    }
+
+    /**
+     * Get the entity manager.
+     */
+    private function getEntityManager(): ?EntityManager
+    {
+        $service = 'doctrine.orm.entity_manager';
+
+        if (!System::getContainer()?->has($service)) {
+            return null;
+        }
+
+        /** @var EntityManager $entityManager */
+        $entityManager = System::getContainer()->get($service);
+
+        return $entityManager;
     }
 }

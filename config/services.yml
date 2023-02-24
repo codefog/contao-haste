@@ -15,6 +15,12 @@ services:
     # DcaDateRangeFilter
     Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
 
+    # DoctrineOrm
+    Codefog\HasteBundle\DoctrineOrmHelper:
+        public: true
+
+    Codefog\HasteBundle\EventListener\DoctrineOrmListener: ~
+
     # InsertTagsListener
     Codefog\HasteBundle\EventListener\InsertTagsListener: ~
 
@@ -28,6 +34,8 @@ services:
             - { name: doctrine.event_listener, event: postGenerateSchema }
 
     Codefog\HasteBundle\DcaRelationsManager:
+        arguments:
+            $entityManager: '@?doctrine.orm.entity_manager'
         public: true
 
     # StringParser
