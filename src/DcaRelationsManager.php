@@ -83,13 +83,13 @@ class DcaRelationsManager
             // Use custom filtering
             if (isset($fieldConfig['filter']) && $fieldConfig['filter']) {
                 $GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['filter'] = false;
-                $this->filterableFields[$fieldName] = $relation;
+                $this->filterableFields[$table][$fieldName] = $relation;
             }
 
             // Use custom search filtering
             if (isset($fieldConfig['search']) && $fieldConfig['search']) {
                 $GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['search'] = false;
-                $this->searchableFields[$fieldName] = $relation;
+                $this->searchableFields[$table][$fieldName] = $relation;
             }
         }
 
@@ -103,7 +103,7 @@ class DcaRelationsManager
 
         // Add filter and search callbacks for the backend only
         if (($request = $this->requestStack->getCurrentRequest()) !== null && $this->scopeMatcher->isBackendRequest($request)) {
-            if (\count($this->filterableFields) > 0) {
+            if (\count($this->filterableFields[$table] ?? []) > 0) {
                 $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'filterByRelations'];
 
                 if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])) {
@@ -112,7 +112,7 @@ class DcaRelationsManager
                 }
             }
 
-            if (\count($this->searchableFields) > 0) {
+            if (\count($this->searchableFields[$table] ?? []) > 0) {
                 $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'filterBySearch'];
 
                 if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])) {
@@ -426,7 +426,7 @@ class DcaRelationsManager
      */
     public function filterByRelations(DataContainer $dc): void
     {
-        if (0 === \count($this->filterableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->filterableFields[$dc->table] ?? []) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return;
         }
 
@@ -441,7 +441,7 @@ class DcaRelationsManager
         $sessionData = $request->getSession()->getBag('contao_backend')->all();
         $filterId = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
-        foreach (array_keys($this->filterableFields) as $field) {
+        foreach (array_keys($this->filterableFields[$dc->table]) as $field) {
             if (isset($sessionData['filter'][$filterId][$field])) {
                 $doFilter = true;
                 $ids = DcaRelationsModel::getReferenceValues($dc->table, $field, $sessionData['filter'][$filterId][$field]);
@@ -459,7 +459,7 @@ class DcaRelationsManager
      */
     public function filterBySearch(DataContainer $dc): void
     {
-        if (0 === \count($this->searchableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->searchableFields[$dc->table] ?? []) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return;
         }
 
@@ -467,7 +467,7 @@ class DcaRelationsManager
         $doFilter = false;
         $sessionData = $request->getSession()->getBag('contao_backend')->all();
 
-        foreach ($this->searchableFields as $field => $relation) {
+        foreach ($this->searchableFields[$dc->table] as $field => $relation) {
             $relatedTable = $relation['related_table'];
 
             Controller::loadDataContainer($relatedTable);
@@ -536,7 +536,7 @@ class DcaRelationsManager
      */
     public function addRelationFilters(DataContainer $dc): string
     {
-        if (0 === \count($this->filterableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->filterableFields[$dc->table] ?? []) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return '';
         }
 
@@ -548,7 +548,7 @@ class DcaRelationsManager
 
         // Set filter from user input
         if ('tl_filters' === Input::post('FORM_SUBMIT')) {
-            foreach (array_keys($this->filterableFields) as $field) {
+            foreach (array_keys($this->filterableFields[$dc->table]) as $field) {
                 if (Input::post($field, true) !== 'tl_'.$field) {
                     $sessionData['filter'][$filter][$field] = Input::post($field, true);
                 } else {
@@ -563,7 +563,7 @@ class DcaRelationsManager
         $return = '<div class="tl_filter tl_subpanel">
 <strong>'.$GLOBALS['TL_LANG']['HST']['advanced_filter'].'</strong> ';
 
-        foreach ($this->filterableFields as $field => $relation) {
+        foreach ($this->filterableFields[$dc->table] as $field => $relation) {
             $return .= '<select name="'.$field.'" class="tl_select tl_chosen'.(isset($session['filter'][$filter][$field]) ? ' active' : '').'">
     <option value="tl_'.$field.'">'.($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '').'</option>
     <option value="tl_'.$field.'">---</option>';
@@ -657,7 +657,7 @@ class DcaRelationsManager
      */
     public function addRelationSearch(DataContainer $dc): string
     {
-        if (0 === \count($this->searchableFields) || ($request = $this->requestStack->getCurrentRequest()) === null) {
+        if (0 === \count($this->searchableFields[$dc->table] ?? []) || ($request = $this->requestStack->getCurrentRequest()) === null) {
             return '';
         }
 
@@ -668,7 +668,7 @@ class DcaRelationsManager
         $sessionValues = $session->get('haste_search');
 
         // Search field per relation
-        foreach ($this->searchableFields as $field => $relation) {
+        foreach ($this->searchableFields[$dc->table] as $field => $relation) {
             // Get searchable fields from related table
             $relatedSearchFields = [];
             $relTable = $relation['related_table'];
