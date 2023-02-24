@@ -591,6 +591,9 @@ class Form
         $fieldConfigs = &$GLOBALS['TL_DCA'][$table]['fields'];
 
         foreach (($fieldConfigs ?? []) as $k => $v) {
+            // Unset the backend attributes that can add unnecessary JavaScript code (#206)
+            unset($v['eval']['submitOnChange']);
+
             if (\is_callable($callback) && !$callback(...[&$k, &$v])) {
                 continue;
             }
