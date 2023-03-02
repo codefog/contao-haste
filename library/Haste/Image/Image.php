@@ -119,7 +119,7 @@ class Image
         }
 
         // Image could not be read
-        if (!is_resource($resWatermark)) {
+        if (!is_resource($resWatermark) && !$resWatermark instanceof \GdImage) {
             return $image;
         }
 
