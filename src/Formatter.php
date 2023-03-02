@@ -75,7 +75,7 @@ class Formatter
         }
 
         if (!$label) {
-            $label = $fieldConfig['name'];
+            $label = $fieldConfig['name'] ?? '';
         }
 
         return $label;
@@ -132,6 +132,10 @@ class Formatter
             }
         }
 
+        if (isset($fieldConfig['eval']['csv']) && str_contains($value, $fieldConfig['eval']['csv'])) {
+            $value = explode($fieldConfig['eval']['csv'], $value);
+        }
+
         if (\is_array($value)) {
             foreach ($value as $kk => $vv) {
                 $value[$kk] = $this->dcaValueFromArray($fieldConfig, $vv);
@@ -164,7 +168,7 @@ class Formatter
             return \is_array($fieldConfig['reference'][$value]) ? $fieldConfig['reference'][$value][0] : $fieldConfig['reference'][$value];
         }
 
-        if (($fieldConfig['eval']['isAssociative'] ?? null) || ArrayUtil::isAssoc($fieldConfig['options'] ?? null) && isset($fieldConfig['options'][$value])) {
+        if ((($fieldConfig['eval']['isAssociative'] ?? null) || ArrayUtil::isAssoc($fieldConfig['options'] ?? null)) && isset($fieldConfig['options'][$value])) {
             return \is_array($fieldConfig['options'][$value]) ? $fieldConfig['options'][$value][0] : $fieldConfig['options'][$value];
         }
 
