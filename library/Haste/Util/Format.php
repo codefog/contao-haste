@@ -95,8 +95,8 @@ class Format
             $strLabel = is_array($GLOBALS['TL_LANG']['MSC'][$arrField['name']] ?? null) ? $GLOBALS['TL_LANG']['MSC'][$arrField['name']][0] : $GLOBALS['TL_LANG']['MSC'][$arrField['name']] ?? '';
         }
 
-        if ($strLabel == '') {
-            $strLabel = $arrField['name'];
+        if (empty($strLabel)) {
+            $strLabel = $arrField['name'] ?? '';
         }
 
         return $strLabel;
@@ -161,6 +161,10 @@ class Format
             while ($objOptions->next()) {
                 $arrField['options'][$objOptions->id] = $objOptions->value;
             }
+        }
+
+        if (isset($arrField['eval']['csv']) && str_contains($varValue, $arrField['eval']['csv'])) {
+            $varValue = explode($arrField['eval']['csv'], $varValue);
         }
 
         if (is_array($varValue)) {
