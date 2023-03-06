@@ -111,16 +111,21 @@ class RepositoryVersion
         $matches = array();
 
         if (preg_match('/(\d{1,3})\.(\d{1,3})\.(\d{1,3})([ \-](\w+))?/', $version, $matches)) {
-            $stat = strtolower($matches[5]);
-            $v = array_search($stat, array_map('strtolower', static::$mStatusName));
+            $v = 9;
 
-            if ($v === false) {
-                $v = 9;
+            if (isset($matches[5])) {
+                $stat = strtolower($matches[5]);
+                $v = array_search($stat, array_map('strtolower', static::$mStatusName));
+
+                if ($v === false) {
+                    $v = 9;
+                }
             }
 
             return (($matches[1] * 1000 + $matches[2]) * 1000 + $matches[3]) * 10 + $v;
+        }
 
-        } elseif (preg_match('/(\d{1,3})\.(\d{1,3})\.(\w*)/', $version, $matches)) {
+        if (preg_match('/(\d{1,3})\.(\d{1,3})\.(\w*)/', $version, $matches)) {
             $stat = strtolower($matches[3]);
             $v = array_search($stat, array_map('strtolower', static::$mStatusName));
 
