@@ -168,7 +168,7 @@ abstract class DcaRelationsModel extends Model
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
-        foreach ((array) $value as $value) {
+        foreach (array_filter((array) $value) as $value) {
             $connection->insert($relation['table'], [$relation['reference_field'] => $reference, $relation['related_field'] => $value]);
         }
     }
