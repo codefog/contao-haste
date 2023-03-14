@@ -137,6 +137,6 @@ class DoctrineOrmHelper
      */
     private function getEntityUniqueId(object $entity): string
     {
-        return get_class($entity) . '::' . $entity->getId();
+        return get_class($entity) . '::' . spl_object_id($entity);
     }
 }

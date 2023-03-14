@@ -18,10 +18,16 @@ class DoctrineOrmListener implements EventSubscriberInterface
     public function getSubscribedEvents(): array
     {
         return [
+            Events::postPersist,
             Events::postUpdate,
             Events::preRemove,
             Events::preUpdate,
         ];
+    }
+
+    public function postPersist(LifecycleEventArgs $args): void
+    {
+        $this->handlePostUpdateRelations($args);
     }
 
     public function postUpdate(LifecycleEventArgs $args): void
