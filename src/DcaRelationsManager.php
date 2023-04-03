@@ -784,6 +784,11 @@ class DcaRelationsManager
                             // Skip installation
                             'skipInstall' => true,
                         ];
+
+                        // Set the table name directly in the relation of DCA field, so the DcaExtractor will not complain about incomplete relation
+                        if (!isset($fieldConfig['table'])) {
+                            $GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['table'] = $relation['table'];
+                        }
                     }
                 } elseif (isset($fieldConfig['table'])) {
                     $relation = [];
