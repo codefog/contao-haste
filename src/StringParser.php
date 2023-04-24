@@ -76,7 +76,7 @@ class StringParser
             $value = str_replace("\xC2\xA0", ' ', $value);
 
             // Remove invisible control characters and unused code points
-            $value = preg_replace('/[\pC]/u', '', $value);
+            $value = (string) preg_replace('/[\pC]/u', '', $value);
         }
 
         // Replace friendly email before stripping tags
