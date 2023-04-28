@@ -84,7 +84,7 @@ class DcaAjaxOperationsListener
         $value = $this->executeSaveCallback($dc, $value, $settings);
 
         // Set the correct empty value
-        if (!\is_array($value) && '' === (string) $value ) {
+        if (!\is_array($value) && '' === (string) $value) {
             $value = Widget::getEmptyValueByFieldType($GLOBALS['TL_DCA'][$dc->table]['fields'][$settings['field']]['sql'] ?? []);
         }
 
@@ -211,7 +211,7 @@ class DcaAjaxOperationsListener
                 return '';
             }
 
-            $value = $row[$settings['field']];
+            $value = (string) $row[$settings['field']];
             $options = (array) $settings['options'];
             $icon = null;
 
