@@ -88,8 +88,11 @@ class DcaAjaxOperationsListener
             $value = Widget::getEmptyValueByFieldType($GLOBALS['TL_DCA'][$dc->table]['fields'][$settings['field']]['sql'] ?? []);
         }
 
+        // Set the correct parameter types
+        $types = array_filter([$GLOBALS['TL_DCA'][$dc->table]['fields'][$settings['field']]['sql']['type'] ?? null]);
+
         // Update the database
-        $this->connection->update($dc->table, [$settings['field'] => $value], ['id' => $id]);
+        $this->connection->update($dc->table, [$settings['field'] => $value], ['id' => $id], $types);
 
         // Create a new version
         $versions->create();
