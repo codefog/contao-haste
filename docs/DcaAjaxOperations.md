@@ -1,11 +1,11 @@
 # DcaAjaxOperations component
 
-This component is designed to help you handle the ajax "toggle" operations in DCA list view. 
+This component is designed to help you handle the ajax "toggle" operations in DCA list view.
 
 
 ## Usage
 
-If you have a boolean field with a specific icon naming (e.g. `featured.svg` and `featured_.svg`), then it is best 
+If you have a boolean field with a specific icon naming (e.g. `featured.svg` and `featured_.svg`), then it is best
 to use the Contao core features:
 
 ```php
@@ -29,7 +29,7 @@ to use the Contao core features:
 ],
 ```
 
-However, suppose you have a different file naming, multiple states per field, or need a custom permission check. 
+However, suppose you have a different file naming, multiple states per field, or need a custom permission check.
 In that case, this component is for you.
 
 Take a look at the example of how we would implement the regular "toggle published" operation:
@@ -40,7 +40,7 @@ $GLOBALS['TL_DCA']['tl_table']['list']['operations']['toggle_my_field'] = [
     'haste_ajax_operation' => [
         'field' => 'my_field',
         'options' => [
-            ['value' => '', 'icon' => 'invisible.svg'],
+            ['value' => '0', 'icon' => 'invisible.svg'],
             ['value' => '1', 'icon' => 'visible.svg'],
         ],
     ],
