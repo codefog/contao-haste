@@ -40,7 +40,7 @@ $GLOBALS['TL_DCA']['tl_table']['list']['operations']['toggle_my_field'] = [
     'haste_ajax_operation' => [
         'field' => 'my_field',
         'options' => [
-            ['value' => '', 'icon' => 'invisible.svg'],
+            ['value' => '0', 'icon' => 'invisible.svg'],
             ['value' => '1', 'icon' => 'visible.svg'],
         ],
     ],
