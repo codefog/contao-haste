@@ -145,15 +145,15 @@ class Formatter
         }
 
         if ('date' === ($fieldConfig['eval']['rgxp'] ?? null)) {
-            return !empty($value) ? $this->date((int) $value) : '';
+            return ((string) $value !== '') ? $this->date((int) $value) : '';
         }
 
         if ('time' === ($fieldConfig['eval']['rgxp'] ?? null)) {
-            return !empty($value) ? $this->time((int) $value) : '';
+            return ((string) $value !== '') ? $this->time((int) $value) : '';
         }
 
         if ('datim' === ($fieldConfig['eval']['rgxp'] ?? null) || \in_array(($fieldConfig['flag'] ?? null), [5, 6, 7, 8, 9, 10], true) || 'tstamp' === ($fieldConfig['name'] ?? null)) {
-            return !empty($value) ? $this->datim((int) $value) : '';
+            return ((string) $value !== '') ? $this->datim((int) $value) : '';
         }
 
         if (($fieldConfig['eval']['isBoolean'] ?? false) || ('checkbox' === ($fieldConfig['inputType'] ?? null) && !($fieldConfig['eval']['multiple'] ?? false))) {
