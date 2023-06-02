@@ -7,6 +7,7 @@ namespace Codefog\HasteBundle\EventListener;
 use Codefog\HasteBundle\AjaxReloadManager;
 use Contao\ContentModel;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
+use Contao\CoreBundle\Exception\ResponseException;
 use Contao\ModuleModel;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -60,7 +61,7 @@ class AjaxReloadListener
     {
         if (str_starts_with($template, 'fe_')) {
             if (($response = $this->manager->getResponse()) !== null) {
-                $response->send();
+                throw new ResponseException($response);
             }
 
             $request = $this->requestStack->getCurrentRequest();
