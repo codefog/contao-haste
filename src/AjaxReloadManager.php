@@ -39,7 +39,7 @@ class AjaxReloadManager implements ResetInterface
         $uniqid = $this->getUniqid($type, $id);
 
         if (isset($this->listeners[$event]) && !isset($this->buffers[$uniqid]) && \in_array($uniqid, $this->listeners[$event], true)) {
-            $this->buffers[$uniqid] = $buffer;
+            $this->buffers[$uniqid] = StringUtil::restoreBasicEntities($buffer);
         }
     }
 
