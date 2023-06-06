@@ -196,7 +196,7 @@ class DcaRelationsManager
         $undo = [];
 
         foreach ($GLOBALS['TL_DCA'] as $table => $dca) {
-            foreach (array_keys($dca['fields']) as $fieldName) {
+            foreach (array_keys($dca['fields'] ?? []) as $fieldName) {
                 $relation = $this->getRelation($table, $fieldName);
 
                 if (null === $relation || ($relation['reference_table'] !== $sourceTable && $relation['related_table'] !== $sourceTable)) {
