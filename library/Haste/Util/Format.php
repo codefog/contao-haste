@@ -163,7 +163,7 @@ class Format
             }
         }
 
-        if (isset($arrField['eval']['csv']) && str_contains($varValue, $arrField['eval']['csv'])) {
+        if (isset($arrField['eval']['csv']) && !is_array($varValue) && str_contains($varValue, $arrField['eval']['csv'])) {
             $varValue = explode($arrField['eval']['csv'], $varValue);
         }
 
