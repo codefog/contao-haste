@@ -69,7 +69,7 @@ class DcaRelationsManager
         $blnCallbacks = false;
 
         foreach ($GLOBALS['TL_DCA'][$table]['fields'] as $fieldName => $fieldConfig) {
-            if (($relation = $this->getRelation($table, $fieldName)) === null) {
+            if (($relation = $this->getRelation($table, (String) $fieldName)) === null) {
                 continue;
             }
 
