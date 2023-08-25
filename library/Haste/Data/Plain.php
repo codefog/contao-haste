@@ -39,7 +39,7 @@ class Plain extends \ArrayObject
      */
     public function __toString()
     {
-        $varValue = ($this->formatted ?: $this->value);
+        $varValue = ($this->formatted ?? $this->value);
 
         if (is_array($varValue)) {
             return implode(', ', $varValue);
