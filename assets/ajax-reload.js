@@ -55,6 +55,8 @@
         const xhr = new XMLHttpRequest();
 
         xhr.open('GET', window.location.href);
+        xhr.setRequestHeader('Cache-Control', 'no-cache');
+        xhr.setRequestHeader('Pragma', 'no-cache');
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.setRequestHeader('Haste-Ajax-Reload', event.name);
 
