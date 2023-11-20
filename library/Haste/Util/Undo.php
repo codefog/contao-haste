@@ -39,7 +39,7 @@ class Undo
             return false;
         }
 
-        $arrData = json_decode($objRecords->haste_data, true);
+        $arrData = $objRecords->haste_data ? json_decode($objRecords->haste_data, true) : [];
         $arrData[$strKey] = $varData;
 
         $intAffectedRows = Database::getInstance()->prepare("UPDATE tl_undo SET haste_data=? WHERE id=?")
@@ -78,7 +78,7 @@ class Undo
         }
 
         $arrFields = array();
-        $hasteData = json_decode($objRecords->haste_data, true);
+        $hasteData = $objRecords->haste_data ? json_decode($objRecords->haste_data, true) : null;
 
         // Restore the data
         foreach ($data as $table => $fields) {
@@ -155,7 +155,7 @@ class Undo
                                               ->limit(1)
                                               ->execute($intUndoId);
 
-        if (!$objRecords->numRows) {
+        if (!$objRecords->numRows || !$objRecords->haste_data) {
             return false;
         }
 
