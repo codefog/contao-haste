@@ -9,6 +9,7 @@ use Codefog\HasteBundle\DoctrineOrmHelper;
 use Codefog\HasteBundle\Form\Validator\ValidatorInterface;
 use Codefog\HasteBundle\Model\DcaRelationsModel;
 use Codefog\HasteBundle\Util\ArrayPosition;
+use Composer\InstalledVersions;
 use Contao\ArrayUtil;
 use Contao\Controller;
 use Contao\DataContainer;
@@ -923,6 +924,11 @@ class Form
         }
 
         $widget = $this->widgets[$fieldName];
+
+        // Support file uploads in Contao 5
+        if (version_compare(InstalledVersions::getVersion('contao/core-bundle'), '5.0', '>=') && $widget instanceof UploadableWidgetInterface) {
+            return $widget->value;
+        }
 
         if (!$widget->submitInput()) {
             // Do not throw exception here for BC
