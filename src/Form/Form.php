@@ -924,9 +924,10 @@ class Form
         }
 
         $widget = $this->widgets[$fieldName];
+        $contaoVersion = InstalledVersions::getVersion('contao/core-bundle') ?? InstalledVersions::getVersion('contao/contao');
 
         // Support file uploads in Contao 5
-        if (version_compare(InstalledVersions::getVersion('contao/core-bundle'), '5.0', '>=') && $widget instanceof UploadableWidgetInterface) {
+        if (version_compare($contaoVersion, '5.0', '>=') && $widget instanceof UploadableWidgetInterface) {
             return $widget->value;
         }
 
