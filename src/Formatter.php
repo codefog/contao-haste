@@ -7,6 +7,7 @@ namespace Codefog\HasteBundle;
 use Contao\ArrayUtil;
 use Contao\Config;
 use Contao\Controller;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\DataContainer;
 use Contao\Date;
 use Contao\PageModel;
@@ -17,8 +18,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class Formatter
 {
-    public function __construct(private readonly Connection $connection, private readonly RequestStack $requestStack,)
-    {
+    public function __construct(
+        private readonly ContaoFramework $framework,
+        private readonly Connection $connection,
+        private readonly RequestStack $requestStack,
+    ) {
     }
 
     /**
@@ -50,6 +54,8 @@ class Formatter
      */
     public function dcaLabel(string $table, string $field): string
     {
+        $this->framework->initialize();
+
         System::loadLanguageFile($table);
         Controller::loadDataContainer($table);
 
@@ -86,6 +92,8 @@ class Formatter
      */
     public function dcaValue(string $table, string $field, mixed $value, DataContainer $dc = null): mixed
     {
+        $this->framework->initialize();
+
         System::loadLanguageFile('default');
         System::loadLanguageFile($table);
 
@@ -180,6 +188,8 @@ class Formatter
      */
     private function formatDate(int $timestamp, string $type): string
     {
+        $this->framework->initialize();
+
         $request = $this->requestStack->getCurrentRequest();
 
         if (null !== $request && ($pageModel = $request->attributes->get('pageModel')) instanceof PageModel) {
