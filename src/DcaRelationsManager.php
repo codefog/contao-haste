@@ -25,6 +25,7 @@ use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\String\UnicodeString;
+use Terminal42\DcMultilingualBundle\Driver;
 
 class DcaRelationsManager
 {
@@ -180,9 +181,13 @@ class DcaRelationsManager
     /**
      * Delete the records in related table.
      */
-    public function deleteRelatedRecords(DataContainer $dc, int $undoId): void
+    public function deleteRelatedRecords(DataContainer $dc, int|string $undoId): void
     {
-        $this->deleteRelatedRecordsWithUndo($dc->table, $dc->id, $undoId);
+        if (!$undoId || ($dc instanceof Driver && '' !== $dc->getCurrentLanguage())) {
+            return;
+        }
+
+        $this->deleteRelatedRecordsWithUndo($dc->table, $dc->id, (int) $undoId);
     }
 
     /**
@@ -319,6 +324,10 @@ class DcaRelationsManager
 
         if (null === $dc) {
             throw new \RuntimeException('There seems to be no valid DataContainer instance!');
+        }
+
+        if ($dc instanceof Driver && '' !== $dc->getCurrentLanguage()) {
+            return;
         }
 
         $this->loadDataContainers();

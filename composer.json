@@ -25,7 +25,8 @@
     },
     "require-dev": {
         "contao/manager-plugin": "^2.0",
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "terminal42/dc_multilingual": "^4.0"
     },
     "conflict": {
         "contao/manager-plugin": "<2.0 || >=3.0"
