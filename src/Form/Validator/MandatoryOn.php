@@ -24,7 +24,7 @@ class MandatoryOn implements ValidatorInterface
             $targetWidget = $form->getWidget($fieldName);
             $targetWidgetValue = $targetWidget->value;
 
-            if ('' === trim($value) && $this->matches[$targetWidget->name] && \in_array($targetWidgetValue, $this->matches[$targetWidget->name], true)) {
+            if ('' === trim((string) $value) && $this->matches[$targetWidget->name] && \in_array($targetWidgetValue, $this->matches[$targetWidget->name], true)) {
                 throw new \RuntimeException($GLOBALS['TL_LANG']['MSC']['mandatory']);
             }
         }

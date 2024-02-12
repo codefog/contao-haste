@@ -12,7 +12,7 @@ class UrlParser
     /**
      * Add a query string to the given URI string or page ID.
      */
-    public function addQueryString(string $query, string $url = null): string
+    public function addQueryString(string $query, string|null $url = null): string
     {
         $url = $this->prepareUrl($url);
         $query = trim(StringUtil::ampersand($query, false), '&');
@@ -39,7 +39,7 @@ class UrlParser
     /**
      * Remove query parameters from the current URL.
      */
-    public function removeQueryString(array $params, string $url = null): string
+    public function removeQueryString(array $params, string|null $url = null): string
     {
         $url = $this->prepareUrl($url);
 
@@ -66,7 +66,7 @@ class UrlParser
     /**
      * Remove query parameters from the current URL using a callback method.
      */
-    public function removeQueryStringCallback(callable $callback, string $url = null): string
+    public function removeQueryStringCallback(callable $callback, string|null $url = null): string
     {
         $url = $this->prepareUrl($url);
 
@@ -74,7 +74,8 @@ class UrlParser
 
         parse_str($queryString, $queries);
 
-        // Cannot use array_filter because flags ARRAY_FILTER_USE_BOTH is only supported in PHP 5.6
+        // Cannot use array_filter because flags ARRAY_FILTER_USE_BOTH is only supported
+        // in PHP 5.6
         foreach ($queries as $k => $v) {
             if (true !== $callback($v, $k)) {
                 unset($queries[$k]);
@@ -93,7 +94,7 @@ class UrlParser
     /**
      * Prepare URL from ID and keep query string from current string.
      */
-    protected function prepareUrl(string $url = null): string
+    protected function prepareUrl(string|null $url = null): string
     {
         if (null === $url) {
             $url = Environment::get('requestUri');

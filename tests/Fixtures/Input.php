@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\Hastebundle\Tests\Fixtures;
 
 class Input
@@ -8,11 +10,11 @@ class Input
 
     public static function post(string $key): mixed
     {
-        return static::$data[$key] ?? null;
+        return self::$data[$key] ?? null;
     }
 
     public static function setPost(string $key, mixed $value): void
     {
-        static::$data[$key] = $value;
+        self::$data[$key] = $value;
     }
 }

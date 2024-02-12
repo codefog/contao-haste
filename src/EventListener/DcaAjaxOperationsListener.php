@@ -34,8 +34,7 @@ class DcaAjaxOperationsListener
         private readonly ScopeMatcher $scopeMatcher,
         private readonly Security $security,
         private readonly ContaoCsrfTokenManager $tokenManager,
-    )
-    {
+    ) {
     }
 
     #[AsHook('executePostActions')]
@@ -124,11 +123,13 @@ class DcaAjaxOperationsListener
             // Add the JavaScript
             $GLOBALS['TL_JAVASCRIPT'][] = $this->packages->getUrl('dca-ajax-operations.js', 'codefog_haste');
 
-            // Add default button callback to display the correct initial state but only add it if not already present
+            // Add default button callback to display the correct initial state but only add
+            // it if not already present
             if (!isset($settings['button_callback'])) {
                 $operation['button_callback'] = $this->getDefaultButtonCallback($name, $table, $settings['haste_ajax_operation']);
 
-                // Make sure an icon is set to prevent DC_Table errors (set to '' as the button_callback will return the correct icon)
+                // Make sure an icon is set to prevent DC_Table errors (set to '' as the
+                // button_callback will return the correct icon)
                 $operation['icon'] = '';
 
                 // Add the onclick attribute
@@ -140,7 +141,7 @@ class DcaAjaxOperationsListener
     /**
      * Adds the "onclick" attribute to the operation DCA.
      */
-    private function addOnClickAttribute(array & $operation): void
+    private function addOnClickAttribute(array &$operation): void
     {
         $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
 
@@ -148,8 +149,8 @@ class DcaAjaxOperationsListener
             $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
         } else {
             // onclick attribute already present
-            if (str_contains($operation['attributes'], 'onclick="')) {
-                $operation['attributes'] = str_replace('onclick="', 'onclick="'.$clickEventString, $operation['attributes']);
+            if (str_contains((string) $operation['attributes'], 'onclick="')) {
+                $operation['attributes'] = str_replace('onclick="', 'onclick="'.$clickEventString, (string) $operation['attributes']);
             } else {
                 $operation['attributes'] = $clickEventString.$operation['attributes'];
             }
@@ -233,7 +234,7 @@ class DcaAjaxOperationsListener
                 Backend::addToUrl($href),
                 StringUtil::specialchars($title),
                 $attributes,
-                Image::getHtml($icon, $label)
+                Image::getHtml($icon, $label),
             );
         };
     }
@@ -241,15 +242,15 @@ class DcaAjaxOperationsListener
     /**
      * Get the versioning edit URL.
      */
-    private function getVersionEditUrl(int $id, string $operation): ?string
+    private function getVersionEditUrl(int $id, string $operation): string|null
     {
         if ('toggle' !== $operation) {
             return null;
         }
 
         $url = Environment::get('requestUri');
-        $url = preg_replace('/&(amp;)?id=[^&]+/', '', $url);
+        $url = preg_replace('/&(amp;)?id=[^&]+/', '', (string) $url);
 
-        return $url . sprintf('&act=edit&id=%s&rt=%s', $id, $this->tokenManager->getDefaultTokenValue());
+        return $url.sprintf('&act=edit&id=%s&rt=%s', $id, $this->tokenManager->getDefaultTokenValue());
     }
 }

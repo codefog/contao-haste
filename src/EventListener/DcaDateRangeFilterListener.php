@@ -22,8 +22,11 @@ class DcaDateRangeFilterListener
 {
     protected array $fieldsToFilter = [];
 
-    public function __construct(private readonly Connection $connection, private readonly RequestStack $requestStack, private readonly ScopeMatcher $scopeMatcher,)
-    {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly RequestStack $requestStack,
+        private readonly ScopeMatcher $scopeMatcher,
+    ) {
     }
 
     #[AsHook('loadDataContainer')]
@@ -42,7 +45,7 @@ class DcaDateRangeFilterListener
         }
 
         if (\count($this->fieldsToFilter) > 0) {
-            $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_dateRangeFilter;filter', $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
+            $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_dateRangeFilter;filter', (string) $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
             $GLOBALS['TL_DCA'][$table]['list']['sorting']['panel_callback']['haste_dateRangeFilter'] = [static::class, 'onPanelCallback'];
             $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'onLoadCallback'];
         }
@@ -97,13 +100,13 @@ class DcaDateRangeFilterListener
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_'.$field.'_from',
                 $session['filter'][$filter][$key]['from'],
-                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? ''
+                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? '',
             );
 
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_'.$field.'_to',
                 $session['filter'][$filter][$key]['to'],
-                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? ''
+                $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? '',
             );
 
             $return .= '</div>';
@@ -183,7 +186,7 @@ class DcaDateRangeFilterListener
     /**
      * Validates user input and turns it into a tstamp if it's valid.
      */
-    private function validateAndGetTstamp(string $value, string $rgxp, bool $from = true): ?int
+    private function validateAndGetTstamp(string $value, string $rgxp, bool $from = true): int|null
     {
         $method = 'is'.ucfirst($rgxp);
 
@@ -200,7 +203,7 @@ class DcaDateRangeFilterListener
 
         try {
             $date = new Date($value, Date::getFormatFromRgxp($rgxp));
-        } catch (\OutOfBoundsException $e) {
+        } catch (\OutOfBoundsException) {
             return null;
         }
 
@@ -216,19 +219,11 @@ class DcaDateRangeFilterListener
     {
         $format = Date::formatToJs(Config::get($rgxp.'Format'));
 
-        switch ($rgxp) {
-            case 'datim':
-                $time = ",\n      timePicker:true";
-                break;
-
-            case 'time':
-                $time = ",\n      pickOnly:\"time\"";
-                break;
-
-            default:
-                $time = '';
-                break;
-        }
+        $time = match ($rgxp) {
+            'datim' => ",\n      timePicker:true",
+            'time' => ",\n      pickOnly:\"time\"",
+            default => '',
+        };
 
         return sprintf(
             '<input id="ctrl_%s" name="%s" class="tl_text%s" value="%s" type="text">
@@ -257,7 +252,7 @@ class DcaDateRangeFilterListener
             $format,
             $time,
             $GLOBALS['TL_LANG']['MSC']['weekOffset'] ?? '',
-            $GLOBALS['TL_LANG']['MSC']['titleFormat'] ?? ''
+            $GLOBALS['TL_LANG']['MSC']['titleFormat'] ?? '',
         );
     }
 }

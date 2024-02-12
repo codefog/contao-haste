@@ -11,7 +11,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class DcaRelationsListener
 {
-    public function __construct(private readonly DcaRelationsManager $dcaRelations,)
+    public function __construct(private readonly DcaRelationsManager $dcaRelations)
     {
     }
 

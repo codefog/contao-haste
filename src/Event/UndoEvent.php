@@ -10,17 +10,12 @@ class UndoEvent extends Event
 {
     public const NAME = 'haste.undo';
 
-    private array $hasteData;
-    private int $id;
-    private string $table;
-    private array $row;
-
-    public function __construct(array $hasteData, int $id, string $table, array $row)
-    {
-        $this->hasteData = $hasteData;
-        $this->id = $id;
-        $this->table = $table;
-        $this->row = $row;
+    public function __construct(
+        private array $hasteData,
+        private int $id,
+        private string $table,
+        private array $row,
+    ) {
     }
 
     public function getHasteData(): array

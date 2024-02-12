@@ -12,9 +12,11 @@ use Symfony\Contracts\Service\ResetInterface;
 class AjaxReloadManager implements ResetInterface
 {
     public const TYPE_CONTENT = 'ce';
+
     public const TYPE_MODULE = 'fmd';
 
     private array $buffers = [];
+
     private array $listeners = [];
 
     /**
@@ -58,7 +60,7 @@ class AjaxReloadManager implements ResetInterface
         }
 
         if (\count($events) > 0) {
-            $buffer = static::addDataAttributes($buffer, $uniqid, $events, $isAjax);
+            $buffer = $this->addDataAttributes($buffer, $uniqid, $events, $isAjax);
         }
 
         return $buffer;
@@ -75,7 +77,7 @@ class AjaxReloadManager implements ResetInterface
     /**
      * Get the response.
      */
-    public function getResponse(): ?Response
+    public function getResponse(): Response|null
     {
         if (0 === \count($this->buffers)) {
             return null;
@@ -154,7 +156,7 @@ class AjaxReloadManager implements ResetInterface
 
                 return '';
             },
-            $buffer
+            $buffer,
         );
 
         // Remove the HTML comments on AJAX request, so they don't appear doubled in the DOM
@@ -166,11 +168,11 @@ class AjaxReloadManager implements ResetInterface
         $buffer = preg_replace(
             '/<([^>!]+)>/',
             sprintf('<$1 data-haste-ajax-id="%s" data-haste-ajax-listeners="%s">', $uniqid, implode(' ', array_unique($events))),
-            $buffer,
-            1
+            (string) $buffer,
+            1,
         );
 
         // Trim the buffer to avoid JS break
-        return trim($buffer);
+        return trim((string) $buffer);
     }
 }

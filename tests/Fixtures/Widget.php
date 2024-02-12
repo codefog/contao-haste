@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\Hastebundle\Tests\Fixtures;
 
 class Widget
 {
     public string $name;
+
     public mixed $value = null;
 
     public function __construct(array $attributes)

@@ -10,16 +10,25 @@ use Contao\Input;
 class Pagination
 {
     public const STATE_CLEAN = 0;
+
     public const STATE_DIRTY = 1;
 
     protected int $currentState = self::STATE_DIRTY;
+
     protected bool $outOfRange = false;
+
     protected int $total;
+
     protected int $perPage;
+
     protected string $urlParameter;
+
     protected int $maxPaginationLinks;
+
     protected int $limit;
+
     protected int $offset;
+
     protected \Contao\Pagination $pagination;
 
     public function __construct(int $total, int $perPage, string $urlParameter)
@@ -149,7 +158,7 @@ class Pagination
             $this->getTotal(),
             $this->getPerPage(),
             $this->getMaxPaginationLinks(),
-            $this->getUrlParameter()
+            $this->getUrlParameter(),
         );
 
         $this->currentState = self::STATE_CLEAN;

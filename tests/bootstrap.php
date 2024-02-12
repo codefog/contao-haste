@@ -12,9 +12,7 @@ declare(strict_types=1);
 
 error_reporting(E_ALL);
 
-$include = function ($file) {
-    return file_exists($file) ? include $file : false;
-};
+$include = fn ($file) => file_exists($file) ? include $file : false;
 
 if (
     false === ($loader = $include(__DIR__.'/../vendor/autoload.php'))
@@ -34,20 +32,20 @@ $fixtureLoader = function ($class): void {
         return;
     }
 
-    if (false !== strpos($class, '\\') && 0 !== strncmp($class, 'Contao\\', 7) && 0 !== strncmp($class, 'Codefog\HasteBundle\\', 19)) {
+    if (str_contains((string) $class, '\\') && !str_starts_with((string) $class, 'Contao\\') && 0 !== strncmp((string) $class, 'Codefog\HasteBundle\\', 19)) {
         return;
     }
 
     $isContaoClass = false;
     $isBundleClass = false;
 
-    if (0 === strncmp($class, 'Contao\\', 7)) {
-        $class = substr($class, 7);
+    if (str_starts_with((string) $class, 'Contao\\')) {
+        $class = substr((string) $class, 7);
         $isContaoClass = true;
     }
 
-    if (0 === strncmp($class, 'Codefog\HasteBundle\\', 19)) {
-        $class = substr($class, 19);
+    if (0 === strncmp((string) $class, 'Codefog\HasteBundle\\', 19)) {
+        $class = substr((string) $class, 19);
         $isBundleClass = true;
     }
 

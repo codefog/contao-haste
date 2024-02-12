@@ -16,8 +16,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class UndoManager
 {
-    public function __construct(private readonly Connection $connection, private readonly EventDispatcherInterface $eventDispatcher,)
-    {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly EventDispatcherInterface $eventDispatcher,
+    ) {
     }
 
     /**
@@ -49,11 +51,11 @@ class UndoManager
     {
         $undoData = $this->connection->fetchOne('SELECT haste_data FROM tl_undo WHERE id=?', [$undoId]);
 
-        if ($undoData === false) {
+        if (false === $undoData) {
             return false;
         }
 
-        $undoData = $undoData ? json_decode($undoData, true) : [];
+        $undoData = $undoData ? json_decode((string) $undoData, true) : [];
         $undoData[$key] = $data;
 
         $affectedRows = $this->connection->update('tl_undo', ['haste_data' => json_encode($undoData)], ['id' => $undoId]);
@@ -64,7 +66,7 @@ class UndoManager
     /**
      * Undo the record.
      */
-    public function undo(int $undoId, DataContainer $dc = null): bool
+    public function undo(int $undoId, DataContainer|null $dc = null): bool
     {
         $record = $this->connection->fetchAssociative('SELECT * FROM tl_undo WHERE id=?', [$undoId]);
         $data = StringUtil::deserialize($record['data']);
@@ -75,7 +77,7 @@ class UndoManager
 
         $error = false;
         $fieldsMapper = [];
-        $hasteData = json_decode($record['haste_data'], true);
+        $hasteData = json_decode((string) $record['haste_data'], true);
         $schemaManager = $this->connection->createSchemaManager();
 
         // Restore the data
@@ -139,7 +141,7 @@ class UndoManager
             return false;
         }
 
-        $undoData = json_decode($undoData, true);
+        $undoData = json_decode((string) $undoData, true);
 
         return \is_array($undoData) && \count($undoData) > 0;
     }

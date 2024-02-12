@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\Hastebundle\Tests;
 
 use Codefog\HasteBundle\StringParser;
@@ -15,7 +17,7 @@ class StringParserTest extends TestCase
         $parser = new StringParser();
         $parser->flatten($value, $key, $data);
 
-        $this->assertEquals($expected, $data);
+        $this->assertSame($expected, $data);
     }
 
     public function flattenDataProvider()
@@ -75,8 +77,7 @@ class StringParserTest extends TestCase
                 ],
             ],
 
-            // Arrays are handled recursively
-            // Array keys are retained
+            // Arrays are handled recursively Array keys are retained
             [
                 ['bar' => ['baz']],
                 'foo',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\Hastebundle\Tests\Form;
 
 use Codefog\HasteBundle\Form\Form;
@@ -11,34 +13,33 @@ use PHPUnit\Framework\TestCase;
 
 class FormTest extends TestCase
 {
-    public function testInstance()
+    public function testInstance(): void
     {
         $this->assertInstanceOf(Form::class, $this->createForm());
     }
 
-    public function testSetFormActionFromUri()
+    public function testSetFormActionFromUri(): void
     {
         $form = $this->createForm();
         $form->setAction('foobar');
 
-        $this->assertEquals('foobar', $form->getAction());
+        $this->assertSame('foobar', $form->getAction());
     }
 
-    public function testFormId()
+    public function testFormId(): void
     {
-        $this->assertEquals('my-form-id', $this->createForm()->getFormId());
+        $this->assertSame('my-form-id', $this->createForm()->getFormId());
     }
 
-    public function testIsSubmitted()
+    public function testIsSubmitted(): void
     {
         $this->assertTrue($this->createForm()->isSubmitted());
         $this->assertFalse($this->createForm(false)->isSubmitted());
     }
 
-    public function testBoundEntity()
+    public function testBoundEntity(): void
     {
         $form = $this->createForm();
-
         $form
             ->addFormField('pageTitle', [
                 'inputType' => 'text',
@@ -58,12 +59,12 @@ class FormTest extends TestCase
             $boundEntity = $form->getBoundEntity();
 
             $this->assertTrue(spl_object_hash($entity) === spl_object_hash($boundEntity));
-            $this->assertEquals('My page title test', $boundEntity->getPageTitle());
-            $this->assertEquals(42, $boundEntity->getJumpTo());
+            $this->assertSame('My page title test', $boundEntity->getPageTitle());
+            $this->assertSame(42, $boundEntity->getJumpTo());
         }
     }
 
-    public function testBoundEntityDefaultValues()
+    public function testBoundEntityDefaultValues(): void
     {
         $form = $this->createForm(false);
 
@@ -83,14 +84,13 @@ class FormTest extends TestCase
 
         $form->createWidgets();
 
-        $this->assertEquals('My page', $form->getWidget('pageTitle')->value);
-        $this->assertEquals(11, $form->getWidget('jumpTo')->value);
+        $this->assertSame('My page', $form->getWidget('pageTitle')->value);
+        $this->assertSame(11, $form->getWidget('jumpTo')->value);
     }
 
-    public function testBoundModel()
+    public function testBoundModel(): void
     {
         $form = $this->createForm();
-
         $form
             ->addFormField('pageTitle', [
                 'inputType' => 'text',
@@ -110,12 +110,12 @@ class FormTest extends TestCase
             $boundModel = $form->getBoundModel();
 
             $this->assertTrue(spl_object_hash($pageModel) === spl_object_hash($boundModel));
-            $this->assertEquals('My page title test', $boundModel->pageTitle);
-            $this->assertEquals(42, $boundModel->jumpTo);
+            $this->assertSame('My page title test', $boundModel->pageTitle);
+            $this->assertSame(42, $boundModel->jumpTo);
         }
     }
 
-    public function testBoundModelDefaultValues()
+    public function testBoundModelDefaultValues(): void
     {
         $form = $this->createForm(false);
 
@@ -138,9 +138,9 @@ class FormTest extends TestCase
 
         $form->createWidgets();
 
-        $this->assertEquals(13, $form->getWidget('id')->value);
-        $this->assertEquals('My page', $form->getWidget('pageTitle')->value);
-        $this->assertEquals(11, $form->getWidget('jumpTo')->value);
+        $this->assertSame(13, $form->getWidget('id')->value);
+        $this->assertSame('My page', $form->getWidget('pageTitle')->value);
+        $this->assertSame(11, $form->getWidget('jumpTo')->value);
     }
 
     private function createForm(bool $isSubmitted = true): Form
@@ -148,6 +148,6 @@ class FormTest extends TestCase
         $GLOBALS['TL_MODELS']['tl_page'] = PageModel::class;
         $GLOBALS['TL_FFL']['text'] = FormTextField::class;
 
-        return new Form('my-form-id', 'POST', fn () => $isSubmitted);
+        return new Form('my-form-id', 'POST', static fn () => $isSubmitted);
     }
 }

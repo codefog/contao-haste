@@ -14,8 +14,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class AjaxReloadListener
 {
-    public function __construct(private readonly AjaxReloadManager $manager, private readonly Packages $packages, private readonly RequestStack $requestStack,)
-    {
+    public function __construct(
+        private readonly AjaxReloadManager $manager,
+        private readonly Packages $packages,
+        private readonly RequestStack $requestStack,
+    ) {
     }
 
     #[AsHook('getContentElement')]
@@ -70,10 +73,11 @@ class AjaxReloadListener
                 $buffer = str_replace(
                     '</body>',
                     sprintf('<script src="%s"></script></body>', $this->packages->getUrl('ajax-reload.js', 'codefog_haste')),
-                    $buffer
+                    $buffer,
                 );
 
-                // Make sure the request is not cached by the browser alongside with the initial request
+                // Make sure the request is not cached by the browser alongside with the
+                // initial request
                 $request->headers->set('Vary', 'Haste-Ajax-Reload');
             }
         }
@@ -84,7 +88,7 @@ class AjaxReloadListener
     /**
      * Get the event from the current request.
      */
-    private function getEventFromCurrentRequest(): ?string
+    private function getEventFromCurrentRequest(): string|null
     {
         $request = $this->requestStack->getCurrentRequest();
 

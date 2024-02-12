@@ -14,9 +14,6 @@ use Doctrine\DBAL\Connection;
 
 abstract class DcaRelationsModel extends Model
 {
-    /**
-     * {@inheritdoc}
-     */
     public function __set($key, $value): void
     {
         if (($this->arrRelations[$key]['type'] ?? null) === 'haste-ManyToMany' && !\is_array($value)) {
@@ -26,14 +23,11 @@ abstract class DcaRelationsModel extends Model
         parent::__set($key, $value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRelated($key, array $options = [])
     {
         try {
             $relation = static::getRelation(static::getTable(), $key);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException) {
             $relation = null;
         }
 
@@ -52,7 +46,8 @@ abstract class DcaRelationsModel extends Model
 
                 $collection = [];
 
-                // Fetch from registry first (only possible if no options and the relation field is the PK)
+                // Fetch from registry first (only possible if no options and the relation field
+                // is the PK)
                 if (0 === \count($options) && $relation['field'] === $strClass::getPk()) {
                     foreach ($ids as $k => $id) {
                         $model = Registry::getInstance()->fetch($relation['related_table'], $id);
@@ -81,9 +76,6 @@ abstract class DcaRelationsModel extends Model
         return parent::getRelated($key, $options);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function save()
     {
         $values = [];
@@ -118,7 +110,8 @@ abstract class DcaRelationsModel extends Model
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
-        // Preserve the values order by using the force saved values in the table in the ORDER BY statement
+        // Preserve the values order by using the force saved values in the table in the
+        // ORDER BY statement
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['related_table']))) {
             $recordValues = $connection->fetchOne('SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1', [$values[0]]);
             $recordValues = StringUtil::deserialize($recordValues);
@@ -143,7 +136,8 @@ abstract class DcaRelationsModel extends Model
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
-        // Preserve the values order by using the force saved values in the table in the ORDER BY statement
+        // Preserve the values order by using the force saved values in the table in the
+        // ORDER BY statement
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['reference_table']))) {
             $recordValues = $connection->fetchOne('SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1', [$values[0]]);
             $recordValues = StringUtil::deserialize($recordValues);

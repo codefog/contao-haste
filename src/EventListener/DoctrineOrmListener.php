@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\EventListener;
 
 use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
@@ -13,7 +15,8 @@ class DoctrineOrmListener implements EventSubscriberInterface
 {
     public function __construct(
         private readonly DoctrineOrmHelper $helper,
-    ) {}
+    ) {
+    }
 
     public function getSubscribedEvents(): array
     {
@@ -52,7 +55,7 @@ class DoctrineOrmListener implements EventSubscriberInterface
             return;
         }
 
-        $relatedFields = $args->getObjectManager()->getClassMetadata(get_class($args->getObject()))->getAssociationNames();
+        $relatedFields = $args->getObjectManager()->getClassMetadata($args->getObject()::class)->getAssociationNames();
 
         foreach ($relatedFields as $relatedField) {
             $this->helper->updateRelatedValues($args->getObjectManager(), $args->getObject(), $relatedField);
@@ -61,7 +64,7 @@ class DoctrineOrmListener implements EventSubscriberInterface
 
     private function handlePreRemoveUndo(LifecycleEventArgs $args): void
     {
-        if ($this->getAttribute($args->getObject(), DoctrineOrmUndo::class) === null) {
+        if (null === $this->getAttribute($args->getObject(), DoctrineOrmUndo::class)) {
             return;
         }
 
@@ -85,14 +88,14 @@ class DoctrineOrmListener implements EventSubscriberInterface
 
     private function handlePostUpdateVersions(LifecycleEventArgs $args): void
     {
-        if ($this->getAttribute($args->getObject(), DoctrineOrmVersion::class) === null) {
+        if (null === $this->getAttribute($args->getObject(), DoctrineOrmVersion::class)) {
             return;
         }
 
         $this->helper->saveObjectVersion($args->getObject());
     }
 
-    private function getAttribute(object $object, string $attribute): ?\ReflectionAttribute
+    private function getAttribute(object $object, string $attribute): \ReflectionAttribute|null
     {
         $reflection = new \ReflectionClass($object);
         $reflectionAttributes = $reflection->getAttributes($attribute);

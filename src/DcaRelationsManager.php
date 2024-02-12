@@ -30,7 +30,9 @@ use Terminal42\DcMultilingualBundle\Driver;
 class DcaRelationsManager
 {
     private array $relationsCache = [];
+
     private array $filterableFields = [];
+
     private array $searchableFields = [];
 
     /**
@@ -55,9 +57,8 @@ class DcaRelationsManager
         private readonly ResourceFinderInterface $resourceFinder,
         private readonly ScopeMatcher $scopeMatcher,
         private readonly UndoManager $undoManager,
-        private readonly ?EntityManager $entityManager = null,
-    )
-    {
+        private readonly EntityManager|null $entityManager = null,
+    ) {
     }
 
     #[AsHook('loadDataContainer')]
@@ -108,7 +109,7 @@ class DcaRelationsManager
                 $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'filterByRelations'];
 
                 if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])) {
-                    $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_filter;filter', $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
+                    $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/filter/', 'haste_filter;filter', (string) $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
                     $GLOBALS['TL_DCA'][$table]['list']['sorting']['panel_callback']['haste_filter'] = [static::class, 'addRelationFilters'];
                 }
             }
@@ -117,7 +118,7 @@ class DcaRelationsManager
                 $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [static::class, 'filterBySearch'];
 
                 if (isset($GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'])) {
-                    $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/search/', 'haste_search;search', $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
+                    $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'] = preg_replace('/search/', 'haste_search;search', (string) $GLOBALS['TL_DCA'][$table]['list']['sorting']['panelLayout'], 1);
                     $GLOBALS['TL_DCA'][$table]['list']['sorting']['panel_callback']['haste_search'] = [static::class, 'addRelationSearch'];
                 }
             }
@@ -138,7 +139,7 @@ class DcaRelationsManager
 
         // Support for csv values
         if (($field['eval']['multiple'] ?? false) && ($field['eval']['csv'] ?? false)) {
-            $values = explode($field['eval']['csv'], $value);
+            $values = explode($field['eval']['csv'], (string) $value);
         } else {
             $values = StringUtil::deserialize($value, true);
         }
@@ -350,9 +351,9 @@ class DcaRelationsManager
     }
 
     #[AsHook('reviseTable')]
-    public function reviseRelatedRecords(string $table, array $ids = null): bool
+    public function reviseRelatedRecords(string $table, array|null $ids = null): bool
     {
-        if ($ids === null || count($ids) === 0 || !isset($GLOBALS['TL_DCA'][$table]['fields'])) {
+        if (null === $ids || 0 === \count($ids) || !isset($GLOBALS['TL_DCA'][$table]['fields'])) {
             return false;
         }
 
@@ -502,7 +503,7 @@ class DcaRelationsManager
                     $relation['related_table'],
                     $relation['field'],
                     $relation['table'],
-                    $relation['related_field']
+                    $relation['related_field'],
                 );
 
                 $procedure = [];
@@ -510,14 +511,14 @@ class DcaRelationsManager
 
                 $strPattern = 'CAST(%s AS CHAR) REGEXP ?';
 
-                if (str_ends_with(Config::get('dbCollation'), '_ci')) {
+                if (str_ends_with((string) Config::get('dbCollation'), '_ci')) {
                     $strPattern = 'LOWER(CAST(%s AS CHAR)) REGEXP LOWER(?)';
                 }
 
                 $fld = $relation['related_table'].'.'.$sessionData['haste_search'][$dc->table]['searchField'];
 
                 if (isset($GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey'])) {
-                    [$t, $f] = explode('.', $GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey']);
+                    [$t, $f] = explode('.', (string) $GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey']);
                     $procedure[] = '('.sprintf($strPattern, $fld).' OR '.sprintf($strPattern, "(SELECT $f FROM $t WHERE $t.id={$relatedTable}.$fld)").')';
                     $values[] = $sessionData['haste_search'][$dc->table]['searchValue'];
                 } else {
@@ -622,7 +623,7 @@ class DcaRelationsManager
                     $vv = $options_callback[$vv];
                 } elseif (isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'])) {
                     // Replace the ID with the foreign key
-                    $key = explode('.', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'], 2);
+                    $key = explode('.', (string) $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['foreignKey'], 2);
 
                     $parent = $this->connection->fetchOne('SELECT '.$key[1].' FROM '.$key[0].' WHERE id=?', [$vv]);
 
@@ -642,7 +643,7 @@ class DcaRelationsManager
                 }
 
                 // No empty options allowed
-                if (!\strlen($option_label)) {
+                if (!\strlen((string) $option_label)) {
                     $option_label = $vv ?: '-';
                 }
 
@@ -697,7 +698,7 @@ class DcaRelationsManager
             // Store search value in the current session
             if ('tl_filters' === Input::post('FORM_SUBMIT')) {
                 $fieldName = Input::post('tl_field_'.$field, true);
-                $keyword = ltrim(Input::postRaw('tl_value_'.$field), '*');
+                $keyword = ltrim((string) Input::postRaw('tl_value_'.$field), '*');
 
                 if ($fieldName && !\in_array($fieldName, $relatedSearchFields, true)) {
                     $fieldName = '';
@@ -708,7 +709,7 @@ class DcaRelationsManager
                 if ($fieldName && $keyword) {
                     try {
                         $this->connection->fetchOne('SELECT id FROM '.$relTable.' WHERE '.$fieldName.' REGEXP ? LIMIT 1', [$keyword]);
-                    } catch (\Exception $e) {
+                    } catch (\Exception) {
                         $keyword = '';
                     }
                 }
@@ -748,7 +749,7 @@ class DcaRelationsManager
     /**
      * Get the relation of particular field in the table.
      */
-    public function getRelation(string $table, string $fieldName): ?array
+    public function getRelation(string $table, string $fieldName): array|null
     {
         Controller::loadDataContainer($table);
 
@@ -762,7 +763,7 @@ class DcaRelationsManager
 
                 // Load from entity
                 if (isset($fieldConfig['entity'])) {
-                    if ($this->entityManager === null) {
+                    if (null === $this->entityManager) {
                         throw new \RuntimeException(sprintf('The entity has been defined in the relation for %s.%s, but there is no entity manager service!', $table, $fieldName));
                     }
 
@@ -794,7 +795,8 @@ class DcaRelationsManager
                             'skipInstall' => true,
                         ];
 
-                        // Set the table name directly in the relation of DCA field, so the DcaExtractor will not complain about incomplete relation
+                        // Set the table name directly in the relation of DCA field, so the DcaExtractor
+                        // will not complain about incomplete relation
                         if (!isset($fieldConfig['table'])) {
                             $GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['table'] = $relation['related_table'];
                         }
@@ -814,16 +816,16 @@ class DcaRelationsManager
                     $relation['reference_field'] = $fieldConfig['referenceColumn'] ?? (str_replace('tl_', '', $table).'_'.$relation['reference']);
                     $relation['reference_sql'] = $fieldConfig['referenceSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
 
-                    if (!is_array($relation['reference_sql'])) {
+                    if (!\is_array($relation['reference_sql'])) {
                         throw new \RuntimeException('The relation key "referenceSql" must be an array!');
                     }
 
                     // Related table data
                     $relation['related_table'] = $fieldConfig['table'];
-                    $relation['related_field'] = $fieldConfig['fieldColumn'] ?? (str_replace('tl_', '', $fieldConfig['table']).'_'.$relation['field']);
+                    $relation['related_field'] = $fieldConfig['fieldColumn'] ?? (str_replace('tl_', '', (string) $fieldConfig['table']).'_'.$relation['field']);
                     $relation['related_sql'] = $fieldConfig['fieldSql'] ?? ['type' => Types::INTEGER, 'unsigned' => true, 'default' => 0];
 
-                    if (!is_array($relation['related_sql'])) {
+                    if (!\is_array($relation['related_sql'])) {
                         throw new \RuntimeException('The relation key "fieldSql" must be an array!');
                     }
 

@@ -1,30 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\Hastebundle\Tests\Fixtures;
 
 class Entity
 {
-    private ?string $pageTitle = null;
-    private ?int $jumpTo = null;
+    private string|null $pageTitle = null;
 
-    public function getPageTitle(): ?string
+    private int|null $jumpTo = null;
+
+    public function getPageTitle(): string|null
     {
         return $this->pageTitle;
     }
 
-    public function setPageTitle(?string $pageTitle): self
+    public function setPageTitle(string|null $pageTitle): self
     {
         $this->pageTitle = $pageTitle;
 
         return $this;
     }
 
-    public function getJumpTo(): ?int
+    public function getJumpTo(): int|null
     {
         return $this->jumpTo;
     }
 
-    public function setJumpTo(?int $jumpTo): self
+    public function setJumpTo(int|null $jumpTo): self
     {
         $this->jumpTo = $jumpTo;
 

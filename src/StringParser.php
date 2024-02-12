@@ -14,9 +14,13 @@ class StringParser
      * Text filter options.
      */
     public const NO_TAGS = 1;
+
     public const NO_BREAKS = 2;
+
     public const NO_EMAILS = 4;
+
     public const NO_INSERTTAGS = 8;
+
     public const NO_ENTITIES = 16;
 
     /**
@@ -38,7 +42,7 @@ class StringParser
         $buffer = System::getContainer()->get('contao.insert_tag.parser')->replaceInline($buffer);
 
         // check if the insert tags have returned a simple token
-        if (str_contains($buffer, '##') && $buffer !== $text) {
+        if (str_contains((string) $buffer, '##') && $buffer !== $text) {
             $buffer = $this->recursiveReplaceTokensAndTags($buffer, $tokens, $textFlags);
         }
 
@@ -93,7 +97,7 @@ class StringParser
 
         // Remove HTML tags but keep line breaks for <br> and <p>
         if ($options & static::NO_TAGS) {
-            $value = strip_tags(preg_replace('{(?!^)<(br|p|/p).*?/?>\n?(?!$)}is', "\n", $value));
+            $value = strip_tags((string) preg_replace('{(?!^)<(br|p|/p).*?/?>\n?(?!$)}is', "\n", $value));
         }
 
         if ($options & static::NO_INSERTTAGS) {
@@ -118,7 +122,7 @@ class StringParser
     /**
      * Flatten input data, Simple Tokens can't handle arrays.
      */
-    public function flatten(mixed $value, string $key, array & $data, string $pattern = ', '): void
+    public function flatten(mixed $value, string $key, array &$data, string $pattern = ', '): void
     {
         if (\is_object($value)) {
             return;

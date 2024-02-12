@@ -31,19 +31,31 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 class Form
 {
     public const STATE_CLEAN = 0;
+
     public const STATE_DIRTY = 1;
 
     protected string $formId = '';
+
     protected string $httpMethod = '';
+
     protected string $action = '';
+
     protected string $enctype = 'application/x-www-form-urlencoded';
+
     protected bool $isSubmitted = false;
+
     protected bool $hasUploads = false;
+
     protected object|null $boundEntity = null;
+
     protected PropertyAccessor|null $propertyAccessor = null;
+
     protected Model|null $boundModel = null;
+
     protected array $validators = [];
+
     protected int $currentState = self::STATE_CLEAN;
+
     protected bool $isValid = true;
 
     /**
@@ -68,7 +80,7 @@ class Form
      */
     protected $inputCallback;
 
-    public function __construct(string $formId, string $httpMethod, callable $submitCheckCallback = null)
+    public function __construct(string $formId, string $httpMethod, callable|null $submitCheckCallback = null)
     {
         if (is_numeric($formId)) {
             throw new \InvalidArgumentException('You cannot use a numeric form id.');
@@ -86,9 +98,10 @@ class Form
         }
 
         $this->httpMethod = $httpMethod;
-        $this->isSubmitted = is_callable($submitCheckCallback) ? $submitCheckCallback($this) : true;
+        $this->isSubmitted = \is_callable($submitCheckCallback) ? $submitCheckCallback($this) : true;
 
-        // The form action can be set using several helper methods but by default it's just pointing to the current page
+        // The form action can be set using several helper methods but by default it's
+        // just pointing to the current page
         $this->action = Environment::get('requestUri');
     }
 
@@ -141,7 +154,7 @@ class Form
         return $this->currentState;
     }
 
-    public function getBoundEntity(): ?object
+    public function getBoundEntity(): object|null
     {
         return $this->boundEntity;
     }
@@ -149,7 +162,7 @@ class Form
     /**
      * Binds a Doctrine entity to the form. If there is data, haste form will add the present values as default values.
      */
-    public function setBoundEntity(object $boundEntity, PropertyAccessor $propertyAccessor = null): self
+    public function setBoundEntity(object $boundEntity, PropertyAccessor|null $propertyAccessor = null): self
     {
         $this->boundEntity = $boundEntity;
         $this->propertyAccessor = $propertyAccessor ?? new PropertyAccessor();
@@ -157,7 +170,7 @@ class Form
         return $this;
     }
 
-    public function getBoundModel(): ?Model
+    public function getBoundModel(): Model|null
     {
         return $this->boundModel;
     }
@@ -201,7 +214,7 @@ class Form
     /**
      * Set a callback to fetch the widget input instead of using getPost().
      */
-    public function setInputCallback(callable $callback = null): self
+    public function setInputCallback(callable|null $callback = null): self
     {
         $this->inputCallback = $callback;
 
@@ -315,7 +328,7 @@ class Form
     /**
      * Adds a form field.
      */
-    public function addFormField(string $fieldName, array $fieldConfig, ArrayPosition $position = null): self
+    public function addFormField(string $fieldName, array $fieldConfig, ArrayPosition|null $position = null): self
     {
         $this->checkFormFieldNameIsValid($fieldName);
 
@@ -336,7 +349,8 @@ class Form
 
             // Try to load the default value from bound Entity
             if (!($fieldConfig['ignoreEntityValue'] ?? false) && null !== $this->boundEntity) {
-                // If the field is a relation, store the value in the helper which will be processed by Doctrine events later on
+                // If the field is a relation, store the value in the helper which will be
+                // processed by Doctrine events later on
                 if (($fieldConfig['relation']['type'] ?? null) === 'haste-ManyToMany') {
                     $entityId = $this->boundEntity->getId();
 
@@ -384,20 +398,20 @@ class Form
                     }
 
                     return $value;
-                }
+                },
             );
         }
 
         // If the field is a relation, remove the default load/save callbacks
         if (!($fieldConfig['ignoreEntityValue'] ?? false) && null !== $this->boundEntity && ($fieldConfig['relation']['type'] ?? null) === 'haste-ManyToMany') {
             // Remove the load callbacks
-            if (is_array($fieldConfig['load_callback'] ?? null)) {
-                $fieldConfig['load_callback'] = array_values(array_filter($fieldConfig['load_callback'], fn (array $callback) => $callback[0] !== DcaRelationsManager::class));
+            if (\is_array($fieldConfig['load_callback'] ?? null)) {
+                $fieldConfig['load_callback'] = array_values(array_filter($fieldConfig['load_callback'], static fn (array $callback) => DcaRelationsManager::class !== $callback[0]));
             }
 
             // Remove the save callbacks
-            if (is_array($fieldConfig['save_callback'] ?? null)) {
-                $fieldConfig['save_callback'] = array_values(array_filter($fieldConfig['save_callback'], fn (array $callback) => $callback[0] !== DcaRelationsManager::class));
+            if (\is_array($fieldConfig['save_callback'] ?? null)) {
+                $fieldConfig['save_callback'] = array_values(array_filter($fieldConfig['save_callback'], static fn (array $callback) => DcaRelationsManager::class !== $callback[0]));
             }
         }
 
@@ -417,7 +431,7 @@ class Form
                     }
 
                     return $value;
-                }
+                },
             );
         }
 
@@ -432,7 +446,8 @@ class Form
         // Reset the ID to the field name
         $fieldConfig['id'] = $fieldName;
 
-        // Remove the label if it was not set – Contao will set it to field name if it's not present
+        // Remove the label if it was not set – Contao will set it to field name if
+        // it's not present
         if (!isset($label) || !$label) {
             $fieldConfig['label'] = '';
         }
@@ -466,54 +481,9 @@ class Form
     }
 
     /**
-     * Create the data container mock.
-     */
-    private function createDataContainerMock(mixed $value, string $field, string $name): DataContainer
-    {
-        return new class($this->getBoundModel(), $value, $field, $name) extends DataContainer {
-            public function __construct($model, $value, $field, $name)
-            {
-                $this->id = $model ? $model->id : 0;
-                $this->table = $model ? $model::getTable() : '';
-                $this->value = $value;
-                $this->field = $field;
-                $this->inputName = $name;
-                $this->activeRecord = $model; // BC
-
-                parent::__construct();
-            }
-
-            public function getCurrentRecord(int|string $id = null, string $table = null): ?array
-            {
-                if (!$id) {
-                    return null;
-                }
-
-                $record = $this->Database
-                    ->prepare("SELECT * FROM $table WHERE id=?")
-                    ->limit(1)
-                    ->execute($id)
-                ;
-
-                return $record->numRows ? $record->row() : null;
-            }
-
-            public function getPalette()
-            {
-                // noop
-            }
-
-            protected function save($varValue)
-            {
-                // noop
-            }
-        };
-    }
-
-    /**
      * Add multiple form fields.
      */
-    public function addFormFields(array $formFields, ArrayPosition $position = null): self
+    public function addFormFields(array $formFields, ArrayPosition|null $position = null): self
     {
         if (null !== $position && (ArrayPosition::FIRST === $position->position() || ArrayPosition::BEFORE === $position->position())) {
             $formFields = array_reverse($formFields, true);
@@ -554,14 +524,18 @@ class Form
     /**
      * Helper method to easily add a captcha field.
      */
-    public function addCaptchaFormField(string $fieldName = 'captcha', ArrayPosition $position = null): self
+    public function addCaptchaFormField(string $fieldName = 'captcha', ArrayPosition|null $position = null): self
     {
-        $this->addFormField($fieldName, [
-            'name' => $fieldName.'_'.$this->formId, // make sure they're unique on a page
-            'label' => &$GLOBALS['TL_LANG']['MSC']['securityQuestion'],
-            'inputType' => 'captcha',
-            'eval' => ['mandatory' => true],
-        ], $position);
+        $this->addFormField(
+            $fieldName,
+            [
+                'name' => $fieldName.'_'.$this->formId, // make sure they're unique on a page
+                'label' => &$GLOBALS['TL_LANG']['MSC']['securityQuestion'],
+                'inputType' => 'captcha',
+                'eval' => ['mandatory' => true],
+            ],
+            $position,
+        );
 
         return $this;
     }
@@ -569,13 +543,17 @@ class Form
     /**
      * Helper method to easily add a submit field.
      */
-    public function addSubmitFormField(string $label, string $fieldName = 'submit', ArrayPosition $position = null): self
+    public function addSubmitFormField(string $label, string $fieldName = 'submit', ArrayPosition|null $position = null): self
     {
-        $this->addFormField($fieldName, [
-            'name' => $fieldName,
-            'label' => $label,
-            'inputType' => 'submit',
-        ], $position);
+        $this->addFormField(
+            $fieldName,
+            [
+                'name' => $fieldName,
+                'label' => $label,
+                'inputType' => 'submit',
+            ],
+            $position,
+        );
 
         return $this;
     }
@@ -583,7 +561,7 @@ class Form
     /**
      * Add form fields from a back end DCA.
      */
-    public function addFieldsFromDca(string $table, callable $callback = null): self
+    public function addFieldsFromDca(string $table, callable|null $callback = null): self
     {
         System::loadLanguageFile($table);
         Controller::loadDataContainer($table);
@@ -619,14 +597,15 @@ class Form
     /**
      * Add form fields from a back end form generator form ID.
      */
-    public function addFieldsFromFormGenerator(int $formId, callable $callback = null): self
+    public function addFieldsFromFormGenerator(int $formId, callable|null $callback = null): self
     {
         if (($objFields = FormFieldModel::findPublishedByPid($formId)) === null) {
             throw new \InvalidArgumentException('Form ID "'.$formId.'" does not exist or has no published fields.');
         }
 
         while ($objFields->next()) {
-            // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
+            // make sure "name" is set because not all form fields do need it and it would
+            // thus overwrite the array indexes
             $fieldName = $objFields->name ?: 'field_'.$objFields->id;
 
             $this->checkFormFieldNameIsValid($fieldName);
@@ -653,7 +632,7 @@ class Form
     /**
      * Adds a form field from the form generator without trying to convert a DCA configuration.
      */
-    public function addFieldFromFormGenerator(string $fieldName, array $fieldConfig, ArrayPosition $position = null): self
+    public function addFieldFromFormGenerator(string $fieldName, array $fieldConfig, ArrayPosition|null $position = null): self
     {
         $this->checkFormFieldNameIsValid($fieldName);
 
@@ -661,7 +640,8 @@ class Form
             $position = ArrayPosition::last();
         }
 
-        // make sure "name" is set because not all form fields do need it and it would thus overwrite the array indexes
+        // make sure "name" is set because not all form fields do need it and it would
+        // thus overwrite the array indexes
         $fieldName = $fieldConfig['name'] ?: 'field_'.$fieldConfig['id'];
 
         // Make sure it has a "name" attribute because it is mandatory
@@ -789,7 +769,8 @@ class Form
 
                 // Bind to Entity instance
                 if (null !== $this->boundEntity) {
-                    // If the field is a relation, store the value in the helper which will be processed by doctrine events later on
+                    // If the field is a relation, store the value in the helper which will be
+                    // processed by doctrine events later on
                     if (null !== ($table = $this->getTableNameForEntity($this->boundEntity)) && ($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
                         /** @var DoctrineOrmHelper $doctrineHelper */
                         $doctrineHelper = System::getContainer()->get(DoctrineOrmHelper::class);
@@ -840,7 +821,6 @@ class Form
         $objObject->hasUploads = $this->hasUploads();
         $objObject->novalidate = $this->generateNoValidateAttribute();
 
-        /** @var Widget $widget */
         $widgets = [];
 
         // Split hidden and visigle widgets
@@ -884,14 +864,14 @@ class Form
     /**
      * Generate a form and return it as HTML string.
      */
-    public function generate(string $templateName = null): string
+    public function generate(string|null $templateName = null): string
     {
         if (null === $templateName) {
             $templateName = 'form';
 
             try {
                 TemplateLoader::getPath($templateName, 'html5');
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $templateName = 'form_wrapper';
             }
         }
@@ -940,12 +920,13 @@ class Form
     /**
      * Return the submitted data as an associative array.
      */
-    public function fetchAll(callable $callback = null): array
+    public function fetchAll(callable|null $callback = null): array
     {
         $data = [];
 
         foreach ($this->widgets as $fieldName => $widget) {
-            // Do not check $widget->submitInput() here because the callback could handle it differently
+            // Do not check $widget->submitInput() here because the callback could
+            // handle it differently
             if (\is_callable($callback)) {
                 $value = $callback($fieldName, $widget);
             } else {
@@ -975,9 +956,54 @@ class Form
     }
 
     /**
+     * Create the data container mock.
+     */
+    private function createDataContainerMock(mixed $value, string $field, string $name): DataContainer
+    {
+        return new class($this->getBoundModel(), $value, $field, $name) extends DataContainer {
+            public function __construct($model, $value, $field, $name)
+            {
+                $this->id = $model ? $model->id : 0;
+                $this->table = $model ? $model::getTable() : '';
+                $this->value = $value;
+                $this->field = $field;
+                $this->inputName = $name;
+                $this->activeRecord = $model; // BC
+
+                parent::__construct();
+            }
+
+            public function getCurrentRecord(int|string|null $id = null, string|null $table = null): array|null
+            {
+                if (!$id) {
+                    return null;
+                }
+
+                $record = $this->Database
+                    ->prepare("SELECT * FROM $table WHERE id=?")
+                    ->limit(1)
+                    ->execute($id)
+                ;
+
+                return $record->numRows ? $record->row() : null;
+            }
+
+            public function getPalette(): void
+            {
+                // noop
+            }
+
+            protected function save($varValue): void
+            {
+                // noop
+            }
+        };
+    }
+
+    /**
      * Get the table name for entity.
      */
-    private function getTableNameForEntity(object $entity): ?string
+    private function getTableNameForEntity(object $entity): string|null
     {
         return $this->getMetaDataForEntity($entity)?->getTableName();
     }
@@ -997,14 +1023,14 @@ class Form
     /**
      * Get the meta data for entity.
      */
-    private function getMetaDataForEntity(object $entity): ?ClassMetadata
+    private function getMetaDataForEntity(object $entity): ClassMetadata|null
     {
         static $cache = [];
 
-        $className = get_class($entity);
+        $className = $entity::class;
 
-        if (!array_key_exists($className, $cache)) {
-            $cache[$className] = $this->getEntityManager()?->getClassMetadata(get_class($entity));
+        if (!\array_key_exists($className, $cache)) {
+            $cache[$className] = $this->getEntityManager()?->getClassMetadata($entity::class);
         }
 
         return $cache[$className];
@@ -1013,7 +1039,7 @@ class Form
     /**
      * Get the entity manager.
      */
-    private function getEntityManager(): ?EntityManager
+    private function getEntityManager(): EntityManager|null
     {
         $service = 'doctrine.orm.entity_manager';
 
@@ -1021,9 +1047,6 @@ class Form
             return null;
         }
 
-        /** @var EntityManager $entityManager */
-        $entityManager = System::getContainer()->get($service);
-
-        return $entityManager;
+        return System::getContainer()->get($service);
     }
 }

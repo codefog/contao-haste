@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle\Tests\Fixtures;
 
-class FormTextField extends \Contao\Widget
+use Contao\Input;
+use Contao\Widget;
+
+class FormTextField extends Widget
 {
     public function validate(): void
     {
-        $this->value = \Contao\Input::post($this->name);
+        $this->value = Input::post($this->name);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\Hastebundle\Tests;
 
 use Codefog\HasteBundle\UrlParser;
@@ -10,7 +12,7 @@ class UrlParserTest extends TestCase
     /**
      * @dataProvider addQueryStringProvider
      */
-    public function testAddQueryString($request, $queryToAdd, $expectedResult)
+    public function testAddQueryString($request, $queryToAdd, $expectedResult): void
     {
         $parser = new UrlParser();
 
@@ -20,7 +22,7 @@ class UrlParserTest extends TestCase
     /**
      * @dataProvider removeQueryStringProvider
      */
-    public function testRemoveQueryString($request, $paramsToRemove, $expectedResult)
+    public function testRemoveQueryString($request, $paramsToRemove, $expectedResult): void
     {
         $parser = new UrlParser();
 
@@ -30,20 +32,17 @@ class UrlParserTest extends TestCase
     /**
      * @dataProvider removeQueryStringProvider
      */
-    public function testRemoveQueryStringCallback($request, $paramsToRemove, $expectedResult)
+    public function testRemoveQueryStringCallback($request, $paramsToRemove, $expectedResult): void
     {
         $parser = new UrlParser();
 
         $actualResult = $parser->removeQueryStringCallback(
-            static function ($value, $key) use ($paramsToRemove) {
-                return !in_array($key, $paramsToRemove, true);
-            },
-            $request
+            static fn ($value, $key) => !\in_array($key, $paramsToRemove, true),
+            $request,
         );
 
         $this->assertSame($expectedResult, $actualResult);
     }
-
 
     public function addQueryStringProvider()
     {
@@ -121,7 +120,6 @@ class UrlParserTest extends TestCase
             ],
         ];
     }
-
 
     public function removeQueryStringProvider()
     {

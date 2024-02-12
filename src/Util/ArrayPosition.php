@@ -7,14 +7,18 @@ namespace Codefog\HasteBundle\Util;
 class ArrayPosition
 {
     public const FIRST = 0;
+
     public const LAST = 1;
+
     public const BEFORE = 2;
+
     public const AFTER = 3;
 
     protected int $position;
+
     protected string $fieldName;
 
-    public function __construct(int $position, string $fieldName = null)
+    public function __construct(int $position, string|null $fieldName = null)
     {
         switch ($position) {
             case static::FIRST:
@@ -37,12 +41,12 @@ class ArrayPosition
         }
     }
 
-    public function position()
+    public function position(): int
     {
         return $this->position;
     }
 
-    public function fieldName()
+    public function fieldName(): string
     {
         return $this->fieldName;
     }
@@ -77,21 +81,21 @@ class ArrayPosition
 
     public static function first(): static
     {
-        return new static(static::FIRST);
+        return new self(static::FIRST);
     }
 
     public static function last(): static
     {
-        return new static(static::LAST);
+        return new self(static::LAST);
     }
 
     public static function before($fieldName): static
     {
-        return new static(static::BEFORE, $fieldName);
+        return new self(static::BEFORE, $fieldName);
     }
 
     public static function after($fieldName): static
     {
-        return new static(static::AFTER, $fieldName);
+        return new self(static::AFTER, $fieldName);
     }
 }

@@ -14,7 +14,7 @@ use Contao\StringUtil;
 #[AsHook('replaceInsertTags')]
 class InsertTagsListener
 {
-    public function __construct(private readonly Formatter $formatter,)
+    public function __construct(private readonly Formatter $formatter)
     {
     }
 
@@ -22,30 +22,16 @@ class InsertTagsListener
     {
         $chunks = StringUtil::trimsplit('::', $tag);
 
-        switch ($chunks[0]) {
-            case 'convert_dateformat':
-                return $this->replaceConvertedDateFormat($chunks);
-
-            case 'dca_label':
-                return $this->replaceDcaLabel($chunks);
-
-            case 'dca_value':
-                return $this->replaceDcaValue($chunks);
-
-            case 'formatted_datetime':
-                return $this->replaceFormattedDateTime($chunks);
-
-            case 'rand':
-                return 3 === \count($chunks) ? random_int((int) $chunks[1], (int) $chunks[2]) : mt_rand();
-
-            case 'flag':
-                return (string) $chunks[1];
-
-            case 'options_label':
-                return $this->replaceOptionsLabel($chunks);
-        }
-
-        return false;
+        return match ($chunks[0]) {
+            'convert_dateformat' => $this->replaceConvertedDateFormat($chunks),
+            'dca_label' => $this->replaceDcaLabel($chunks),
+            'dca_value' => $this->replaceDcaValue($chunks),
+            'formatted_datetime' => $this->replaceFormattedDateTime($chunks),
+            'rand' => 3 === \count($chunks) ? random_int((int) $chunks[1], (int) $chunks[2]) : mt_rand(),
+            'flag' => (string) $chunks[1],
+            'options_label' => $this->replaceOptionsLabel($chunks),
+            default => false,
+        };
     }
 
     /**
@@ -84,7 +70,7 @@ class InsertTagsListener
 
         try {
             $date = new Date($chunks[1], $determineFormat($chunks[2]));
-        } catch (\OutOfBoundsException $e) {
+        } catch (\OutOfBoundsException) {
             return false;
         }
 
@@ -110,7 +96,7 @@ class InsertTagsListener
 
         // Support strtotime()
         if (!is_numeric($timestamp)) {
-            $timestamp = strtotime($timestamp);
+            $timestamp = strtotime((string) $timestamp);
         }
 
         $strFormat = $chunks[2];

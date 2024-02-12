@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Codefog\HasteBundle;
 
 use Codefog\HasteBundle\Model\DcaRelationsModel;
@@ -15,7 +17,9 @@ class DoctrineOrmHelper
 {
     private array $entityRelatedValues = [];
 
-    /** @var array|Versions[] */
+    /**
+     * @var array<Versions>
+     */
     private array $entityVersions = [];
 
     public function __construct(
@@ -24,8 +28,8 @@ class DoctrineOrmHelper
         private readonly DcaRelationsManager $dcaRelationsManager,
         private readonly RouterInterface $router,
         private readonly Security $security,
-    )
-    {}
+    ) {
+    }
 
     /**
      * Add the entity related values.
@@ -84,7 +88,7 @@ class DoctrineOrmHelper
         }
 
         // Set the edit URL, if any
-        if (count($editRouteParams) > 0) {
+        if (\count($editRouteParams) > 0) {
             $editRouteParams['id'] ??= '%s';
             $editRouteParams['act'] ??= 'edit';
             $editRouteParams['rt'] ??= '1';
@@ -137,6 +141,6 @@ class DoctrineOrmHelper
      */
     private function getEntityUniqueId(object $entity): string
     {
-        return get_class($entity) . '::' . spl_object_id($entity);
+        return $entity::class.'::'.spl_object_id($entity);
     }
 }

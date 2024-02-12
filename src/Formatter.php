@@ -90,7 +90,7 @@ class Formatter
     /**
      * Format DCA field value according to Contao Core standard.
      */
-    public function dcaValue(string $table, string $field, mixed $value, DataContainer $dc = null): mixed
+    public function dcaValue(string $table, string $field, mixed $value, DataContainer|null $dc = null): mixed
     {
         $this->framework->initialize();
 
@@ -116,7 +116,7 @@ class Formatter
     /**
      * Format field value according to Contao Core standard.
      */
-    public function dcaValueFromArray(array $fieldConfig, mixed $value, DataContainer $dc = null): mixed
+    public function dcaValueFromArray(array $fieldConfig, mixed $value, DataContainer|null $dc = null): mixed
     {
         $value = StringUtil::deserialize($value);
 
@@ -129,7 +129,7 @@ class Formatter
             $fieldConfig['options'] = $fieldConfig['options_callback']($dc);
         } elseif (isset($fieldConfig['foreignKey']) && $value) {
             // foreignKey
-            $chunks = explode('.', $fieldConfig['foreignKey'], 2);
+            $chunks = explode('.', (string) $fieldConfig['foreignKey'], 2);
 
             $fieldConfig['options'] = [];
 
@@ -140,8 +140,8 @@ class Formatter
             }
         }
 
-        if (isset($fieldConfig['eval']['csv']) && str_contains($value, $fieldConfig['eval']['csv'])) {
-            $value = explode($fieldConfig['eval']['csv'], $value);
+        if (isset($fieldConfig['eval']['csv']) && str_contains((string) $value, (string) $fieldConfig['eval']['csv'])) {
+            $value = explode($fieldConfig['eval']['csv'], (string) $value);
         }
 
         if (\is_array($value)) {
@@ -153,15 +153,15 @@ class Formatter
         }
 
         if ('date' === ($fieldConfig['eval']['rgxp'] ?? null)) {
-            return ((string) $value !== '') ? $this->date((int) $value) : '';
+            return '' !== (string) $value ? $this->date((int) $value) : '';
         }
 
         if ('time' === ($fieldConfig['eval']['rgxp'] ?? null)) {
-            return ((string) $value !== '') ? $this->time((int) $value) : '';
+            return '' !== (string) $value ? $this->time((int) $value) : '';
         }
 
-        if ('datim' === ($fieldConfig['eval']['rgxp'] ?? null) || \in_array(($fieldConfig['flag'] ?? null), [5, 6, 7, 8, 9, 10], true) || 'tstamp' === ($fieldConfig['name'] ?? null)) {
-            return ((string) $value !== '') ? $this->datim((int) $value) : '';
+        if ('datim' === ($fieldConfig['eval']['rgxp'] ?? null) || \in_array($fieldConfig['flag'] ?? null, [5, 6, 7, 8, 9, 10], true) || 'tstamp' === ($fieldConfig['name'] ?? null)) {
+            return '' !== (string) $value ? $this->datim((int) $value) : '';
         }
 
         if (($fieldConfig['eval']['isBoolean'] ?? false) || ('checkbox' === ($fieldConfig['inputType'] ?? null) && !($fieldConfig['eval']['multiple'] ?? false))) {
@@ -176,7 +176,7 @@ class Formatter
             return \is_array($fieldConfig['reference'][$value]) ? $fieldConfig['reference'][$value][0] : $fieldConfig['reference'][$value];
         }
 
-        if ((($fieldConfig['eval']['isAssociative'] ?? null) || ArrayUtil::isAssoc($fieldConfig['options'] ?? null)) && isset($fieldConfig['options'][$value])) {
+        if (isset($fieldConfig['options'][$value]) && (($fieldConfig['eval']['isAssociative'] ?? null) || ArrayUtil::isAssoc($fieldConfig['options'] ?? null))) {
             return \is_array($fieldConfig['options'][$value]) ? $fieldConfig['options'][$value][0] : $fieldConfig['options'][$value];
         }
 
