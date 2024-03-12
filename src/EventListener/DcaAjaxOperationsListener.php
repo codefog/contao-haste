@@ -165,7 +165,7 @@ class DcaAjaxOperationsListener
         $hasPermission = true;
 
         // Check the permissions
-        if (($GLOBALS['TL_DCA'][$table]['fields'][$settings['field']]['exclude'] ?? false) && $this->security->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $table.'::'.$settings['field'])) {
+        if (($GLOBALS['TL_DCA'][$table]['fields'][$settings['field']]['exclude'] ?? false) && !$this->security->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $table.'::'.$settings['field'])) {
             $hasPermission = false;
         }
 
