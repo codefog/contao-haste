@@ -43,8 +43,8 @@ class InsertTagsListener
      *
      * Description:
      *
-     * The source_format and target_format can be any format from php date()
-     * or "date", "datim" or "time" to take the the format from the root page settings
+     * The source_format and target_format can be any format from php date() or
+     * "date", "datim" or "time" to take the the format from the root page settings
      * (or system settings, in case not defined).
      *
      * Possible use cases:
@@ -84,11 +84,14 @@ class InsertTagsListener
      *
      * {{formatted_datetime::timestamp}}
      *      or
-     * {{formatted_datetime::timestamp::datim}} - formats a given timestamp with the global date and time (datim) format
-     * {{formatted_datetime::timestamp::date}} - formats a given timestamp with the global date format
-     * {{formatted_datetime::timestamp::time}} - formats a given timestamp with the global time format
-     * {{formatted_datetime::timestamp::Y-m-d H:i}} - formats a given timestamp with the specified format
-     * {{formatted_datetime::+1 day::Y-m-d H:i}} - formats a given php date/time format (see http://php.net/manual/en/function.strtotime.php) with the specified format
+     * {{formatted_datetime::timestamp::datim}} - formats a given timestamp with the
+     * global date and time (datim) format {{formatted_datetime::timestamp::date}} -
+     * formats a given timestamp with the global date format
+     * {{formatted_datetime::timestamp::time}} - formats a given timestamp with the
+     * global time format {{formatted_datetime::timestamp::Y-m-d H:i}} - formats a
+     * given timestamp with the specified format {{formatted_datetime::+1 day::Y-m-d
+     * H:i}} - formats a given php date/time format (see
+     * http://php.net/manual/en/function.strtotime.php) with the specified format
      */
     private function replaceFormattedDateTime(array $chunks): string
     {
@@ -149,7 +152,7 @@ class InsertTagsListener
     {
         $value = $chunks[2];
 
-        if (null === ($field = FormFieldModel::findByPk($chunks[1]))) {
+        if (null === ($field = FormFieldModel::findById($chunks[1]))) {
             return $value;
         }
 

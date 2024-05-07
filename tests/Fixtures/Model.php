@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests\Fixtures;
+namespace Codefog\HasteBundle\Tests\Fixtures;
 
 class Model
 {
@@ -18,7 +18,7 @@ class Model
         $this->data[$key] = $value;
     }
 
-    public static function findByPk(int $id): static
+    public static function findById(int $id): static
     {
         $model = new static();
         $model->id = $id;

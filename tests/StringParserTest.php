@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests;
+namespace Codefog\HasteBundle\Tests;
 
 use Codefog\HasteBundle\StringParser;
 use PHPUnit\Framework\TestCase;
@@ -20,7 +20,7 @@ class StringParserTest extends TestCase
         $this->assertSame($expected, $data);
     }
 
-    public function flattenDataProvider()
+    public static function flattenDataProvider(): iterable
     {
         return [
             // String input will set key and value
@@ -83,8 +83,8 @@ class StringParserTest extends TestCase
                 'foo',
                 [],
                 [
-                    'foo_bar' => 'baz',
                     'foo_bar_baz' => '1',
+                    'foo_bar' => 'baz',
                     'foo' => '',
                 ],
             ],

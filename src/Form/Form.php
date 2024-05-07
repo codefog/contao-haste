@@ -160,7 +160,8 @@ class Form
     }
 
     /**
-     * Binds a Doctrine entity to the form. If there is data, haste form will add the present values as default values.
+     * Binds a Doctrine entity to the form. If there is data, haste form will add the
+     * present values as default values.
      */
     public function setBoundEntity(object $boundEntity, PropertyAccessor|null $propertyAccessor = null): self
     {
@@ -176,7 +177,8 @@ class Form
     }
 
     /**
-     * Binds a model instance to the form. If there is data, haste form will add the present values as default values.
+     * Binds a model instance to the form. If there is data, haste form will add the
+     * present values as default values.
      */
     public function setBoundModel(Model $boundModel): self
     {
@@ -585,9 +587,10 @@ class Form
     /**
      * Return true if the field has "inputType" set, false otherwise.
      *
-     * This is a default callback that can be used with addFieldsFromDca() method. It prevents from adding fields
-     * that do not have inputType specified which would result in an exception. The fields you typically would
-     * like to skip are: id, tstamp, pid, sorting.
+     * This is a default callback that can be used with addFieldsFromDca() method. It
+     * prevents from adding fields that do not have inputType specified which would
+     * result in an exception. The fields you typically would like to skip are: id,
+     * tstamp, pid, sorting.
      */
     public function skipFieldsWithoutInputType(string $fieldName, array $fieldConfig): bool
     {
@@ -630,7 +633,8 @@ class Form
     }
 
     /**
-     * Adds a form field from the form generator without trying to convert a DCA configuration.
+     * Adds a form field from the form generator without trying to convert a DCA
+     * configuration.
      */
     public function addFieldFromFormGenerator(string $fieldName, array $fieldConfig, ArrayPosition|null $position = null): self
     {

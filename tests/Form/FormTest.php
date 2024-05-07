@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests\Form;
+namespace Codefog\HasteBundle\Tests\Form;
 
 use Codefog\HasteBundle\Form\Form;
-use Codefog\Hastebundle\Tests\Fixtures\Entity;
-use Codefog\Hastebundle\Tests\Fixtures\FormTextField;
+use Codefog\HasteBundle\Tests\Fixtures\Entity;
+use Codefog\HasteBundle\Tests\Fixtures\FormTextField;
 use Contao\Input;
 use Contao\PageModel;
+use Contao\System;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class FormTest extends TestCase
 {
@@ -119,7 +122,7 @@ class FormTest extends TestCase
     {
         $form = $this->createForm(false);
 
-        $pageModel = PageModel::findByPk(13);
+        $pageModel = PageModel::findById(13);
         $pageModel->pageTitle = 'My page';
         $pageModel->jumpTo = 11;
         $form->setBoundModel($pageModel);
@@ -147,6 +150,10 @@ class FormTest extends TestCase
     {
         $GLOBALS['TL_MODELS']['tl_page'] = PageModel::class;
         $GLOBALS['TL_FFL']['text'] = FormTextField::class;
+
+        $container = new Container();
+        $container->set('request_stack', new RequestStack());
+        System::setContainer($container);
 
         return new Form('my-form-id', 'POST', static fn () => $isSubmitted);
     }

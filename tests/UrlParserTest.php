@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests;
+namespace Codefog\HasteBundle\Tests;
 
 use Codefog\HasteBundle\UrlParser;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +44,7 @@ class UrlParserTest extends TestCase
         $this->assertSame($expectedResult, $actualResult);
     }
 
-    public function addQueryStringProvider()
+    public static function addQueryStringProvider(): iterable
     {
         // current request -> query to add -> expected result
         return [
@@ -121,7 +121,7 @@ class UrlParserTest extends TestCase
         ];
     }
 
-    public function removeQueryStringProvider()
+    public static function removeQueryStringProvider(): iterable
     {
         // current request -> query to remove -> expected result
         return [

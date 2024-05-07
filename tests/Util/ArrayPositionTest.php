@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests\Util;
+namespace Codefog\HasteBundle\Tests\Util;
 
 use Codefog\HasteBundle\Util\ArrayPosition;
 use PHPUnit\Framework\TestCase;
