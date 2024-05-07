@@ -36,16 +36,16 @@ class DcaRelationsManager
     private array $searchableFields = [];
 
     /**
-     * This cache stores the table and record ID that has been already purged.
-     * It allows you to have multiple fields with the same relation in one DCA
-     * and prevents the earlier field values to be removed by the last one
-     * (the helper table is purged only once in this case, for the first field).
+     * This cache stores the table and record ID that has been already purged. It
+     * allows you to have multiple fields with the same relation in one DCA and
+     * prevents the earlier field values to be removed by the last one (the helper
+     * table is purged only once in this case, for the first field).
      */
     private array $purgeCache = [];
 
     /**
-     * This cache is in fact a hotfix for the "override all" mode. It simply
-     * does not allow the last record to be double-saved.
+     * This cache is in fact a hotfix for the "override all" mode. It simply does not
+     * allow the last record to be double-saved.
      */
     private array $overrideAllCache = [];
 
@@ -848,8 +848,7 @@ class DcaRelationsManager
 
     /**
      * Get the relations table name in the following format (sorted alphabetically):
-     * Parameters: tl_table_one, tl_table_two
-     * Returned value: tl_table_one_table_two.
+     * Parameters: tl_table_one, tl_table_two Returned value: tl_table_one_table_two.
      */
     public function getTableName(string $tableOne, string $tableTwo): string
     {

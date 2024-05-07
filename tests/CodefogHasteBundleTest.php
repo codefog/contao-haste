@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests;
+namespace Codefog\HasteBundle\Tests;
 
 use Codefog\HasteBundle\CodefogHasteBundle;
 use PHPUnit\Framework\TestCase;

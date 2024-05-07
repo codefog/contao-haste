@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Codefog\Hastebundle\Tests\Fixtures;
+namespace Codefog\HasteBundle\Tests\Fixtures;
 
 use Contao\Model;
 

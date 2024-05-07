@@ -118,7 +118,8 @@ class DcaDateRangeFilterListener
     }
 
     /**
-     * On data container load callback. Filters the records by setting sorting->root if filters are set.
+     * On data container load callback. Filters the records by setting sorting->root
+     * if filters are set.
      */
     public function onLoadCallback(DataContainer $dc): void
     {
