@@ -2,6 +2,8 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
+        bind:
+            string $projectDir: '%kernel.project_dir%'
 
     # AjaxReload
     Codefog\HasteBundle\AjaxReloadManager:
@@ -49,3 +51,6 @@ services:
     # UrlParser
     Codefog\HasteBundle\UrlParser:
         public: true
+
+    # FileUploadNormalizer
+    Codefog\HasteBundle\FileUploadNormalizer: ~
