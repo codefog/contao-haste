@@ -152,7 +152,7 @@ class Relations
 
             // Support for csv values
             if (($field['eval']['multiple'] ?? false) && ($field['eval']['csv'] ?? false)) {
-                $arrValues = explode($field['eval']['csv'], $varValue);
+                $arrValues = !$varValue ? [] : explode($field['eval']['csv'], $varValue);
             } else {
                 $arrValues = deserialize($varValue, true);
             }
