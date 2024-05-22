@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Codefog\HasteBundle\Tests;
 
 use Codefog\HasteBundle\StringParser;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Contao\CoreBundle\String\SimpleTokenParser;
 use PHPUnit\Framework\TestCase;
 
 class StringParserTest extends TestCase
@@ -14,7 +16,7 @@ class StringParserTest extends TestCase
      */
     public function testFlatten(mixed $value, string $key, array $data, array $expected): void
     {
-        $parser = new StringParser();
+        $parser = new StringParser($this->createMock(SimpleTokenParser::class), $this->createMock(InsertTagParser::class));
         $parser->flatten($value, $key, $data);
 
         $this->assertSame($expected, $data);
