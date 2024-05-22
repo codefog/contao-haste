@@ -139,7 +139,7 @@ class DcaRelationsManager
 
         // Support for csv values
         if (($field['eval']['multiple'] ?? false) && ($field['eval']['csv'] ?? false)) {
-            $values = explode($field['eval']['csv'], (string) $value);
+            $values = !$value ? [] : explode($field['eval']['csv'], $value);
         } else {
             $values = StringUtil::deserialize($value, true);
         }
