@@ -27,6 +27,7 @@ Then, run the Contao install tool to update the database.
 - [DcaRelations](docs/DcaRelations.md)
 - [DoctrineOrm](docs/DoctrineOrm.md)
 - [Form](docs/Form.md)
+- [FileUploadNormalizer](docs/FileUploadNormalizer.md)
 - [Formatter](docs/Formatter.md)
 - [StringParser](docs/StringParser.md)
 - [Undo](docs/Undo.md)
