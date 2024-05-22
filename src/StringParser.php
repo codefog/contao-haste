@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Codefog\HasteBundle;
 
 use Contao\ArrayUtil;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Contao\CoreBundle\String\SimpleTokenParser;
 use Contao\StringUtil;
-use Contao\System;
 
 class StringParser
 {
@@ -23,6 +24,12 @@ class StringParser
 
     public const NO_ENTITIES = 16;
 
+    public function __construct(
+        private SimpleTokenParser $simpleTokenParser,
+        private InsertTagParser $insertTagParser,
+    ) {
+    }
+
     /**
      * Recursively replace simple tokens and insert tags.
      */
@@ -36,13 +43,13 @@ class StringParser
         $text = StringUtil::decodeEntities($text);
 
         // first parse the tokens as they might have if-else clauses
-        $buffer = System::getContainer()->get('contao.string.simple_token_parser')->parse($text, $tokens);
+        $buffer = $this->simpleTokenParser->parse($text, $tokens);
 
         // then replace the insert tags
-        $buffer = System::getContainer()->get('contao.insert_tag.parser')->replaceInline($buffer);
+        $buffer = $this->insertTagParser->replaceInline($buffer);
 
         // check if the insert tags have returned a simple token
-        if (str_contains((string) $buffer, '##') && $buffer !== $text) {
+        if (str_contains($buffer, '##') && $buffer !== $text) {
             $buffer = $this->recursiveReplaceTokensAndTags($buffer, $tokens, $textFlags);
         }
 
