@@ -126,7 +126,7 @@ class Pagination
 
     public function getCurrentPage(): int
     {
-        return Input::get($this->getUrlParameter()) ?: 1;
+        return (int) (Input::get($this->getUrlParameter()) ?: 1);
     }
 
     /**
