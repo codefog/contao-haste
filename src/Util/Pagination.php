@@ -124,6 +124,11 @@ class Pagination
         return $this->pagination;
     }
 
+    public function getCurrentPage(): int
+    {
+        return Input::get($this->getUrlParameter()) ?: 1;
+    }
+
     /**
      * Generate the pagination and return it as HTML string.
      */
@@ -143,7 +148,7 @@ class Pagination
             return;
         }
 
-        $page = Input::get($this->getUrlParameter()) ?: 1;
+        $page = $this->getCurrentPage();
 
         // Set limit and offset
         $limit = $this->getPerPage() ?: $this->getTotal();
