@@ -76,6 +76,8 @@ class AjaxReloadManager implements ResetInterface
 
     /**
      * Get the response.
+     *
+     * @deprecated
      */
     public function getResponse(): Response|null
     {
@@ -87,6 +89,14 @@ class AjaxReloadManager implements ResetInterface
         $response->headers->set('Vary', 'Accept');
 
         return $response;
+    }
+
+    /**
+     * Get the buffers.
+     */
+    public function getBuffers(): array
+    {
+        return $this->buffers;
     }
 
     /**

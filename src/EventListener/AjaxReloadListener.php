@@ -7,17 +7,21 @@ namespace Codefog\HasteBundle\EventListener;
 use Codefog\HasteBundle\AjaxReloadManager;
 use Contao\ContentModel;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
-use Contao\CoreBundle\Exception\ResponseException;
+use Contao\CoreBundle\Routing\ScopeMatcher;
 use Contao\ModuleModel;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-class AjaxReloadListener
+class AjaxReloadListener implements EventSubscriberInterface
 {
     public function __construct(
         private readonly AjaxReloadManager $manager,
         private readonly Packages $packages,
         private readonly RequestStack $requestStack,
+        private readonly ScopeMatcher $scopeMatcher,
     ) {
     }
 
@@ -59,30 +63,54 @@ class AjaxReloadListener
         return $buffer;
     }
 
-    #[AsHook('modifyFrontendPage')]
-    public function onModifyFrontendPage(string $buffer, string $template): string
+    public function onResponse(ResponseEvent $event): void
     {
-        if (str_starts_with($template, 'fe_')) {
-            if (($response = $this->manager->getResponse()) !== null) {
-                throw new ResponseException($response);
-            }
+        $request = $event->getRequest();
 
-            $request = $this->requestStack->getCurrentRequest();
-
-            if ($this->manager->hasListeners()) {
-                $buffer = str_replace(
-                    '</body>',
-                    sprintf('<script src="%s"></script></body>', $this->packages->getUrl('ajax-reload.js', 'codefog_haste')),
-                    $buffer,
-                );
-
-                // Make sure the request is not cached by the browser alongside with the
-                // initial request
-                $request->headers->set('Vary', 'Haste-Ajax-Reload');
-            }
+        // Only handle GET requests
+        if (!$request->isMethod(Request::METHOD_GET)) {
+            return;
         }
 
-        return $buffer;
+        // Only handle frontend requests
+        if (!$this->scopeMatcher->isFrontendRequest($request)) {
+            return;
+        }
+
+        $response = $event->getResponse();
+
+        // Only handle text/html responses
+        if ($response->headers->get('Content-Type') === 'text/html') {
+            return;
+        }
+
+        // Modify the regular response
+        if ($this->manager->hasListeners() && !$request->headers->has('Haste-Ajax-Reload')) {
+            // Vary on the header, so we don't have the same URL cached
+            $response->headers->set('Vary', 'Haste-Ajax-Reload', false);
+
+            // Add the necessary <script> tags
+            $response->setContent(str_replace(
+                '</body>',
+                sprintf('<script src="%s"></script></body>', $this->packages->getUrl('ajax-reload.js', 'codefog_haste')),
+                $response->getContent(),
+            ));
+
+            return;
+        }
+
+        // Return the requested buffers in an ajax response
+        if ($request->headers->has('Haste-Ajax-Reload') && ($buffers = $this->manager->getBuffers()) !== []) {
+            $response->setContent(json_encode($buffers));
+            $response->headers->set('Content-Type', 'application/json');
+        }
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ResponseEvent::class => 'onResponse',
+        ];
     }
 
     /**
