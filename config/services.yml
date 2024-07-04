@@ -4,6 +4,7 @@ services:
         autoconfigure: true
         bind:
             string $projectDir: '%kernel.project_dir%'
+            $security: '@security.helper'
 
     # AjaxReload
     Codefog\HasteBundle\AjaxReloadManager:

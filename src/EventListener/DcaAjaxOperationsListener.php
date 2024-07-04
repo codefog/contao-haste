@@ -20,10 +20,11 @@ use Contao\System;
 use Contao\Versions;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
+use Symfony\Bundle\SecurityBundle\Security as BundleSecurity;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Security as CoreSecurity;
 
 class DcaAjaxOperationsListener
 {
@@ -32,7 +33,9 @@ class DcaAjaxOperationsListener
         private readonly Packages $packages,
         private readonly RequestStack $requestStack,
         private readonly ScopeMatcher $scopeMatcher,
-        private readonly Security $security,
+        // To remain compatible with symfony/security-core 5.4 (Contao 4.13), 6.4 (Contao 5.3) and 7.0+ (Contao 5.4+),
+        // we need to allow both types for the @security.helper service.
+        private readonly CoreSecurity|BundleSecurity $security,
         private readonly ContaoCsrfTokenManager $tokenManager,
     ) {
     }
