@@ -10,11 +10,8 @@ use Contao\FrontendUser;
 use Contao\Versions;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Bundle\SecurityBundle\Security as BundleSecurity;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Security as CoreSecurity;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class DoctrineOrmHelper
 {
@@ -30,7 +27,7 @@ class DoctrineOrmHelper
         private readonly Connection $connection,
         private readonly DcaRelationsManager $dcaRelationsManager,
         private readonly RouterInterface $router,
-        private readonly AuthorizationCheckerInterface $security,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {
     }
 
@@ -85,7 +82,7 @@ class DoctrineOrmHelper
         $versions = new Versions($objectManager->getClassMetadata($entity::class)->getTableName(), $entity->getId());
 
         // Set the frontend user, if any
-        if (($user = $this->getUser()) instanceof FrontendUser) {
+        if (($user = $this->tokenStorage->getToken()?->getUser()) instanceof FrontendUser) {
             $versions->setUsername($user->username);
             $versions->setUserId(0);
         }
@@ -145,18 +142,5 @@ class DoctrineOrmHelper
     private function getEntityUniqueId(object $entity): string
     {
         return $entity::class.'::'.spl_object_id($entity);
-    }
-
-    /**
-     * Helper function to get the user from the @security.helper service 
-     * to stay compatible with Contao 4.13, 5.3 and 5.4+.
-     */
-    private function getUser(): UserInterface|null
-    {
-        if ($this->security instanceof CoreSecurity || $this->security instanceof BundleSecurity) {
-            return $this->security->getUser();
-        }
-
-        return null;
     }
 }
