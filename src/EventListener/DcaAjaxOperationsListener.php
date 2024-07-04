@@ -24,7 +24,6 @@ use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Security;
 
 class DcaAjaxOperationsListener
 {
@@ -33,9 +32,7 @@ class DcaAjaxOperationsListener
         private readonly Packages $packages,
         private readonly RequestStack $requestStack,
         private readonly ScopeMatcher $scopeMatcher,
-        // To remain compatible with symfony/security-core 5.4 (Contao 4.13), 6.4 (Contao 5.3) and 7.0+ (Contao 5.4+),
-        // we need to allow both types for the @security.helper service.
-        private readonly Security|AuthorizationCheckerInterface $security,
+        private readonly AuthorizationCheckerInterface $security,
         private readonly ContaoCsrfTokenManager $tokenManager,
     ) {
     }
