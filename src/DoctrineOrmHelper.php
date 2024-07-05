@@ -11,7 +11,7 @@ use Contao\Versions;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class DoctrineOrmHelper
 {
@@ -27,7 +27,7 @@ class DoctrineOrmHelper
         private readonly Connection $connection,
         private readonly DcaRelationsManager $dcaRelationsManager,
         private readonly RouterInterface $router,
-        private readonly Security $security,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {
     }
 
@@ -82,7 +82,7 @@ class DoctrineOrmHelper
         $versions = new Versions($objectManager->getClassMetadata($entity::class)->getTableName(), $entity->getId());
 
         // Set the frontend user, if any
-        if (($user = $this->security->getUser()) instanceof FrontendUser) {
+        if (($user = $this->tokenStorage->getToken()?->getUser()) instanceof FrontendUser) {
             $versions->setUsername($user->username);
             $versions->setUserId(0);
         }

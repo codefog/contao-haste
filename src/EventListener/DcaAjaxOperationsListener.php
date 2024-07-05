@@ -23,7 +23,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class DcaAjaxOperationsListener
 {
@@ -32,7 +32,7 @@ class DcaAjaxOperationsListener
         private readonly Packages $packages,
         private readonly RequestStack $requestStack,
         private readonly ScopeMatcher $scopeMatcher,
-        private readonly Security $security,
+        private readonly AuthorizationCheckerInterface $security,
         private readonly ContaoCsrfTokenManager $tokenManager,
     ) {
     }
