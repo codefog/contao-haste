@@ -65,6 +65,10 @@ class AjaxReloadListener implements EventSubscriberInterface
 
     public function onResponse(ResponseEvent $event): void
     {
+        if (!$this->scopeMatcher->isFrontendMainRequest($event)) {
+            return;
+        }
+
         $request = $event->getRequest();
 
         // Only handle GET requests
@@ -72,15 +76,10 @@ class AjaxReloadListener implements EventSubscriberInterface
             return;
         }
 
-        // Only handle frontend requests
-        if (!$this->scopeMatcher->isFrontendRequest($request)) {
-            return;
-        }
-
         $response = $event->getResponse();
 
         // Only handle text/html responses
-        if ($response->headers->get('Content-Type') === 'text/html') {
+        if (!str_starts_with($response->headers->get('Content-Type', ''), 'text/html')) {
             return;
         }
 
