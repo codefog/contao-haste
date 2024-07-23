@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Codefog\HasteBundle\Util;
 
 use Contao\Config;
+use Contao\FrontendTemplate;
 use Contao\Input;
+use Contao\Template;
 
 class Pagination
 {
@@ -29,14 +31,17 @@ class Pagination
 
     protected int $offset;
 
+    protected Template|string|null $template = null;
+
     protected \Contao\Pagination $pagination;
 
-    public function __construct(int $total, int $perPage, string $urlParameter)
+    public function __construct(int $total, int $perPage, string $urlParameter, Template|string|null $template = null)
     {
         $this->setTotal($total);
         $this->setPerPage($perPage);
         $this->setUrlParameter($urlParameter);
         $this->setMaxPaginationLinks(Config::get('maxPaginationLinks'));
+        $this->setTemplate($template);
     }
 
     public function getCurrentState(): int
@@ -124,6 +129,21 @@ class Pagination
         return $this->pagination;
     }
 
+    public function getTemplate(): ?Template
+    {
+        $this->compile();
+
+        return $this->template;
+    }
+
+    public function setTemplate(Template|string|null $template): self
+    {
+        $this->currentState = self::STATE_DIRTY;
+        $this->template = $template;
+
+        return $this;
+    }
+
     public function getCurrentPage(): int
     {
         return (int) (Input::get($this->getUrlParameter()) ?: 1);
@@ -159,11 +179,16 @@ class Pagination
             $limit = $this->getTotal() - $offset;
         }
 
+        if (is_string($this->template)) {
+            $this->template = new FrontendTemplate($this->template);
+        }
+
         $this->pagination = new \Contao\Pagination(
             $this->getTotal(),
             $this->getPerPage(),
             $this->getMaxPaginationLinks(),
             $this->getUrlParameter(),
+            $this->template,
         );
 
         $this->currentState = self::STATE_CLEAN;
