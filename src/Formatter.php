@@ -140,7 +140,7 @@ class Formatter
             }
         }
 
-        if (isset($fieldConfig['eval']['csv']) && str_contains((string) $value, (string) $fieldConfig['eval']['csv'])) {
+        if (isset($fieldConfig['eval']['csv']) && !is_array($value) && str_contains((string) $value, (string) $fieldConfig['eval']['csv'])) {
             $value = explode($fieldConfig['eval']['csv'], (string) $value);
         }
 
