@@ -898,7 +898,7 @@ class Form
             throw new \BadMethodCallException('The has been not submitted');
         }
 
-        if ('POST' !== $this->getHttpMethod()) {
+        if (!$this->inputCallback && 'POST' !== $this->getHttpMethod()) {
             throw new \BadMethodCallException('Widgets only support fetching POST values. Use the \Contao\Input class for other purposes.');
         }
 
