@@ -737,7 +737,7 @@ class Form
 
         foreach ($this->widgets as $fieldName => $widget) {
             if (null !== $this->inputCallback && method_exists($widget, 'setInputCallback')) {
-                $widget->setInputCallback($this->inputCallback);
+                $widget->setInputCallback(static fn () => ${$this->inputCallback}($fieldName, $widget));
             }
 
             $widget->validate();
