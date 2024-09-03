@@ -737,7 +737,7 @@ class Form
 
         foreach ($this->widgets as $fieldName => $widget) {
             if (null !== $this->inputCallback && method_exists($widget, 'setInputCallback')) {
-                $widget->setInputCallback($this->inputCallback);
+                $widget->setInputCallback(fn () => call_user_func($this->inputCallback, $fieldName, $widget));
             }
 
             $widget->validate();
@@ -898,7 +898,7 @@ class Form
             throw new \BadMethodCallException('The has been not submitted');
         }
 
-        if ('POST' !== $this->getHttpMethod()) {
+        if (!$this->inputCallback && 'POST' !== $this->getHttpMethod()) {
             throw new \BadMethodCallException('Widgets only support fetching POST values. Use the \Contao\Input class for other purposes.');
         }
 
