@@ -37,8 +37,8 @@ if (!class_exists(HasteUpdater::class)) {
         {
             $this->loadDataContainers();
 
-            foreach ((array) $GLOBALS['TL_DCA'] as $tableName => $dca) {
-                foreach ((array) $dca['fields'] as $fieldName => $fieldData) {
+            foreach (($GLOBALS['TL_DCA'] ?? []) as $tableName => $dca) {
+                foreach (($dca['fields'] ?? []) as $fieldName => $fieldData) {
                     $relation = \Haste\Model\Relations::getRelation($tableName, $fieldName);
 
                     if ($relation === false) {
