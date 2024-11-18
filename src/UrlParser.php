@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Codefog\HasteBundle;
 
-use Contao\Environment;
 use Contao\StringUtil;
+use Contao\System;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class UrlParser
 {
+    public function __construct(private readonly RequestStack|null $requestStack = null)
+    {
+    }
+
     /**
      * Add a query string to the given URI string or page ID.
      */
@@ -97,9 +102,20 @@ class UrlParser
     protected function prepareUrl(string|null $url = null): string
     {
         if (null === $url) {
-            $url = Environment::get('requestUri');
+            if (null !== $this->requestStack) {
+                $url = $this->requestStack->getCurrentRequest()?->getUri();
+            } else {
+                // Fallback for manually created UrlParser instances
+                trigger_deprecation('codefog/contao-haste', '5.2', 'Instantiating "%s" without the RequestStack has been deprecated and will no longer work in Haste 6. Retrieve the "%s" service from the container instead.', __CLASS__);
+
+                $container = System::getContainer();
+
+                if ($container->has('request_stack')) {
+                    $url = $container->get('request_stack')->getCurrentRequest()?->getUri();
+                }
+            }
         }
 
-        return StringUtil::ampersand($url, false);
+        return StringUtil::ampersand((string) $url, false);
     }
 }
