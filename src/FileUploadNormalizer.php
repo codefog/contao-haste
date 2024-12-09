@@ -33,6 +33,7 @@ class FileUploadNormalizer
     public function normalize(array $files): array
     {
         $standardizedPerKey = [];
+        $groups = [];
 
         foreach ($files as $k => $file) {
             switch (true) {
@@ -55,6 +56,25 @@ class FileUploadNormalizer
                 case null !== ($filePath = $this->extractFilePath($file)):
                     $standardizedPerKey[$k][] = $this->fromFile($filePath);
                     break;
+            }
+
+            if (is_string($k) && str_ends_with($k, '_0')) {
+                $groups[] = substr($k, 0, -2);
+            }
+        }
+
+        foreach ($groups as $group) {
+            if (array_key_exists($group, $standardizedPerKey)) {
+                continue;
+            }
+
+            $standardizedPerKey[$group] = [];
+
+            foreach ($standardizedPerKey as $k => $file) {
+                if (1 === \count($file) && preg_match('/^'.preg_quote($group, '/').'_\d+$/', $k)) {
+                    $standardizedPerKey[$group][] = reset($file);
+                    unset($standardizedPerKey[$k]);
+                }
             }
         }
 

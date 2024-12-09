@@ -118,6 +118,54 @@ class FileUploadNormalizerTest extends TestCase
             null,
         ];
 
+        yield 'File upload with indexed keys' => [
+            [
+                'file_0' => [
+                    'name' => 'name.jpg',
+                    'type' => 'image/jpeg',
+                    'tmp_name' => 'path/to/name.jpg',
+                    'error' => 0,
+                    'size' => 333,
+                    'uploaded' => true,
+                    'uuid' => '660d272c-f4c3-11ed-a05b-0242ac120003',
+                ],
+                'file_1' => [
+                    'name' => 'name.jpg',
+                    'type' => 'image/jpeg',
+                    'tmp_name' => 'path/to/name.jpg',
+                    'error' => 0,
+                    'size' => 333,
+                    'uploaded' => true,
+                    'uuid' => '660d272c-f4c3-11ed-a05b-0242ac120003',
+                ],
+            ],
+            [
+                'file' => [
+                    [
+                        'name' => 'name.jpg',
+                        'type' => 'image/jpeg',
+                        'tmp_name' => 'path/to/name.jpg',
+                        'error' => 0,
+                        'size' => 333,
+                        'uploaded' => true,
+                        'uuid' => '660d272c-f4c3-11ed-a05b-0242ac120003',
+                    ],
+                    [
+                        'name' => 'name.jpg',
+                        'type' => 'image/jpeg',
+                        'tmp_name' => 'path/to/name.jpg',
+                        'error' => 0,
+                        'size' => 333,
+                        'uploaded' => true,
+                        'uuid' => '660d272c-f4c3-11ed-a05b-0242ac120003',
+                    ],
+                ],
+            ],
+            '/project-dir',
+            null,
+            null,
+        ];
+
         yield 'Array of it all' => [
             [
                 'upload_field_already_correct' => [
