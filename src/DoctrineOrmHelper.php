@@ -140,7 +140,7 @@ class DoctrineOrmHelper
             ]),
         ]);
 
-        $this->dcaRelationsManager->deleteRelatedRecordsWithUndo($table, $entity->getId(), $this->connection->lastInsertId());
+        $this->dcaRelationsManager->deleteRelatedRecordsWithUndo($table, $entity->getId(), (int) $this->connection->lastInsertId());
     }
 
     /**
