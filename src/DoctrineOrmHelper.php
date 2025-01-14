@@ -112,7 +112,14 @@ class DoctrineOrmHelper
             throw new \RuntimeException(sprintf('The entity with "%s" identifier has no \Contao\Versions instance', $uniqueId));
         }
 
-        $this->entityVersions[$uniqueId]->create();
+        $version = $this->entityVersions[$uniqueId];
+
+        try {
+            $version->create();
+        } catch (\LogicException) {
+            $version->setUsername('');
+            $version->create();
+        }
     }
 
     /**
