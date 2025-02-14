@@ -176,15 +176,15 @@ class Format
         }
 
         if ('date' === ($arrField['eval']['rgxp'] ?? null)) {
-            return static::date($varValue);
+            return '' !== (string) $varValue ? static::date($varValue) : '';
         }
 
         if ('time' === ($arrField['eval']['rgxp'] ?? null)) {
-            return static::time($varValue);
+            return '' !== (string) $varValue ? static::time($varValue) : '';
         }
 
         if ('datim' === ($arrField['eval']['rgxp'] ?? null) || in_array(($arrField['flag'] ?? null), array(5, 6, 7, 8, 9, 10)) || 'tstamp' === ($arrField['name'] ?? null)) {
-            return static::datim($varValue);
+            return '' !== (string) $varValue ? static::datim($varValue) : '';
         }
 
         if (($arrField['eval']['isBoolean'] ?? false) || ('checkbox' === ($arrField['inputType'] ?? null) && !($arrField['eval']['multiple'] ?? false))) {
