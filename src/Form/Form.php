@@ -825,7 +825,7 @@ class Form
         $objObject->hasUploads = $this->hasUploads();
         $objObject->novalidate = $this->generateNoValidateAttribute();
 
-        $widgets = [];
+        $widgets = ['hidden' => [], 'visible' => []];
 
         // Split hidden and visigle widgets
         foreach ($this->widgets as $k => $widget) {
@@ -835,19 +835,19 @@ class Form
         $objObject->hidden = '';
 
         // Generate hidden form fields
-        foreach ((array) ($widgets['hidden'] ?? []) as $widget) {
+        foreach ($widgets['hidden'] as $widget) {
             $objObject->hidden .= $widget->parse();
         }
 
         $objObject->fields = '';
 
         // Generate visible form fields
-        foreach ((array) $widgets['visible'] as $widget) {
+        foreach ($widgets['visible'] as $widget) {
             $objObject->fields .= $widget->parse();
         }
 
-        $objObject->hiddenWidgets = $widgets['hidden'] ?? [];
-        $objObject->visibleWidgets = $widgets['visible'] ?? [];
+        $objObject->hiddenWidgets = $widgets['hidden'];
+        $objObject->visibleWidgets = $widgets['visible'];
 
         $objObject->hasteFormInstance = $this;
 
