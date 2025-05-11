@@ -15,7 +15,7 @@ services:
     Codefog\HasteBundle\EventListener\DcaAjaxOperationsListener: ~
 
     # DcaDateRangeFilter
-    Codefog\HasteBundle\EventListener\DcaDateRangeFilter: ~
+    Codefog\HasteBundle\EventListener\DcaDateRangeFilterListener: ~
 
     # DoctrineOrm
     Codefog\HasteBundle\DoctrineOrmHelper:
