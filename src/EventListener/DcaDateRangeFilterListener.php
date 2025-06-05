@@ -99,13 +99,13 @@ class DcaDateRangeFilterListener
 
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_'.$field.'_from',
-                $session['filter'][$filter][$key]['from'],
+                $session['filter'][$filter][$key]['from'] ?? '',
                 $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? '',
             );
 
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_'.$field.'_to',
-                $session['filter'][$filter][$key]['to'],
+                $session['filter'][$filter][$key]['to'] ?? '',
                 $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['eval']['rgxp'] ?? '',
             );
 
