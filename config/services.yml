@@ -40,6 +40,8 @@ services:
             $entityManager: '@?doctrine.orm.entity_manager'
         public: true
 
+    Codefog\HasteBundle\Twig\HasteExtension: ~
+
     # StringParser
     Codefog\HasteBundle\StringParser:
         public: true
