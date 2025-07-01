@@ -53,7 +53,7 @@ class DcaAjaxOperationsListener
 
         // Check permissions
         if (!$this->checkPermission($dc->table, $settings)) {
-            throw new AccessDeniedException(sprintf('Not enough permissions to toggle field %s::%s', $dc->table, $settings['field']));
+            throw new AccessDeniedException(\sprintf('Not enough permissions to toggle field %s::%s', $dc->table, $settings['field']));
         }
 
         $id = $dc->id = (int) Input::post('id');
@@ -146,7 +146,7 @@ class DcaAjaxOperationsListener
         $clickEventString = 'return Haste.toggleAjaxOperation(this, %s);';
 
         if (!isset($operation['attributes'])) {
-            $operation['attributes'] = sprintf('onclick="%s"', $clickEventString);
+            $operation['attributes'] = \sprintf('onclick="%s"', $clickEventString);
         } else {
             // onclick attribute already present
             if (str_contains((string) $operation['attributes'], 'onclick="')) {
@@ -227,7 +227,7 @@ class DcaAjaxOperationsListener
                 $icon = $options[0]['icon'];
             }
 
-            return sprintf(
+            return \sprintf(
                 '<a data-haste-ajax-operation-value="%s" data-haste-ajax-operation-name="%s" href="%s" title="%s"%s>%s</a> ',
                 $value,
                 $name,
@@ -251,6 +251,6 @@ class DcaAjaxOperationsListener
         $url = Environment::get('requestUri');
         $url = preg_replace('/&(amp;)?id=[^&]+/', '', (string) $url);
 
-        return $url.sprintf('&act=edit&id=%s&rt=%s', $id, $this->tokenManager->getDefaultTokenValue());
+        return $url.\sprintf('&act=edit&id=%s&rt=%s', $id, $this->tokenManager->getDefaultTokenValue());
     }
 }

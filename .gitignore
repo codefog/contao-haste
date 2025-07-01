@@ -1,18 +1,4 @@
-# OS
-.DS_Store
-Thumbs.db
-
-# IDEs 
-.buildpath
-.project
-.settings/
-.build/
-.idea/
-nbproject/
-
-# Composer
+/node_modules/
 /vendor/
 /composer.lock
-
-# PHPUnit
-.phpunit.result.cache
+/.phpunit.result.cache

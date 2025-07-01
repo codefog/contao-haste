@@ -58,13 +58,13 @@ class FileUploadNormalizer
                     break;
             }
 
-            if (is_string($k) && str_ends_with($k, '_0')) {
+            if (\is_string($k) && str_ends_with($k, '_0')) {
                 $groups[] = substr($k, 0, -2);
             }
         }
 
         foreach ($groups as $group) {
-            if (array_key_exists($group, $standardizedPerKey)) {
+            if (\array_key_exists($group, $standardizedPerKey)) {
                 continue;
             }
 

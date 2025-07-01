@@ -2,14 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * This file is part of Contao.
- *
- * (c) Leo Feyer
- *
- * @license LGPL-3.0-or-later
- */
-
 error_reporting(E_ALL);
 
 $include = fn ($file) => file_exists($file) ? include $file : false;

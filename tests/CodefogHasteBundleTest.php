@@ -13,7 +13,6 @@ class CodefogHasteBundleTest extends TestCase
     {
         $bundle = new CodefogHasteBundle();
 
-        $this->assertInstanceOf(CodefogHasteBundle::class, $bundle);
         $this->assertSame($bundle->getPath(), \dirname(__DIR__));
     }
 }

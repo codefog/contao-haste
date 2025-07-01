@@ -139,7 +139,7 @@ class DcaRelationsManager
 
         // Support for csv values
         if (($field['eval']['multiple'] ?? false) && ($field['eval']['csv'] ?? false)) {
-            $values = !$value ? [] : explode($field['eval']['csv'], $value);
+            $values = !$value ? [] : explode($field['eval']['csv'], (string) $value);
         } else {
             $values = StringUtil::deserialize($value, true);
         }
@@ -447,8 +447,11 @@ class DcaRelationsManager
             $rootIds = Database::getInstance()->getChildRecords($rootIds, $dc->table, false, $rootIds);
         }
 
+        /** @var AttributeBagInterface $sessionBag */
+        $sessionBag = $request->getSession()->getBag('contao_backend');
+
         $doFilter = false;
-        $sessionData = $request->getSession()->getBag('contao_backend')->all();
+        $sessionData = $sessionBag->all();
         $filterId = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
         foreach (array_keys($this->filterableFields[$dc->table]) as $field) {
@@ -473,9 +476,12 @@ class DcaRelationsManager
             return;
         }
 
+        /** @var AttributeBagInterface $sessionBag */
+        $sessionBag = $request->getSession()->getBag('contao_backend');
+
         $rootIds = \is_array($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] ?? null) ? $GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['root'] : [];
         $doFilter = false;
-        $sessionData = $request->getSession()->getBag('contao_backend')->all();
+        $sessionData = $sessionBag->all();
 
         foreach ($this->searchableFields[$dc->table] as $field => $relation) {
             $relatedTable = $relation['related_table'];
@@ -489,7 +495,7 @@ class DcaRelationsManager
                 && $field === $sessionData['haste_search'][$dc->table]['field']
             ) {
                 $doFilter = true;
-                $query = sprintf(
+                $query = \sprintf(
                     'SELECT %s.%s AS sourceId FROM %s INNER JOIN %s ON %s.%s = %s.%s INNER JOIN %s ON %s.%s = %s.%s',
                     $dc->table,
                     $relation['reference'],
@@ -519,10 +525,10 @@ class DcaRelationsManager
 
                 if (isset($GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey'])) {
                     [$t, $f] = explode('.', (string) $GLOBALS['TL_DCA'][$relatedTable]['fields'][$fld]['foreignKey']);
-                    $procedure[] = '('.sprintf($strPattern, $fld).' OR '.sprintf($strPattern, "(SELECT $f FROM $t WHERE $t.id={$relatedTable}.$fld)").')';
+                    $procedure[] = '('.\sprintf($strPattern, $fld).' OR '.\sprintf($strPattern, "(SELECT $f FROM $t WHERE $t.id={$relatedTable}.$fld)").')';
                     $values[] = $sessionData['haste_search'][$dc->table]['searchValue'];
                 } else {
-                    $procedure[] = sprintf($strPattern, $fld);
+                    $procedure[] = \sprintf($strPattern, $fld);
                 }
 
                 $values[] = $sessionData['haste_search'][$dc->table]['searchValue'];
@@ -723,7 +729,7 @@ class DcaRelationsManager
             }
 
             $return .= '<div class="tl_search tl_subpanel">';
-            $return .= '<strong>'.sprintf($GLOBALS['TL_LANG']['HST']['advanced_search'], $this->formatter->dcaLabel($dc->table, $field)).'</strong> ';
+            $return .= '<strong>'.\sprintf($GLOBALS['TL_LANG']['HST']['advanced_search'], $this->formatter->dcaLabel($dc->table, $field)).'</strong> ';
 
             $options_sorter = [];
 
@@ -764,7 +770,7 @@ class DcaRelationsManager
                 // Load from entity
                 if (isset($fieldConfig['entity'])) {
                     if (null === $this->entityManager) {
-                        throw new \RuntimeException(sprintf('The entity has been defined in the relation for %s.%s, but there is no entity manager service!', $table, $fieldName));
+                        throw new \RuntimeException(\sprintf('The entity has been defined in the relation for %s.%s, but there is no entity manager service!', $table, $fieldName));
                     }
 
                     $metaData = $this->entityManager->getClassMetadata($fieldConfig['entity']);
@@ -866,9 +872,9 @@ class DcaRelationsManager
     {
         $processed = [];
 
-        /** @var array<SplFileInfo> $files */
         $files = $this->resourceFinder->findIn('dca')->depth(0)->files()->name('*.php');
 
+        /** @var SplFileInfo $file */
         foreach ($files as $file) {
             if (\in_array($file->getBasename(), $processed, true)) {
                 continue;

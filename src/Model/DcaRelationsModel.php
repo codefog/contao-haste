@@ -184,7 +184,7 @@ abstract class DcaRelationsModel extends Model
         $relation = System::getContainer()->get(DcaRelationsManager::class)->getRelation($table, $field);
 
         if (null === $relation) {
-            throw new \InvalidArgumentException(sprintf('Field %s.%s is not related!', $table, $field));
+            throw new \InvalidArgumentException(\sprintf('Field %s.%s is not related!', $table, $field));
         }
 
         return $relation;

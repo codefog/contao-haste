@@ -1,8 +1,15 @@
 name: CI
 
-on: [push]
+on:
+    push: ~
+    pull_request: ~
+
+permissions: read-all
 
 jobs:
+    ci:
+        uses: 'terminal42/contao-build-tools/.github/workflows/build-tools.yml@main'
+
     tests:
         name: 'PHP ${{ matrix.php }} (Composer Flags: ${{ matrix.composer }})'
         runs-on: ubuntu-latest

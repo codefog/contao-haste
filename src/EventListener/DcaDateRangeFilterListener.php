@@ -95,7 +95,7 @@ class DcaDateRangeFilterListener
             $key = 'haste_dateRangeFilter_'.$field;
 
             $return .= '<div class="tl_subpanel haste-date-range-filter">';
-            $return .= sprintf('<strong>%s: </strong>', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '');
+            $return .= \sprintf('<strong>%s: </strong>', $GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '');
 
             $return .= $this->createDatepickerInputField(
                 'haste_dateRangeFilter_'.$field.'_from',
@@ -129,8 +129,11 @@ class DcaDateRangeFilterListener
             return;
         }
 
+        /** @var AttributeBagInterface $sessionBag */
+        $sessionBag = $request->getSession()->getBag('contao_backend');
+
         $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
-        $sessionData = $request->getSession()->getBag('contao_backend')->all();
+        $sessionData = $sessionBag->all();
 
         $root = [];
         $filterRecords = false;
@@ -181,7 +184,7 @@ class DcaDateRangeFilterListener
             return [];
         }
 
-        return $this->connection->fetchFirstColumn(sprintf('SELECT id FROM %s WHERE %s', $dc->table, implode(' AND ', $where)));
+        return $this->connection->fetchFirstColumn(\sprintf('SELECT id FROM %s WHERE %s', $dc->table, implode(' AND ', $where)));
     }
 
     /**
@@ -203,7 +206,7 @@ class DcaDateRangeFilterListener
         }
 
         try {
-            $date = new Date($value, Date::getFormatFromRgxp($rgxp));
+            $date = new Date((int) $value, Date::getFormatFromRgxp($rgxp));
         } catch (\OutOfBoundsException) {
             return null;
         }
@@ -226,7 +229,7 @@ class DcaDateRangeFilterListener
             default => '',
         };
 
-        return sprintf(
+        return \sprintf(
             '<input id="ctrl_%s" name="%s" class="tl_text%s" value="%s" type="text">
             %s
             <script>

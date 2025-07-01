@@ -25,7 +25,7 @@ use Contao\TemplateLoader;
 use Contao\UploadableWidgetInterface;
 use Contao\Widget;
 use Doctrine\ORM\EntityManager;
-use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class Form
@@ -52,6 +52,9 @@ class Form
 
     protected Model|null $boundModel = null;
 
+    /**
+     * @var array<string, array<ValidatorInterface|callable>>
+     */
     protected array $validators = [];
 
     protected int $currentState = self::STATE_CLEAN;
@@ -205,7 +208,7 @@ class Form
     public function setActionFromPageId(int $id): self
     {
         if (($pageModel = PageModel::findPublishedById($id)) === null) {
-            throw new \InvalidArgumentException(sprintf('The page ID "%s" does not exist', $id));
+            throw new \InvalidArgumentException(\sprintf('The page ID "%s" does not exist', $id));
         }
 
         $this->action = $pageModel->getFrontendUrl();
@@ -253,7 +256,7 @@ class Form
     public function getFormField(string $fieldName): array
     {
         if (!$this->hasFormField($fieldName)) {
-            throw new \InvalidArgumentException(sprintf('Form field "%s" does not exist!', $fieldName));
+            throw new \InvalidArgumentException(\sprintf('Form field "%s" does not exist!', $fieldName));
         }
 
         return $this->formFields[$fieldName];
@@ -265,7 +268,7 @@ class Form
     public function removeFormField(string $fieldName): self
     {
         if (!$this->hasFormField($fieldName)) {
-            throw new \InvalidArgumentException(sprintf('Form field "%s" does not exist!', $fieldName));
+            throw new \InvalidArgumentException(\sprintf('Form field "%s" does not exist!', $fieldName));
         }
 
         unset($this->formFields[$fieldName]);
@@ -290,7 +293,7 @@ class Form
         $this->createWidgets();
 
         if (!\array_key_exists($fieldName, $this->widgets)) {
-            throw new \InvalidArgumentException(sprintf('Widget "%s" does not exist!', $fieldName));
+            throw new \InvalidArgumentException(\sprintf('Widget "%s" does not exist!', $fieldName));
         }
 
         return $this->widgets[$fieldName];
@@ -379,13 +382,14 @@ class Form
         }
 
         if (!isset($fieldConfig['inputType'])) {
-            throw new \RuntimeException(sprintf('You did not specify any inputType for the field "%s"!', $fieldName));
+            throw new \RuntimeException(\sprintf('You did not specify any inputType for the field "%s"!', $fieldName));
         }
 
+        /** @var class-string<Widget> $className */
         $className = $GLOBALS['TL_FFL'][$fieldConfig['inputType']] ?? null;
 
         if (!class_exists($className)) {
-            throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $className, $fieldConfig['inputType']));
+            throw new \RuntimeException(\sprintf('The class "%s" for type "%s" could not be found.', $className, $fieldConfig['inputType']));
         }
 
         $rgxp = $fieldConfig['eval']['rgxp'] ?? null;
@@ -443,6 +447,7 @@ class Form
         $label = $fieldConfig['label'] ?? null;
 
         // Generate the attributes
+        /** @var array $fieldConfig */
         $fieldConfig = $className::getAttributesFromDca($fieldConfig, $fieldConfig['name'], $fieldConfig['value'] ?? null, $fieldName, $dc->table, $dc);
 
         // Reset the ID to the field name
@@ -602,18 +607,18 @@ class Form
      */
     public function addFieldsFromFormGenerator(int $formId, callable|null $callback = null): self
     {
-        if (($objFields = FormFieldModel::findPublishedByPid($formId)) === null) {
+        if (null === ($objFields = FormFieldModel::findPublishedByPid($formId))) {
             throw new \InvalidArgumentException('Form ID "'.$formId.'" does not exist or has no published fields.');
         }
 
-        while ($objFields->next()) {
+        foreach ($objFields as $objField) {
             // make sure "name" is set because not all form fields do need it and it would
             // thus overwrite the array indexes
-            $fieldName = $objFields->name ?: 'field_'.$objFields->id;
+            $fieldName = $objField->name ?: 'field_'.$objField->id;
 
             $this->checkFormFieldNameIsValid($fieldName);
 
-            $fieldConfig = $objFields->row();
+            $fieldConfig = $objField->row();
 
             // Make sure it has a "name" attribute because it is mandatory
             if (!isset($fieldConfig['name'])) {
@@ -662,13 +667,9 @@ class Form
     /**
      * Add a validator to the form field.
      */
-    public function addValidator(string $fieldName, callable $validator): self
+    public function addValidator(string $fieldName, ValidatorInterface|callable $validator): self
     {
-        if ($validator instanceof ValidatorInterface || \is_callable($validator)) {
-            $this->validators[$fieldName][] = $validator;
-        } else {
-            throw new \InvalidArgumentException(sprintf('Validator must be an instance of %s or a callable.', ValidatorInterface::class));
-        }
+        $this->validators[$fieldName][] = $validator;
 
         return $this;
     }
@@ -691,7 +692,7 @@ class Form
             $className = $GLOBALS['TL_FFL'][$fieldConfig['type']] ?? '';
 
             if (!class_exists($className)) {
-                throw new \RuntimeException(sprintf('The class "%s" for type "%s" could not be found.', $className, $fieldConfig['type']));
+                throw new \RuntimeException(\sprintf('The class "%s" for type "%s" could not be found.', $className, $fieldConfig['type']));
             }
 
             // Some widgets render the mandatory asterisk only based on "require" attribute
@@ -737,7 +738,7 @@ class Form
 
         foreach ($this->widgets as $fieldName => $widget) {
             if (null !== $this->inputCallback && method_exists($widget, 'setInputCallback')) {
-                $widget->setInputCallback(fn () => call_user_func($this->inputCallback, $fieldName, $widget));
+                $widget->setInputCallback(fn () => ($this->inputCallback)($fieldName, $widget));
             }
 
             $widget->validate();
@@ -955,7 +956,7 @@ class Form
         }
 
         if (\in_array($fieldName, array_keys($this->formFields), true)) {
-            throw new \InvalidArgumentException(sprintf('"%s" has already been added to the form.', $fieldName));
+            throw new \InvalidArgumentException(\sprintf('"%s" has already been added to the form.', $fieldName));
         }
     }
 
@@ -965,7 +966,7 @@ class Form
     private function createDataContainerMock(mixed $value, string $field, string $name): DataContainer
     {
         return new class($this->getBoundModel(), $value, $field, $name) extends DataContainer {
-            public function __construct($model, $value, $field, $name)
+            public function __construct(Model|null $model, mixed $value, string $field, string $name)
             {
                 $this->id = $model ? $model->id : 0;
                 $this->table = $model ? $model::getTable() : '';
@@ -992,7 +993,10 @@ class Form
                 return $record->numRows ? $record->row() : null;
             }
 
-            public function getPalette(): void
+            /**
+             * @return string|void
+             */
+            public function getPalette()
             {
                 // noop
             }
@@ -1026,8 +1030,14 @@ class Form
 
     /**
      * Get the meta data for entity.
+     *
+     * @template T of object
+     *
+     * @param T $entity
+     *
+     * @return ClassMetadataInfo<T>
      */
-    private function getMetaDataForEntity(object $entity): ClassMetadata|null
+    private function getMetaDataForEntity(object $entity): ClassMetadataInfo|null
     {
         static $cache = [];
 
@@ -1047,7 +1057,7 @@ class Form
     {
         $service = 'doctrine.orm.entity_manager';
 
-        if (!System::getContainer()?->has($service)) {
+        if (!System::getContainer()->has($service)) {
             return null;
         }
 

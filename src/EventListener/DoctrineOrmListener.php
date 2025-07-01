@@ -8,6 +8,7 @@ use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
 use Codefog\HasteBundle\Attribute\DoctrineOrmVersion;
 use Codefog\HasteBundle\DoctrineOrmHelper;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
@@ -28,27 +29,42 @@ class DoctrineOrmListener implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     public function postPersist(LifecycleEventArgs $args): void
     {
         $this->handlePostUpdateRelations($args);
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     public function postUpdate(LifecycleEventArgs $args): void
     {
         $this->handlePostUpdateRelations($args);
         $this->handlePostUpdateVersions($args);
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     public function preRemove(LifecycleEventArgs $args): void
     {
         $this->handlePreRemoveUndo($args);
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     public function preUpdate(LifecycleEventArgs $args): void
     {
         $this->handlePreUpdateVersions($args);
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     private function handlePostUpdateRelations(LifecycleEventArgs $args): void
     {
         if (!$this->helper->hasEntityRelatedValues($args->getObject())) {
@@ -62,6 +78,9 @@ class DoctrineOrmListener implements EventSubscriberInterface
         }
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     private function handlePreRemoveUndo(LifecycleEventArgs $args): void
     {
         if (null === $this->getAttribute($args->getObject(), DoctrineOrmUndo::class)) {
@@ -71,6 +90,9 @@ class DoctrineOrmListener implements EventSubscriberInterface
         $this->helper->storeObjectUndo($args->getObjectManager(), $args->getObject());
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     private function handlePreUpdateVersions(LifecycleEventArgs $args): void
     {
         if (($attribute = $this->getAttribute($args->getObject(), DoctrineOrmVersion::class)) === null) {
@@ -86,6 +108,9 @@ class DoctrineOrmListener implements EventSubscriberInterface
         );
     }
 
+    /**
+     * @param LifecycleEventArgs<EntityManager> $args
+     */
     private function handlePostUpdateVersions(LifecycleEventArgs $args): void
     {
         if (null === $this->getAttribute($args->getObject(), DoctrineOrmVersion::class)) {
@@ -95,6 +120,13 @@ class DoctrineOrmListener implements EventSubscriberInterface
         $this->helper->saveObjectVersion($args->getObject());
     }
 
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $attribute
+     *
+     * @return \ReflectionAttribute<T>|null
+     */
     private function getAttribute(object $object, string $attribute): \ReflectionAttribute|null
     {
         $reflection = new \ReflectionClass($object);

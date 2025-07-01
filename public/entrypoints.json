@@ -2,12 +2,12 @@
   "entrypoints": {
     "ajax-reload": {
       "js": [
-        "/bundles/codefoghaste/ajax-reload.a2e92af1.js"
+        "/bundles/codefoghaste/ajax-reload.878c9470.js"
       ]
     },
     "dca-ajax-operations": {
       "js": [
-        "/bundles/codefoghaste/dca-ajax-operations.f1fc43fe.js"
+        "/bundles/codefoghaste/dca-ajax-operations.12904106.js"
       ]
     }
   }

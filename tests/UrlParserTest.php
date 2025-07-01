@@ -12,33 +12,33 @@ class UrlParserTest extends TestCase
     /**
      * @dataProvider addQueryStringProvider
      */
-    public function testAddQueryString($request, $queryToAdd, $expectedResult): void
+    public function testAddQueryString(string $url, string $queryToAdd, string $expectedResult): void
     {
         $parser = new UrlParser();
 
-        $this->assertSame($expectedResult, $parser->addQueryString($queryToAdd, $request));
+        $this->assertSame($expectedResult, $parser->addQueryString($queryToAdd, $url));
     }
 
     /**
      * @dataProvider removeQueryStringProvider
      */
-    public function testRemoveQueryString($request, $paramsToRemove, $expectedResult): void
+    public function testRemoveQueryString(string $url, array $paramsToRemove, string $expectedResult): void
     {
         $parser = new UrlParser();
 
-        $this->assertSame($expectedResult, $parser->removeQueryString($paramsToRemove, $request));
+        $this->assertSame($expectedResult, $parser->removeQueryString($paramsToRemove, $url));
     }
 
     /**
      * @dataProvider removeQueryStringProvider
      */
-    public function testRemoveQueryStringCallback($request, $paramsToRemove, $expectedResult): void
+    public function testRemoveQueryStringCallback(string $url, array $paramsToRemove, string $expectedResult): void
     {
         $parser = new UrlParser();
 
         $actualResult = $parser->removeQueryStringCallback(
             static fn ($value, $key) => !\in_array($key, $paramsToRemove, true),
-            $request,
+            $url,
         );
 
         $this->assertSame($expectedResult, $actualResult);

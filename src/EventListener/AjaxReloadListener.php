@@ -79,7 +79,7 @@ class AjaxReloadListener implements EventSubscriberInterface
         $response = $event->getResponse();
 
         // Only handle text/html responses
-        if (!str_starts_with($response->headers->get('Content-Type', ''), 'text/html')) {
+        if (!str_starts_with((string) $response->headers->get('Content-Type', ''), 'text/html')) {
             return;
         }
 
@@ -91,7 +91,7 @@ class AjaxReloadListener implements EventSubscriberInterface
             // Add the necessary <script> tags
             $response->setContent(str_replace(
                 '</body>',
-                sprintf('<script src="%s"></script></body>', $this->packages->getUrl('ajax-reload.js', 'codefog_haste')),
+                \sprintf('<script src="%s"></script></body>', $this->packages->getUrl('ajax-reload.js', 'codefog_haste')),
                 $response->getContent(),
             ));
 

@@ -16,11 +16,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class FormTest extends TestCase
 {
-    public function testInstance(): void
-    {
-        $this->assertInstanceOf(Form::class, $this->createForm());
-    }
-
     public function testSetFormActionFromUri(): void
     {
         $form = $this->createForm();

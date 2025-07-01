@@ -147,7 +147,7 @@ class AjaxReloadManager implements ResetInterface
     private function getUniqid(string $type, int $id): string
     {
         if (!\in_array($type, [self::TYPE_CONTENT, self::TYPE_MODULE], true)) {
-            throw new \InvalidArgumentException(sprintf('The type "%s" is not supported', $type));
+            throw new \InvalidArgumentException(\sprintf('The type "%s" is not supported', $type));
         }
 
         return $type.$id;
@@ -177,7 +177,7 @@ class AjaxReloadManager implements ResetInterface
         // Add the necessary attributes to the first wrapping element
         $buffer = preg_replace(
             '/<([^>!]+)>/',
-            sprintf('<$1 data-haste-ajax-id="%s" data-haste-ajax-listeners="%s">', $uniqid, implode(' ', array_unique($events))),
+            \sprintf('<$1 data-haste-ajax-id="%s" data-haste-ajax-listeners="%s">', $uniqid, implode(' ', array_unique($events))),
             (string) $buffer,
             1,
         );

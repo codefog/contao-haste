@@ -35,8 +35,12 @@ class HasteExtension extends AbstractExtension
         return $functions;
     }
 
-    private function generateIcon(string $src, string $alt = '', HtmlAttributes|null $attributes = null): string
+    private function generateIcon(string $src, string $alt = '', HtmlAttributes|string|null $attributes = null): string
     {
-        return Image::getHtml($src, $alt, $attributes ? $attributes->toString(false) : '');
+        if ($attributes instanceof HtmlAttributes) {
+            $attributes = $attributes->toString(false);
+        }
+
+        return Image::getHtml($src, $alt, $attributes ?: '');
     }
 }

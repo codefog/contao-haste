@@ -106,7 +106,7 @@ class UrlParser
                 $url = $this->requestStack->getCurrentRequest()?->getUri();
             } else {
                 // Fallback for manually created UrlParser instances
-                trigger_deprecation('codefog/contao-haste', '5.2', 'Instantiating "%s" without the RequestStack has been deprecated and will no longer work in Haste 6. Retrieve the "%s" service from the container instead.', __CLASS__);
+                trigger_deprecation('codefog/contao-haste', '5.2', 'Instantiating "%s" without the RequestStack has been deprecated and will no longer work in Haste 6. Retrieve the "%s" service from the container instead.', self::class);
 
                 $container = System::getContainer();
 

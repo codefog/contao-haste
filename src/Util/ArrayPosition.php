@@ -79,22 +79,22 @@ class ArrayPosition
         return $existing;
     }
 
-    public static function first(): static
+    public static function first(): self
     {
         return new self(static::FIRST);
     }
 
-    public static function last(): static
+    public static function last(): self
     {
         return new self(static::LAST);
     }
 
-    public static function before($fieldName): static
+    public static function before(string $fieldName): self
     {
         return new self(static::BEFORE, $fieldName);
     }
 
-    public static function after($fieldName): static
+    public static function after(string $fieldName): self
     {
         return new self(static::AFTER, $fieldName);
     }

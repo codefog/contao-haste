@@ -25,8 +25,8 @@ class StringParser
     public const NO_ENTITIES = 16;
 
     public function __construct(
-        private SimpleTokenParser $simpleTokenParser,
-        private InsertTagParser $insertTagParser,
+        private readonly SimpleTokenParser $simpleTokenParser,
+        private readonly InsertTagParser $insertTagParser,
     ) {
     }
 
@@ -95,10 +95,8 @@ class StringParser
             $emails = [];
             preg_match_all('{<.+@.+\.[A-Za-z]+>}', $value, $emails);
 
-            if (!empty($emails[0])) {
-                foreach ($emails[0] as $k => $v) {
-                    $value = str_replace($v, '%email'.$k.'%', $value);
-                }
+            foreach ($emails[0] as $k => $v) {
+                $value = str_replace($v, '%email'.$k.'%', $value);
             }
         }
 

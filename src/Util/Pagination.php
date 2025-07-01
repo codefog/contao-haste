@@ -129,7 +129,7 @@ class Pagination
         return $this->pagination;
     }
 
-    public function getTemplate(): ?Template
+    public function getTemplate(): Template|null
     {
         $this->compile();
 
@@ -179,7 +179,7 @@ class Pagination
             $limit = $this->getTotal() - $offset;
         }
 
-        if (is_string($this->template)) {
+        if (\is_string($this->template)) {
             $this->template = new FrontendTemplate($this->template);
         }
 

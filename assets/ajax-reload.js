@@ -1,9 +1,12 @@
+/* eslint-disable no-console */
+/* eslint-disable no-eval */
+
 (() => {
     const elementsInProgress = {};
     const eventsInProgress = {};
 
-    function dispatchEvents() {
-        if (arguments.length === 0) {
+    function dispatchEvents(...args) {
+        if (args.length === 0) {
             console.error('Please provide at least one event');
         }
 
@@ -11,7 +14,7 @@
         const events = [];
         const listeners = [...document.querySelectorAll('[data-haste-ajax-listeners]')];
 
-        [...arguments].forEach(event => {
+        args.forEach((event) => {
             let eventData = event;
 
             if (typeof event === 'string') {
@@ -21,7 +24,7 @@
             let found = false;
 
             // Find the elements that listen to particular event
-            listeners.forEach(el => {
+            listeners.forEach((el) => {
                 if (el.dataset.hasteAjaxListeners.split(' ').indexOf(eventData.name) !== -1) {
                     found = true;
                     els[el.dataset.hasteAjaxId] = el;
@@ -34,7 +37,7 @@
         });
 
         if (Object.keys(els).length > 0 && events.length > 0) {
-            events.forEach(event => sendRequest(els, event));
+            events.forEach((event) => sendRequest(els, event));
         }
     }
 
@@ -44,13 +47,13 @@
             eventsInProgress[event.name].abort();
         }
 
-        for (const key in els) {
+        Object.keys(els).forEach((key) => {
             // Mark the events to be updated by this event
             elementsInProgress[key] = event.name;
 
             // Add the CSS class
             els[key].classList.add('haste-ajax-reloading');
-        }
+        });
 
         const xhr = new XMLHttpRequest();
 
@@ -61,16 +64,16 @@
         xhr.setRequestHeader('Haste-Ajax-Reload', event.name);
 
         // Set the custom headers
-        for (const header in event.headers || {}) {
-            xhr.setRequestHeader(header, event.headers[header]);
-        }
+        Object.entries(event.headers || {}).forEach((v) => {
+            xhr.setRequestHeader(...v);
+        });
 
         xhr.onload = () => {
             if (xhr.status === 200) {
                 const newEls = {};
                 const entries = JSON.parse(xhr.responseText);
 
-                Object.keys(entries).forEach(id => {
+                Object.keys(entries).forEach((id) => {
                     // Replace the entry only if it's marked to be updated by this event
                     if (els[id] && elementsInProgress[id] === event.name) {
                         els[id].outerHTML = entries[id];
@@ -80,22 +83,24 @@
                         newEls[id] = document.querySelector(`[data-haste-ajax-id="${id}"]`);
 
                         // Execute the <script> tags inside the new element
-                        [...newEls[id].getElementsByTagName('script')].forEach(script => eval(script.innerHTML));
+                        [...newEls[id].getElementsByTagName('script')].forEach((script) => eval(script.innerHTML));
                     }
                 });
 
                 // Dispatch a global custom event
-                document.dispatchEvent(new CustomEvent('HasteAjaxReloadComplete', {
-                    bubbles: false,
-                    cancelable: false,
-                    detail: {
-                        entries,
-                        event: event.name,
-                        eventData: event,
-                        oldElements: els,
-                        newElements: newEls
-                    }
-                }));
+                document.dispatchEvent(
+                    new CustomEvent('HasteAjaxReloadComplete', {
+                        bubbles: false,
+                        cancelable: false,
+                        detail: {
+                            entries,
+                            event: event.name,
+                            eventData: event,
+                            oldElements: els,
+                            newElements: newEls,
+                        },
+                    }),
+                );
             } else {
                 console.error(`The request for event "${event.name}" has failed`);
                 console.error(xhr);
