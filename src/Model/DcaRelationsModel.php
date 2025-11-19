@@ -147,7 +147,7 @@ abstract class DcaRelationsModel extends Model
             }
         }
 
-        return $connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['reference_field']." IN ('".implode("','", $values)."')") : '').$order);
+        return $connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['reference_field'].' IN ('.$connection->getDatabasePlatform()->quoteStringLiteral(implode("','", $values)).')') : '').$order);
     }
 
     /**
