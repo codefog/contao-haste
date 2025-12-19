@@ -17,6 +17,7 @@ use Contao\DataContainer;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -362,7 +363,15 @@ class DcaRelationsManager
                 continue;
             }
 
-            $values = $this->connection->fetchFirstColumn('SELECT '.$relation['reference'].' FROM '.$table.' WHERE id IN ('.implode(',', array_map('intval', $ids)).') AND tstamp=0');
+            $values = $this->connection->fetchFirstColumn(
+                \sprintf(
+                    'SELECT %s FROM %s WHERE id IN (?) AND tstamp=0',
+                    $this->connection->quoteIdentifier($relation['reference']),
+                    $this->connection->quoteIdentifier($table),
+                ),
+                [$ids],
+                [ArrayParameterType::INTEGER],
+            );
 
             foreach ($values as $value) {
                 $this->purgeRelatedRecords($relation, $value);
@@ -739,7 +748,7 @@ class DcaRelationsManager
             }
 
             // Sort by option values
-            uksort($options_sorter, 'strnatcasecmp');
+            uksort($options_sorter, strnatcasecmp(...));
             $active = $sessionValues[$dc->table]['searchValue'] && $sessionValues[$dc->table]['table'] === $relTable;
 
             $return .= '<select name="tl_field_'.$field.'" class="tl_select tl_chosen'.($active ? ' active' : '').'">

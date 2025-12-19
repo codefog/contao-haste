@@ -71,7 +71,7 @@ class FileUploadNormalizer
             $standardizedPerKey[$group] = [];
 
             foreach ($standardizedPerKey as $k => $file) {
-                if (1 === \count($file) && preg_match('/^'.preg_quote($group, '/').'_\d+$/', $k)) {
+                if (1 === \count($file) && preg_match('/^'.preg_quote($group, '/').'_\d+$/', (string) $k)) {
                     $standardizedPerKey[$group][] = reset($file);
                     unset($standardizedPerKey[$k]);
                 }
