@@ -41,7 +41,7 @@ abstract class DcaRelationsModel extends Model
 
                 $ids = $connection->fetchFirstColumn(
                     'SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?',
-                    [$this->{$relation['reference']}]
+                    [$this->{$relation['reference']}],
                 );
 
                 if (0 === \count($ids)) {
@@ -122,7 +122,7 @@ abstract class DcaRelationsModel extends Model
         if (!empty($values)) {
             $queryBuilder->where($queryBuilder->expr()->in(
                 $relation['related_field'],
-                $queryBuilder->createNamedParameter($value, ArrayParameterType::STRING)
+                $queryBuilder->createNamedParameter($value, ArrayParameterType::STRING),
             ));
         }
 
@@ -131,7 +131,7 @@ abstract class DcaRelationsModel extends Model
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['related_table']))) {
             $recordValues = $connection->fetchOne(
                 'SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1',
-                [$values[0]]
+                [$values[0]],
             );
 
             $recordValues = StringUtil::deserialize($recordValues);
@@ -176,7 +176,7 @@ abstract class DcaRelationsModel extends Model
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['reference_table']))) {
             $recordValues = $connection->fetchOne(
                 'SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1',
-                [$values[0]]
+                [$values[0]],
             );
 
             $recordValues = StringUtil::deserialize($recordValues);
