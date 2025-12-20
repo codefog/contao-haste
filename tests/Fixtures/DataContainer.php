@@ -10,6 +10,7 @@ class DataContainer
 
     public function __construct()
     {
+        // This comment is needed to prevent Rector from removing the empty function
     }
 
     public function __set($strKey, $varValue): void
