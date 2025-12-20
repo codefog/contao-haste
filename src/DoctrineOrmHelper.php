@@ -9,7 +9,7 @@ use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\FrontendUser;
 use Contao\Versions;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -69,7 +69,7 @@ class DoctrineOrmHelper
 
         $this->framework->initialize();
 
-        /** @var ClassMetadataInfo<T> $metadata */
+        /** @var ClassMetadata<T> $metadata */
         $metadata = $objectManager->getClassMetadata($entity::class);
 
         DcaRelationsModel::setRelatedValues(
@@ -91,7 +91,7 @@ class DoctrineOrmHelper
     {
         $this->framework->initialize();
 
-        /** @var ClassMetadataInfo<T> $metadata */
+        /** @var ClassMetadata<T> $metadata */
         $metadata = $objectManager->getClassMetadata($entity::class);
 
         $versions = new Versions($metadata->getTableName(), $entity->getId());
@@ -146,7 +146,7 @@ class DoctrineOrmHelper
      */
     public function storeObjectUndo(ObjectManager $objectManager, object $entity): void
     {
-        /** @var ClassMetadataInfo<T> $metadata */
+        /** @var ClassMetadata<T> $metadata */
         $metadata = $objectManager->getClassMetadata($entity::class);
 
         $table = $metadata->getTableName();

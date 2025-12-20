@@ -25,6 +25,7 @@ use Contao\TemplateLoader;
 use Contao\UploadableWidgetInterface;
 use Contao\Widget;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
@@ -1035,9 +1036,9 @@ class Form
      *
      * @param T $entity
      *
-     * @return ClassMetadataInfo<T>
+     * @return ClassMetadata<T>|null
      */
-    private function getMetaDataForEntity(object $entity): ClassMetadataInfo|null
+    private function getMetaDataForEntity(object $entity): ClassMetadata|ClassMetadataInfo|null
     {
         static $cache = [];
 

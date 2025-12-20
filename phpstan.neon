@@ -3,6 +3,7 @@ parameters:
         - '#no value type specified in iterable type#'
         - '#Unable to resolve the template type T in call to method Doctrine\\ORM\\EntityManager::getClassMetadata#'
         - '#::\$activeRecord#'
+        - '#invalid return type Doctrine\\ORM\\Mapping\\ClassMetadataInfo#'
     excludePaths:
         - tests/bootstrap.php
         - tests/Fixtures/
