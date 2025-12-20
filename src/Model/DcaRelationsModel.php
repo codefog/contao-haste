@@ -39,12 +39,10 @@ abstract class DcaRelationsModel extends Model
                 /** @var Connection $connection */
                 $connection = System::getContainer()->get('database_connection');
 
-                $ids = $connection
-                    ->executeQuery(
-                        'SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?',
-                        [$this->{$relation['reference']}])
-                    ->fetchFirstColumn()
-                ;
+                $ids = $connection->fetchFirstColumn(
+                    'SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?',
+                    [$this->{$relation['reference']}]
+                );
 
                 if (0 === \count($ids)) {
                     return null;
@@ -172,12 +170,10 @@ abstract class DcaRelationsModel extends Model
         // Preserve the values order by using the force saved values in the table in the
         // ORDER BY statement
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['reference_table']))) {
-            $recordValues = $connection->
-                executeQuery(
-                    'SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1',
-                    [$values[0]])
-                    ->fetchOne()
-            ;
+            $recordValues = $connection->fetchOne(
+                'SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1',
+                [$values[0]]
+            );
 
             $recordValues = StringUtil::deserialize($recordValues);
 
@@ -189,11 +185,11 @@ abstract class DcaRelationsModel extends Model
             }
         }
 
-        return $connection->executeQuery(
+        return $connection->fetchFirstColumn(
             'SELECT '.$relation['related_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['reference_field'].' IN (?)') : '').$order,
             $params,
             $types,
-        )->fetchFirstColumn();
+        );
     }
 
     /**
