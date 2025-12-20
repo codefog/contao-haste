@@ -107,45 +107,44 @@ abstract class DcaRelationsModel extends Model
      */
     public static function getReferenceValues(string $table, string $field, mixed $value = null): array
     {
-        $relation = static::getRelation($table, $field);
-        $values = (array) $value;
-        $order = '';
-        $params = [];
-        $types = [];
-
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
+        $relation = static::getRelation($table, $field);
+        $values = (array) $value;
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder
+            ->select($relation['reference_field'])
+            ->from($relation['table'])
+        ;
+
         if (!empty($values)) {
-            $params[] = $values;
-            $types[] = ArrayParameterType::STRING;
+            $queryBuilder->where($queryBuilder->expr()->in(
+                $relation['related_field'],
+                $queryBuilder->createNamedParameter($value, ArrayParameterType::STRING)
+            ));
         }
 
         // Preserve the values order by using the force saved values in the table in the
         // ORDER BY statement
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['related_table']))) {
-            $recordValues = $connection
-                ->executeQuery(
-                    'SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1',
-                    [$values[0]])
-                ->fetchOne()
-            ;
+            $recordValues = $connection->fetchOne(
+                'SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1',
+                [$values[0]]
+            );
 
             $recordValues = StringUtil::deserialize($recordValues);
 
             if (\is_array($recordValues) && \count($recordValues) > 0) {
-                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', ?)';
-
-                $params[] = $recordValues;
-                $types[] = ArrayParameterType::STRING;
+                $queryBuilder
+                    ->orderBy('FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', :order)')
+                    ->setParameter('order', $recordValues, ArrayParameterType::STRING)
+                ;
             }
         }
 
-        return $connection->executeQuery(
-            'SELECT '.$relation['reference_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['related_field'].' IN (?)') : '').$order,
-            $params,
-            $types,
-        )->fetchFirstColumn();
+        return $queryBuilder->fetchFirstColumn();
     }
 
     /**
@@ -153,18 +152,23 @@ abstract class DcaRelationsModel extends Model
      */
     public static function getRelatedValues(string $table, string $field, mixed $value = null): array
     {
-        $relation = static::getRelation($table, $field);
-        $values = (array) $value;
-        $order = '';
-        $params = [];
-        $types = [];
-
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
+        $relation = static::getRelation($table, $field);
+        $values = (array) $value;
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder
+            ->select($relation['related_field'])
+            ->from($relation['table'])
+        ;
+
         if (!empty($values)) {
-            $params[] = $values;
-            $types[] = ArrayParameterType::STRING;
+            $queryBuilder->where($queryBuilder->expr()->in(
+                $relation['reference_field'],
+                $queryBuilder->createNamedParameter($values, ArrayParameterType::STRING),
+            ));
         }
 
         // Preserve the values order by using the force saved values in the table in the
@@ -178,18 +182,14 @@ abstract class DcaRelationsModel extends Model
             $recordValues = StringUtil::deserialize($recordValues);
 
             if (\is_array($recordValues) && \count($recordValues) > 0) {
-                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['related_field']).', ?)';
-
-                $params[] = $recordValues;
-                $types[] = ArrayParameterType::STRING;
+                $queryBuilder
+                    ->orderBy('FIND_IN_SET('.$connection->quoteIdentifier($relation['related_field']).', :order)')
+                    ->setParameter('order', $recordValues, ArrayParameterType::STRING)
+                ;
             }
         }
 
-        return $connection->fetchFirstColumn(
-            'SELECT '.$relation['related_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['reference_field'].' IN (?)') : '').$order,
-            $params,
-            $types,
-        );
+        return $queryBuilder->fetchFirstColumn();
     }
 
     /**
@@ -204,8 +204,8 @@ abstract class DcaRelationsModel extends Model
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
-        foreach (array_filter((array) $value) as $value) {
-            $connection->insert($relation['table'], [$relation['reference_field'] => $reference, $relation['related_field'] => $value]);
+        foreach (array_filter((array) $value) as $v) {
+            $connection->insert($relation['table'], [$relation['reference_field'] => $reference, $relation['related_field'] => $v]);
         }
     }
 
