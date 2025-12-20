@@ -90,7 +90,7 @@ class UndoManager
             foreach ($fields as $row) {
                 // Unset fields that no longer exist in the database
                 foreach (array_keys($row) as $field) {
-                    if (!\in_array(strtolower($field), $fieldsMapper[$table], true)) {
+                    if (!\in_array(strtolower((string) $field), $fieldsMapper[$table], true)) {
                         unset($row[$field]);
                     }
                 }

@@ -13,6 +13,7 @@ use Contao\Date;
 use Contao\PageModel;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -133,7 +134,15 @@ class Formatter
 
             $fieldConfig['options'] = [];
 
-            $options = $this->connection->fetchAllAssociative('SELECT id, '.$chunks[1].' AS value FROM '.$chunks[0].' WHERE id IN ('.implode(',', array_map('intval', (array) $value)).')');
+            $options = $this->connection->fetchAllAssociative(
+                \sprintf(
+                    'SELECT id, %s AS value FROM %s WHERE id IN (?)',
+                    $this->connection->quoteIdentifier($chunks[1]),
+                    $this->connection->quoteIdentifier($chunks[0]),
+                ),
+                [(array) $value],
+                [ArrayParameterType::INTEGER],
+            );
 
             foreach ($options as $option) {
                 $fieldConfig['options'][$option['id']] = $option['value'];
