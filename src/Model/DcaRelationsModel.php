@@ -10,6 +10,7 @@ use Contao\Model\Collection;
 use Contao\Model\Registry;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 
 abstract class DcaRelationsModel extends Model
@@ -38,7 +39,10 @@ abstract class DcaRelationsModel extends Model
                 /** @var Connection $connection */
                 $connection = System::getContainer()->get('database_connection');
 
-                $ids = $connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?', [$this->{$relation['reference']}]);
+                $ids = $connection->fetchFirstColumn(
+                    'SELECT '.$relation['related_field'].' FROM '.$relation['table'].' WHERE '.$relation['reference_field'].'=?',
+                    [$this->{$relation['reference']}],
+                );
 
                 if (0 === \count($ids)) {
                     return null;
@@ -103,25 +107,44 @@ abstract class DcaRelationsModel extends Model
      */
     public static function getReferenceValues(string $table, string $field, mixed $value = null): array
     {
-        $relation = static::getRelation($table, $field);
-        $values = (array) $value;
-        $order = '';
-
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
+
+        $relation = static::getRelation($table, $field);
+        $values = (array) $value;
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder
+            ->select($relation['reference_field'])
+            ->from($relation['table'])
+        ;
+
+        if (!empty($values)) {
+            $queryBuilder->where($queryBuilder->expr()->in(
+                $relation['related_field'],
+                $queryBuilder->createNamedParameter($value, ArrayParameterType::STRING),
+            ));
+        }
 
         // Preserve the values order by using the force saved values in the table in the
         // ORDER BY statement
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['related_table']))) {
-            $recordValues = $connection->fetchOne('SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1', [$values[0]]);
+            $recordValues = $connection->fetchOne(
+                'SELECT '.$field.' FROM '.$relation['related_table'].' WHERE '.$relation['field'].'=? LIMIT 1',
+                [$values[0]],
+            );
+
             $recordValues = StringUtil::deserialize($recordValues);
 
             if (\is_array($recordValues) && \count($recordValues) > 0) {
-                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', '.$connection->getDatabasePlatform()->quoteStringLiteral(implode(',', $recordValues)).')';
+                $queryBuilder
+                    ->orderBy('FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', :order)')
+                    ->setParameter('order', $recordValues, ArrayParameterType::STRING)
+                ;
             }
         }
 
-        return $connection->fetchFirstColumn('SELECT '.$relation['reference_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['related_field']." IN ('".implode("','", $values)."')") : '').$order);
+        return $queryBuilder->fetchFirstColumn();
     }
 
     /**
@@ -129,25 +152,44 @@ abstract class DcaRelationsModel extends Model
      */
     public static function getRelatedValues(string $table, string $field, mixed $value = null): array
     {
-        $relation = static::getRelation($table, $field);
-        $values = (array) $value;
-        $order = '';
-
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
+
+        $relation = static::getRelation($table, $field);
+        $values = (array) $value;
+
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder
+            ->select($relation['related_field'])
+            ->from($relation['table'])
+        ;
+
+        if (!empty($values)) {
+            $queryBuilder->where($queryBuilder->expr()->in(
+                $relation['reference_field'],
+                $queryBuilder->createNamedParameter($values, ArrayParameterType::STRING),
+            ));
+        }
 
         // Preserve the values order by using the force saved values in the table in the
         // ORDER BY statement
         if (1 === \count($values) && $relation['forceSave'] && \array_key_exists(strtolower($field), $connection->createSchemaManager()->listTableColumns($relation['reference_table']))) {
-            $recordValues = $connection->fetchOne('SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1', [$values[0]]);
+            $recordValues = $connection->fetchOne(
+                'SELECT '.$field.' FROM '.$relation['reference_table'].' WHERE '.$relation['reference'].'=? LIMIT 1',
+                [$values[0]],
+            );
+
             $recordValues = StringUtil::deserialize($recordValues);
 
             if (\is_array($recordValues) && \count($recordValues) > 0) {
-                $order = ' ORDER BY FIND_IN_SET('.$connection->quoteIdentifier($relation['related_field']).', '.$connection->getDatabasePlatform()->quoteStringLiteral(implode(',', $recordValues)).')';
+                $queryBuilder
+                    ->orderBy('FIND_IN_SET('.$connection->quoteIdentifier($relation['related_field']).', :order)')
+                    ->setParameter('order', $recordValues, ArrayParameterType::STRING)
+                ;
             }
         }
 
-        return $connection->fetchFirstColumn('SELECT '.$relation['related_field'].' FROM '.$relation['table'].(!empty($values) ? (' WHERE '.$relation['reference_field']." IN ('".implode("','", $values)."')") : '').$order);
+        return $queryBuilder->fetchFirstColumn();
     }
 
     /**
@@ -162,8 +204,8 @@ abstract class DcaRelationsModel extends Model
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
-        foreach (array_filter((array) $value) as $value) {
-            $connection->insert($relation['table'], [$relation['reference_field'] => $reference, $relation['related_field'] => $value]);
+        foreach (array_filter((array) $value) as $v) {
+            $connection->insert($relation['table'], [$relation['reference_field'] => $reference, $relation['related_field'] => $v]);
         }
     }
 
