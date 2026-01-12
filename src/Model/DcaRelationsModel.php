@@ -122,7 +122,7 @@ abstract class DcaRelationsModel extends Model
         if (!empty($values)) {
             $queryBuilder->where($queryBuilder->expr()->in(
                 $relation['related_field'],
-                $queryBuilder->createNamedParameter($value, ArrayParameterType::STRING),
+                $queryBuilder->createNamedParameter($values, ArrayParameterType::STRING),
             ));
         }
 
