@@ -139,7 +139,7 @@ abstract class DcaRelationsModel extends Model
             if (\is_array($recordValues) && \count($recordValues) > 0) {
                 $queryBuilder
                     ->orderBy('FIND_IN_SET('.$connection->quoteIdentifier($relation['reference_field']).', :order)')
-                    ->setParameter('order', $recordValues, ArrayParameterType::STRING)
+                    ->setParameter('order', implode(',', $recordValues))
                 ;
             }
         }
@@ -184,7 +184,7 @@ abstract class DcaRelationsModel extends Model
             if (\is_array($recordValues) && \count($recordValues) > 0) {
                 $queryBuilder
                     ->orderBy('FIND_IN_SET('.$connection->quoteIdentifier($relation['related_field']).', :order)')
-                    ->setParameter('order', $recordValues, ArrayParameterType::STRING)
+                    ->setParameter('order', implode(',', $recordValues))
                 ;
             }
         }
