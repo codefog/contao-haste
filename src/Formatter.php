@@ -8,6 +8,7 @@ use Contao\ArrayUtil;
 use Contao\Config;
 use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\Database;
 use Contao\DataContainer;
 use Contao\Date;
 use Contao\PageModel;
@@ -130,15 +131,15 @@ class Formatter
             $fieldConfig['options'] = $fieldConfig['options_callback']($dc);
         } elseif (isset($fieldConfig['foreignKey']) && $value) {
             // foreignKey
-            $chunks = explode('.', (string) $fieldConfig['foreignKey'], 2);
+            [$table, $field] = explode('.', (string) $fieldConfig['foreignKey'], 2) + [null, null];
 
             $fieldConfig['options'] = [];
 
             $options = $this->connection->fetchAllAssociative(
                 \sprintf(
                     'SELECT id, %s AS value FROM %s WHERE id IN (?)',
-                    $this->connection->quoteIdentifier($chunks[1]),
-                    $this->connection->quoteIdentifier($chunks[0]),
+                    Database::quoteIdentifier($table),
+                    Database::quoteIdentifier($field),
                 ),
                 [(array) $value],
                 [ArrayParameterType::INTEGER],
