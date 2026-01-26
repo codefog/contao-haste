@@ -138,8 +138,8 @@ class Formatter
             $options = $this->connection->fetchAllAssociative(
                 \sprintf(
                     'SELECT id, %s AS value FROM %s WHERE id IN (?)',
-                    Database::quoteIdentifier($table),
                     Database::quoteIdentifier($field),
+                    Database::quoteIdentifier($table),
                 ),
                 [(array) $value],
                 [ArrayParameterType::INTEGER],
