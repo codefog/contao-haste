@@ -7,7 +7,7 @@ namespace Codefog\HasteBundle\Tests\Util;
 use Codefog\HasteBundle\Util\ArrayPosition;
 use PHPUnit\Framework\TestCase;
 
-class ArrayPositionTest extends TestCase
+final class ArrayPositionTest extends TestCase
 {
     public function testFirst(): void
     {

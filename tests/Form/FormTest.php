@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class FormTest extends TestCase
+final class FormTest extends TestCase
 {
     public function testSetFormActionFromUri(): void
     {
@@ -56,7 +56,7 @@ class FormTest extends TestCase
         if ($form->validate()) {
             $boundEntity = $form->getBoundEntity();
 
-            $this->assertTrue(spl_object_hash($entity) === spl_object_hash($boundEntity));
+            $this->assertSame(spl_object_hash($boundEntity), spl_object_hash($entity));
             $this->assertSame('My page title test', $boundEntity->getPageTitle());
             $this->assertSame(42, $boundEntity->getJumpTo());
         }
@@ -107,7 +107,7 @@ class FormTest extends TestCase
         if ($form->validate()) {
             $boundModel = $form->getBoundModel();
 
-            $this->assertTrue(spl_object_hash($pageModel) === spl_object_hash($boundModel));
+            $this->assertSame(spl_object_hash($boundModel), spl_object_hash($pageModel));
             $this->assertSame('My page title test', $boundModel->pageTitle);
             $this->assertSame(42, $boundModel->jumpTo);
         }

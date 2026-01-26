@@ -7,7 +7,7 @@ namespace Codefog\HasteBundle\Tests;
 use Codefog\HasteBundle\CodefogHasteBundle;
 use PHPUnit\Framework\TestCase;
 
-class CodefogHasteBundleTest extends TestCase
+final class CodefogHasteBundleTest extends TestCase
 {
     public function testCanBeInstantiated(): void
     {

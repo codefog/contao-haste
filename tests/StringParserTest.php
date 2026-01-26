@@ -9,7 +9,7 @@ use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Contao\CoreBundle\String\SimpleTokenParser;
 use PHPUnit\Framework\TestCase;
 
-class StringParserTest extends TestCase
+final class StringParserTest extends TestCase
 {
     /**
      * @dataProvider flattenDataProvider
@@ -24,92 +24,92 @@ class StringParserTest extends TestCase
 
     public static function flattenDataProvider(): iterable
     {
-        return [
-            // String input will set key and value
+        // String input will set key and value
+        yield [
+            'bar',
+            'foo',
+            [],
             [
-                'bar',
-                'foo',
-                [],
-                [
-                    'foo' => 'bar',
-                ],
+                'foo' => 'bar',
             ],
+        ];
 
-            // Empty array will be converted to empty string
+        // Empty array will be converted to empty string
+        yield [
+            [],
+            'foo',
+            [],
             [
-                [],
-                'foo',
-                [],
-                [
-                    'foo' => '',
-                ],
+                'foo' => '',
             ],
+        ];
 
-            // Numeric array keys will add boolean flags
+        // Numeric array keys will add boolean flags
+        yield [
+            ['bar'],
+            'foo',
+            [],
             [
-                ['bar'],
-                'foo',
-                [],
-                [
-                    'foo_bar' => '1',
-                    'foo' => 'bar',
-                ],
+                'foo_bar' => '1',
+                'foo' => 'bar',
             ],
+        ];
 
-            // Multiple values will be comma-separated
+        // Multiple values will be comma-separated
+        yield [
+            ['bar', 'baz'],
+            'foo',
+            [],
             [
-                ['bar', 'baz'],
-                'foo',
-                [],
-                [
-                    'foo_bar' => '1',
-                    'foo_baz' => '1',
-                    'foo' => 'bar, baz',
-                ],
+                'foo_bar' => '1',
+                'foo_baz' => '1',
+                'foo' => 'bar, baz',
             ],
+        ];
 
-            // Array keys are retained
+        // Array keys are retained
+        yield [
+            ['bar' => 'baz'],
+            'foo',
+            [],
             [
-                ['bar' => 'baz'],
-                'foo',
-                [],
-                [
-                    'foo_bar' => 'baz',
-                    'foo' => '',
-                ],
+                'foo_bar' => 'baz',
+                'foo' => '',
             ],
+        ];
 
-            // Arrays are handled recursively Array keys are retained
+        // Arrays are handled recursively Array keys are retained
+        yield [
+            ['bar' => ['baz']],
+            'foo',
+            [],
             [
-                ['bar' => ['baz']],
-                'foo',
-                [],
-                [
-                    'foo_bar_baz' => '1',
-                    'foo_bar' => 'baz',
-                    'foo' => '',
-                ],
+                'foo_bar_baz' => '1',
+                'foo_bar' => 'baz',
+                'foo' => '',
             ],
+        ];
+
+        yield [
+            ['bar' => ['baz' => 'boo']],
+            'foo',
+            [],
             [
-                ['bar' => ['baz' => 'boo']],
-                'foo',
-                [],
-                [
-                    'foo_bar_baz' => 'boo',
-                    'foo_bar' => '',
-                    'foo' => '',
-                ],
+                'foo_bar_baz' => 'boo',
+                'foo_bar' => '',
+                'foo' => '',
             ],
+        ];
+
+        yield [
+            ['bar' => ['baz' => ['boo']]],
+            'foo',
+            [],
             [
-                ['bar' => ['baz' => ['boo']]],
-                'foo',
-                [],
-                [
-                    'foo_bar_baz_boo' => '1',
-                    'foo_bar_baz' => 'boo',
-                    'foo_bar' => '',
-                    'foo' => '',
-                ],
+                'foo_bar_baz_boo' => '1',
+                'foo_bar_baz' => 'boo',
+                'foo_bar' => '',
+                'foo' => '',
             ],
         ];
     }
