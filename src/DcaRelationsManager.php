@@ -662,7 +662,13 @@ class DcaRelationsManager
                     $option_label = $vv ?: '-';
                 }
 
-                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.(isset($session['filter'][$filter][$field]) && (string) $value === (string) $session['filter'][$filter][$field] ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString((string) $option_label))->ascii()->toString();
+                $selected = isset($session['filter'][$filter][$field]) && (string) $value === (string) $session['filter'][$filter][$field];
+
+                if ($selected) {
+                    $dc->setPanelState(true);
+                }
+
+                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.($selected ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString((string) $option_label))->ascii()->toString();
             }
 
             $return .= "\n".implode("\n", array_keys($options_sorter));
@@ -750,6 +756,10 @@ class DcaRelationsManager
             // Sort by option values
             uksort($options_sorter, strnatcasecmp(...));
             $active = $sessionValues[$dc->table]['searchValue'] && $sessionValues[$dc->table]['table'] === $relTable;
+
+            if ($active) {
+                $dc->setPanelState(true);
+            }
 
             $return .= '<select name="tl_field_'.$field.'" class="tl_select tl_chosen'.($active ? ' active' : '').'">
             '.implode("\n", $options_sorter).'
