@@ -116,7 +116,7 @@ class DcaDateRangeFilterListener
 
         $GLOBALS['TL_CSS'][] = System::getContainer()->get('assets.packages')->getUrl('dca-date-range-filter.css', 'codefog_haste');
 
-        if (isset($sessionData['filter'][$filter][$key]) && $updatePanelState) {
+        if ($updatePanelState && isset($sessionData['filter'][$filter][$key])) {
             $dc->setPanelState(true);
         }
 

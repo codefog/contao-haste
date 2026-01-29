@@ -591,6 +591,10 @@ class DcaRelationsManager
 <strong>'.$GLOBALS['TL_LANG']['HST']['advanced_filter'].'</strong> ';
 
         foreach ($this->filterableFields[$dc->table] as $field => $relation) {
+            if ($updatePanelState) {
+                $return .= '<div class="tl_select_wrapper" data-controller="contao--choices">';
+            }
+
             $return .= '<select name="'.$field.'" class="tl_select tl_chosen'.(isset($session['filter'][$filter][$field]) ? ' active' : '').'"'.($updatePanelState ? ' onchange="this.form.requestSubmit()"' : '').'>
     <option value="tl_'.$field.'">'.($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '').'</option>
     <option value="tl_'.$field.'">---</option>';
@@ -675,6 +679,10 @@ class DcaRelationsManager
 
             $return .= "\n".implode("\n", array_keys($options_sorter));
             $return .= '</select> ';
+
+            if ($updatePanelState) {
+                $return .= '</div>';
+            }
 
             // Add the line-break after 5 elements
             if (0 === ++$count % 5) {
