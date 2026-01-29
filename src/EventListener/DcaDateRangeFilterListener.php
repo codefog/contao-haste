@@ -66,6 +66,7 @@ class DcaDateRangeFilterListener
             return '';
         }
 
+        $updatePanelState = method_exists($dc, 'setPanelState');
         $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
         /** @var AttributeBagInterface $session */
@@ -114,7 +115,7 @@ class DcaDateRangeFilterListener
 
         $GLOBALS['TL_CSS'][] = System::getContainer()->get('assets.packages')->getUrl('dca-date-range-filter.css', 'codefog_haste');
 
-        if (isset($sessionData['filter'][$filter][$key])) {
+        if (isset($sessionData['filter'][$filter][$key]) && $updatePanelState) {
             $dc->setPanelState(true);
         }
 
