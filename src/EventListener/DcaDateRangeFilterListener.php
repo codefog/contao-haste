@@ -66,6 +66,7 @@ class DcaDateRangeFilterListener
             return '';
         }
 
+        /** @phpstan-ignore function.alreadyNarrowedType */
         $updatePanelState = method_exists($dc, 'setPanelState');
         $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
