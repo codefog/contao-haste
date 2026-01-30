@@ -565,6 +565,8 @@ class DcaRelationsManager
             return '';
         }
 
+        /** @phpstan-ignore function.alreadyNarrowedType */
+        $updatePanelState = method_exists($dc, 'setPanelState');
         $filter = ($GLOBALS['TL_DCA'][$dc->table]['list']['sorting']['mode'] ?? null) === DataContainer::MODE_PARENT ? $dc->table.'_'.$dc->currentPid : $dc->table;
 
         /** @var AttributeBagInterface $session */
@@ -589,7 +591,11 @@ class DcaRelationsManager
 <strong>'.$GLOBALS['TL_LANG']['HST']['advanced_filter'].'</strong> ';
 
         foreach ($this->filterableFields[$dc->table] as $field => $relation) {
-            $return .= '<select name="'.$field.'" class="tl_select tl_chosen'.(isset($session['filter'][$filter][$field]) ? ' active' : '').'">
+            if ($updatePanelState) {
+                $return .= '<div class="tl_select_wrapper" data-controller="contao--choices">';
+            }
+
+            $return .= '<select name="'.$field.'" class="tl_select tl_chosen'.(isset($session['filter'][$filter][$field]) ? ' active' : '').'"'.($updatePanelState ? ' onchange="this.form.requestSubmit()"' : '').'>
     <option value="tl_'.$field.'">'.($GLOBALS['TL_DCA'][$dc->table]['fields'][$field]['label'][0] ?? '').'</option>
     <option value="tl_'.$field.'">---</option>';
 
@@ -662,11 +668,21 @@ class DcaRelationsManager
                     $option_label = $vv ?: '-';
                 }
 
-                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.(isset($session['filter'][$filter][$field]) && (string) $value === (string) $session['filter'][$filter][$field] ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString((string) $option_label))->ascii()->toString();
+                $selected = isset($session['filter'][$filter][$field]) && (string) $value === (string) $session['filter'][$filter][$field];
+
+                if ($selected && $updatePanelState) {
+                    $dc->setPanelState(true);
+                }
+
+                $options_sorter['  <option value="'.StringUtil::specialchars($value).'"'.($selected ? ' selected="selected"' : '').'>'.$option_label.'</option>'] = (new UnicodeString((string) $option_label))->ascii()->toString();
             }
 
             $return .= "\n".implode("\n", array_keys($options_sorter));
             $return .= '</select> ';
+
+            if ($updatePanelState) {
+                $return .= '</div>';
+            }
 
             // Add the line-break after 5 elements
             if (0 === ++$count % 5) {
@@ -686,6 +702,8 @@ class DcaRelationsManager
             return '';
         }
 
+        /** @phpstan-ignore function.alreadyNarrowedType */
+        $updatePanelState = method_exists($dc, 'setPanelState');
         $return = '<div class="tl_filter tl_subpanel">';
 
         /** @var AttributeBagInterface $session */
@@ -751,7 +769,11 @@ class DcaRelationsManager
             uksort($options_sorter, strnatcasecmp(...));
             $active = $sessionValues[$dc->table]['searchValue'] && $sessionValues[$dc->table]['table'] === $relTable;
 
-            $return .= '<select name="tl_field_'.$field.'" class="tl_select tl_chosen'.($active ? ' active' : '').'">
+            if ($active && $updatePanelState) {
+                $dc->setPanelState(true);
+            }
+
+            $return .= '<select name="tl_field_'.$field.'" class="tl_select tl_chosen'.($active ? ' active' : '').'"'.($updatePanelState ? ' onchange="this.form.requestSubmit()"' : '').'>
             '.implode("\n", $options_sorter).'
             </select>
             <span>=</span>
