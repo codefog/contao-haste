@@ -347,13 +347,13 @@ class Form
             $fieldConfig['name'] = $fieldName;
         }
 
+        $boundFieldName = $fieldConfig['boundName'] ?? $fieldName;
+
         // Support default values
         if (!$this->isSubmitted()) {
             if (isset($fieldConfig['default']) && !isset($fieldConfig['value'])) {
                 $fieldConfig['value'] = $fieldConfig['default'];
             }
-
-            $boundFieldName = $fieldConfig['boundName'] ?? $fieldName;
 
             // Try to load the default value from bound Entity
             if (!($fieldConfig['ignoreEntityValue'] ?? false) && null !== $this->boundEntity) {
@@ -455,6 +455,7 @@ class Form
 
         // Reset the ID to the field name
         $fieldConfig['id'] = $fieldName;
+        $fieldConfig['boundName'] = $boundFieldName;
 
         // Remove the label if it was not set – Contao will set it to field name if
         // it's not present
