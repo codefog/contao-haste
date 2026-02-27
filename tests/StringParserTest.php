@@ -16,7 +16,7 @@ final class StringParserTest extends TestCase
      */
     public function testFlatten(mixed $value, string $key, array $data, array $expected): void
     {
-        $parser = new StringParser($this->createMock(SimpleTokenParser::class), $this->createMock(InsertTagParser::class));
+        $parser = new StringParser($this->createStub(SimpleTokenParser::class), $this->createStub(InsertTagParser::class));
         $parser->flatten($value, $key, $data);
 
         $this->assertSame($expected, $data);
