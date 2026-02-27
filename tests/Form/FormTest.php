@@ -141,6 +141,35 @@ final class FormTest extends TestCase
         $this->assertSame(11, $form->getWidget('jumpTo')->value);
     }
 
+    public function testBoundModelField(): void
+    {
+        $form = $this->createForm();
+        $form
+            ->addFormField('title', [
+                'boundName' => 'pageTitle',
+                'inputType' => 'text',
+            ])
+            ->addFormField('url', [
+                'boundName' => 'jumpTo',
+                'inputType' => 'text',
+            ])
+        ;
+
+        $pageModel = new PageModel();
+        $form->setBoundModel($pageModel);
+
+        Input::setPost('title', 'My page title test');
+        Input::setPost('url', 42);
+
+        if ($form->validate()) {
+            $boundModel = $form->getBoundModel();
+
+            $this->assertSame(spl_object_hash($boundModel), spl_object_hash($pageModel));
+            $this->assertSame('My page title test', $boundModel->pageTitle);
+            $this->assertSame(42, $boundModel->jumpTo);
+        }
+    }
+
     private function createForm(bool $isSubmitted = true): Form
     {
         $GLOBALS['TL_MODELS']['tl_page'] = PageModel::class;
