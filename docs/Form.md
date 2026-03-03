@@ -197,6 +197,9 @@ if ($form->validate()) {
 }
 ```
 
+If the DCA has a property `boundName`, it will be used instead of the field
+name to bind the form field to the entity.
+
 
 ### Bind model to the form
 
@@ -220,6 +223,8 @@ if ($form->validate()) {
 }
 ```
 
+If the DCA has a property `boundName`, it will be used instead of the field
+name to bind the form field to the model.
 
 ### Add a field validation
 

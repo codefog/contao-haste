@@ -347,6 +347,8 @@ class Form
             $fieldConfig['name'] = $fieldName;
         }
 
+        $boundFieldName = $fieldConfig['boundName'] ?? $fieldName;
+
         // Support default values
         if (!$this->isSubmitted()) {
             if (isset($fieldConfig['default']) && !isset($fieldConfig['value'])) {
@@ -361,13 +363,13 @@ class Form
                     $entityId = $this->boundEntity->getId();
 
                     if ($entityId > 0 && ($table = $this->getTableNameForEntity($this->boundEntity)) !== null) {
-                        $fieldConfig['value'] = DcaRelationsModel::getRelatedValues($table, $fieldName, $entityId);
+                        $fieldConfig['value'] = DcaRelationsModel::getRelatedValues($table, $boundFieldName, $entityId);
                     }
-                } elseif ($this->propertyAccessor->isReadable($this->boundEntity, $fieldName)) {
-                    $value = $this->propertyAccessor->getValue($this->boundEntity, $fieldName);
+                } elseif ($this->propertyAccessor->isReadable($this->boundEntity, $boundFieldName)) {
+                    $value = $this->propertyAccessor->getValue($this->boundEntity, $boundFieldName);
 
                     // This might be a related object
-                    if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
+                    if ($this->hasEntitySingleValuedRelation($this->boundEntity, $boundFieldName)) {
                         $value = $value?->getId();
                     }
 
@@ -378,7 +380,7 @@ class Form
 
             // Try to load the default value from bound Model
             if (!($fieldConfig['ignoreModelValue'] ?? false) && null !== $this->boundModel) {
-                $fieldConfig['value'] = $this->boundModel->$fieldName;
+                $fieldConfig['value'] = $this->boundModel->$boundFieldName;
             }
         }
 
@@ -453,6 +455,7 @@ class Form
 
         // Reset the ID to the field name
         $fieldConfig['id'] = $fieldName;
+        $fieldConfig['boundName'] = $boundFieldName;
 
         // Remove the label if it was not set – Contao will set it to field name if
         // it's not present
@@ -773,6 +776,8 @@ class Form
                     continue;
                 }
 
+                $boundFieldName = $this->formFields[$fieldName]['boundName'] ?? $fieldName;
+
                 // Bind to Entity instance
                 if (null !== $this->boundEntity) {
                     // If the field is a relation, store the value in the helper which will be
@@ -780,25 +785,25 @@ class Form
                     if (null !== ($table = $this->getTableNameForEntity($this->boundEntity)) && ($GLOBALS['TL_DCA'][$table]['fields'][$fieldName]['relation']['type'] ?? null) === 'haste-ManyToMany') {
                         /** @var DoctrineOrmHelper $doctrineHelper */
                         $doctrineHelper = System::getContainer()->get(DoctrineOrmHelper::class);
-                        $doctrineHelper->addEntityRelatedValues($this->boundEntity, $fieldName, (array) $value);
+                        $doctrineHelper->addEntityRelatedValues($this->boundEntity, $boundFieldName, (array) $value);
 
                         continue;
                     }
 
                     // Set the regular value, if writable
-                    if ($this->propertyAccessor->isWritable($this->boundEntity, $fieldName)) {
+                    if ($this->propertyAccessor->isWritable($this->boundEntity, $boundFieldName)) {
                         // This might be a related object
-                        if ($this->hasEntitySingleValuedRelation($this->boundEntity, $fieldName)) {
+                        if ($this->hasEntitySingleValuedRelation($this->boundEntity, $boundFieldName)) {
                             $value = $this->getEntityManager()->getRepository($this->getMetaDataForEntity($this->boundEntity)->getAssociationTargetClass($fieldName))->find($value);
                         }
 
-                        $this->propertyAccessor->setValue($this->boundEntity, $fieldName, $value);
+                        $this->propertyAccessor->setValue($this->boundEntity, $boundFieldName, $value);
                     }
                 }
 
                 // Bind to Model instance
                 if (null !== $this->boundModel) {
-                    $this->boundModel->$fieldName = $value;
+                    $this->boundModel->$boundFieldName = $value;
                 }
             }
         }
