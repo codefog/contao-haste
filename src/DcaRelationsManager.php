@@ -604,6 +604,10 @@ class DcaRelationsManager
             if (0 === \count($ids)) {
                 $return .= '</select> ';
 
+                if ($updatePanelState) {
+                    $return .= '</div>';
+                }
+
                 // Add the line-break after 5 elements
                 if (0 === ++$count % 5) {
                     $return .= '<br>';
