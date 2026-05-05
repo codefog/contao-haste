@@ -7,26 +7,20 @@ namespace Codefog\HasteBundle\EventListener;
 use Codefog\HasteBundle\Attribute\DoctrineOrmUndo;
 use Codefog\HasteBundle\Attribute\DoctrineOrmVersion;
 use Codefog\HasteBundle\DoctrineOrmHelper;
-use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
-class DoctrineOrmListener implements EventSubscriberInterface
+#[AsDoctrineListener(Events::postPersist)]
+#[AsDoctrineListener(Events::postUpdate)]
+#[AsDoctrineListener(Events::preRemove)]
+#[AsDoctrineListener(Events::preUpdate)]
+class DoctrineOrmListener
 {
     public function __construct(
         private readonly DoctrineOrmHelper $helper,
     ) {
-    }
-
-    public function getSubscribedEvents(): array
-    {
-        return [
-            Events::postPersist,
-            Events::postUpdate,
-            Events::preRemove,
-            Events::preUpdate,
-        ];
     }
 
     /**
