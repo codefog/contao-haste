@@ -18,9 +18,8 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 #[AsDoctrineListener(Events::preUpdate)]
 class DoctrineOrmListener
 {
-    public function __construct(
-        private readonly DoctrineOrmHelper $helper,
-    ) {
+    public function __construct(private readonly DoctrineOrmHelper $helper)
+    {
     }
 
     /**
