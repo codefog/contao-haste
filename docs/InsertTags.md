@@ -132,5 +132,5 @@ The following checks are performed:
 	the minimum and maximum value (see `mt_rand` documentation).
 
 
-[flags]: https://docs.contao.org/books/manual/current/en/04-managing-content/insert-tags.html#insert-tag-flags
+[flags]: https://docs.contao.org/5.x/manual/en/article-management/insert-tags/#insert-tag-flags
 [date]: http://php.net/date
